@@ -11,7 +11,7 @@ namespace FriendlyFireAutoban
 		name = "Test",
 		description = "Friendly Fire Autoban",
 		id = "patpeter.friendly.fire.autoban",
-		version = "1.0-build4",
+		version = "1.0.0",
 		SmodMajor = 2,
 		SmodMinor = 2,
 		SmodRevision = 1
