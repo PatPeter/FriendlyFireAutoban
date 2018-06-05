@@ -52,20 +52,28 @@ namespace FriendlyFireAutoban.EventHandlers
 			{
 				if (this.plugin.teamkillCounter.ContainsKey(killer.SteamId)) {
 					this.plugin.teamkillCounter[killer.SteamId]++;
-					plugin.Debug("Player " + killer.ToString() + " has " + this.plugin.teamkillCounter[killer.SteamId] + " teamkills.");
+					plugin.Info("Player " + killer.ToString() + " killed " + player.ToString() + ", for a total of " + this.plugin.teamkillCounter[killer.SteamId] + " teamkills.");
 				}
 				else
 				{
 					this.plugin.teamkillCounter[killer.SteamId] = 1;
-					plugin.Debug("Player " + killer.ToString() + " has 1 teamkill.");
+					plugin.Info("Player " + killer.ToString() + " killed " + player.ToString() + ", for a total of 1 teamkill.");
 				}
 
 				if (this.plugin.teamkillCounter[killer.SteamId] >= this.plugin.GetConfigInt("friendly_fire_autoban_amount")) {
-					plugin.Info("Player " + killer.ToString() + " has been banned for " + this.plugin.GetConfigInt("friendly_fire_autoban_length") + " seconds after teamkilling " + this.plugin.GetConfigInt("friendly_fire_autoban_amount") + " players.");
+					plugin.Info("Player " + killer.ToString() + " has been banned for " + this.plugin.GetConfigInt("friendly_fire_autoban_length") + " seconds after teamkilling " + this.plugin.teamkillCounter[killer.SteamId] + " players.");
 					killer.Ban(this.plugin.GetConfigInt("friendly_fire_autoban_length"));
 				}
+				spawnRagdoll = true;
 			}
-			spawnRagdoll = true;
+			else if (player.Class.ClassType == Classes.SCP_106)
+			{
+				spawnRagdoll = false;
+			}
+			else
+			{
+				spawnRagdoll = true;
+			}
 		}
 	}
 }
