@@ -12,7 +12,7 @@ namespace FriendlyFireAutoban
 		name = "Friendly Fire Autoban",
 		description = "Plugin that autobans players for friendly firing.",
 		id = "patpeter.friendly.fire.autoban",
-		version = "1.1.0-build10",
+		version = "1.2.0",
 		SmodMajor = 3,
 		SmodMinor = 1,
 		SmodRevision = 0
@@ -25,7 +25,7 @@ namespace FriendlyFireAutoban
 
 		public override void OnEnable()
 		{
-			this.Info("Friendly Fire Autoban 1.0.0-build7 has loaded :)");
+			this.Info("Friendly Fire Autoban 1.2.0 has loaded :)");
 			this.Info("friendly_fire_autoban_enable value: " + this.GetConfigBool("friendly_fire_autoban_enable"));
 			this.Info("friendly_fire_autoban_amount value: " + this.GetConfigInt("friendly_fire_autoban_amount"));
 			this.Info("friendly_fire_autoban_length value: " + this.GetConfigInt("friendly_fire_autoban_length"));
