@@ -49,16 +49,18 @@ namespace FriendlyFireAutoban.EventHandlers
 
 		public void OnPlayerDie(PlayerDeathEvent ev)
 		{
-			if (this.plugin.GetConfigBool("friendly_fire_autoban_enable") && this.plugin.duringRound && isTeamkill(ev.Player.TeamRole.Team, ev.Killer.TeamRole.Team))
+			if (this.plugin.GetConfigBool("friendly_fire_autoban_enable") && 
+				this.plugin.duringRound && 
+				isTeamkill(ev.Killer, ev.Player))
 			{
 				if (this.plugin.teamkillCounter.ContainsKey(ev.Killer.SteamId)) {
 					this.plugin.teamkillCounter[ev.Killer.SteamId]++;
-					plugin.Info("Player " + ev.Killer.ToString() + " killed " + ev.Player.ToString() + ", for a total of " + this.plugin.teamkillCounter[ev.Killer.SteamId] + " teamkills.");
+					plugin.Info("Player " + ev.Killer.ToString() + " (" + ev.Killer.TeamRole.ToString() + ") killed " + ev.Player.ToString() + " (" + ev.Player.TeamRole.ToString() + "), for a total of " + this.plugin.teamkillCounter[ev.Killer.SteamId] + " teamkills.");
 				}
 				else
 				{
 					this.plugin.teamkillCounter[ev.Killer.SteamId] = 1;
-					plugin.Info("Player " + ev.Killer.ToString() + " killed " + ev.Player.ToString() + ", for a total of 1 teamkill.");
+					plugin.Info("Player " + ev.Killer.ToString() + " (" + ev.Killer.TeamRole.ToString() + ") killed " + ev.Player.ToString() + " (" + ev.Player.TeamRole.ToString() + "), for a total of 1 teamkill.");
 				}
 
 				if (this.plugin.teamkillCounter[ev.Killer.SteamId] >= this.plugin.GetConfigInt("friendly_fire_autoban_amount")) {
@@ -77,33 +79,38 @@ namespace FriendlyFireAutoban.EventHandlers
 			}
 		}
 
-		public bool isTeamkill(Team team1, Team team2)
+		public bool isTeamkill(Player killer, Player victim)
 		{
-			if ((int)team1 == (int)team2)
-			{
-				return true;
-			}
-			else if (team1 == Team.NINETAILFOX && team2 == Team.SCIENTISTS)
-			{
-				return true;
-			}
-			else if (team1 == Team.SCIENTISTS && team2 == Team.NINETAILFOX)
-			{
-				return true;
-			}
-			else if (team1 == Team.CHAOS_INSURGENCY && team2 == Team.CLASSD)
-			{
-				return true;
-			}
-			else if (team1 == Team.CLASSD && team2 == Team.CHAOS_INSURGENCY)
-			{
-				return true;
-			}
-			else
+			int killerTeam = (int) killer.TeamRole.Team;
+			int victimTeam = (int) victim.TeamRole.Team;
+
+			if (killer.SteamId == victim.SteamId)
 			{
 				return false;
 			}
 
+			bool isTeamkill = false;
+			string[] teamkillMatrix = this.plugin.GetConfigList("friendly_fire_autoban_matrix");
+			foreach (string pair in teamkillMatrix)
+			{
+				string[] tuple = pair.Split(':');
+				if (tuple.Length != 2)
+				{
+					plugin.Debug("Tuple " + pair + " does not have a single : in it.");
+					continue;
+				}
+				int tuple0 = -1, tuple1 = -1;
+				if (!int.TryParse(tuple[0], out tuple0) || !int.TryParse(tuple[1], out tuple1))
+				{
+					plugin.Debug("Either " + tuple[0] + " or " + tuple[1] + " could not be parsed as an int.");
+					continue;
+				}
+				if (killerTeam == tuple0 && victimTeam == tuple1)
+				{
+					isTeamkill = true;
+				}
+			}
+			return isTeamkill;
 		}
 	}
 }
