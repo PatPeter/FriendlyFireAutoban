@@ -9,13 +9,13 @@ namespace FriendlyFireAutoban
 {
 	[PluginDetails(
 		author = "PatPeter",
-		name = "Test",
-		description = "Friendly Fire Autoban",
+		name = "Friendly Fire Autoban",
+		description = "Plugin that autobans players for friendly firing.",
 		id = "patpeter.friendly.fire.autoban",
-		version = "1.0.0-build7",
-		SmodMajor = 2,
-		SmodMinor = 2,
-		SmodRevision = 1
+		version = "1.0.0-build10",
+		SmodMajor = 3,
+		SmodMinor = 1,
+		SmodRevision = 0
 		)]
 	class FriendlyFireAutobanPlugin : Plugin
 	{
