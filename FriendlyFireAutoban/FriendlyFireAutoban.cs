@@ -29,6 +29,7 @@ namespace FriendlyFireAutoban
 			this.Info("friendly_fire_autoban_enable value: " + this.GetConfigBool("friendly_fire_autoban_enable"));
 			this.Info("friendly_fire_autoban_amount value: " + this.GetConfigInt("friendly_fire_autoban_amount"));
 			this.Info("friendly_fire_autoban_length value: " + this.GetConfigInt("friendly_fire_autoban_length"));
+			this.Info("friendly_fire_autoban_length value: " + this.GetConfigInt("friendly_fire_autoban_noguns"));
 			this.Info("friendly_fire_autoban_matrix value: " + this.GetConfigList("friendly_fire_autoban_matrix").ToString());
 		}
 
@@ -45,9 +46,10 @@ namespace FriendlyFireAutoban
 			this.AddEventHandler(typeof(IEventHandlerPlayerDie), new PlayerDieHandler(this), Priority.Highest);
 			// Register config settings
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_enable", true, Smod2.Config.SettingType.BOOL, true, "Enable Friendly Fire Autoban."));
-			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_amount", 5, Smod2.Config.SettingType.NUMERIC, true, "Friendly Fire Autoban amount of teamkills before a ban."));
-			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_length", 3600, Smod2.Config.SettingType.NUMERIC, true, "Friendly Fire Autoban length in seconds."));
-			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_matrix", new string[] { "1:1", "2:2", "1:3", "2:4", "3:1", "4:2" }, Smod2.Config.SettingType.LIST, true, "Friendly Fire Autoban matrix of killer:victim that count as teamkills."));
+			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_amount", 5, Smod2.Config.SettingType.NUMERIC, true, "Friendly Fire Autoban amount of teamkills before a ban will be issued."));
+			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_length", 3600, Smod2.Config.SettingType.NUMERIC, true, "Friendly Fire Autoban length in minutes."));
+			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_noguns", 0, Smod2.Config.SettingType.NUMERIC, true, "Number of kills to remove the player's guns as a warning for teamkilling."));
+			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_matrix", new string[] { "1:1", "2:2", "3:3", "4:4", "1:3", "2:4", "3:1", "4:2" }, Smod2.Config.SettingType.LIST, true, "Friendly Fire Autoban matrix of killer:victim that count as teamkills."));
 		}
 	}
 }
