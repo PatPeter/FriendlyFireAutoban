@@ -55,16 +55,35 @@ namespace FriendlyFireAutoban.EventHandlers
 			{
 				if (this.plugin.teamkillCounter.ContainsKey(ev.Killer.SteamId)) {
 					this.plugin.teamkillCounter[ev.Killer.SteamId]++;
-					plugin.Info("Player " + ev.Killer.ToString() + " (" + ev.Killer.TeamRole.ToString() + ") killed " + ev.Player.ToString() + " (" + ev.Player.TeamRole.ToString() + "), for a total of " + this.plugin.teamkillCounter[ev.Killer.SteamId] + " teamkills.");
+					plugin.Info("Player " + ev.Killer.Name + " " + ev.Killer.SteamId + " " + ev.Killer.IpAddress + " " + ev.Killer.TeamRole.ToString() + " killed " + ev.Player.Name + " " + ev.Player.SteamId + " " + ev.Player.IpAddress + " " + ev.Player.TeamRole.ToString() + ", for a total of " + this.plugin.teamkillCounter[ev.Killer.SteamId] + " teamkills.");
 				}
 				else
 				{
 					this.plugin.teamkillCounter[ev.Killer.SteamId] = 1;
-					plugin.Info("Player " + ev.Killer.ToString() + " (" + ev.Killer.TeamRole.ToString() + ") killed " + ev.Player.ToString() + " (" + ev.Player.TeamRole.ToString() + "), for a total of 1 teamkill.");
+					plugin.Info("Player " + ev.Killer.Name + " " + ev.Killer.SteamId + " " + ev.Killer.IpAddress + " (" + ev.Killer.TeamRole.ToString() + ") killed " + ev.Player.ToString() + " (" + ev.Player.TeamRole.ToString() + "), for a total of 1 teamkill.");
 				}
 
-				if (this.plugin.teamkillCounter[ev.Killer.SteamId] >= this.plugin.GetConfigInt("friendly_fire_autoban_amount")) {
-					plugin.Info("Player " + ev.Killer.ToString() + " has been banned for " + this.plugin.GetConfigInt("friendly_fire_autoban_length") + " seconds after teamkilling " + this.plugin.teamkillCounter[ev.Killer.SteamId] + " players.");
+				if (this.plugin.GetConfigInt("friendly_fire_autoban_noguns") > 0 && this.plugin.teamkillCounter[ev.Killer.SteamId] >= this.plugin.GetConfigInt("friendly_fire_autoban_noguns"))
+				{
+					List<Item> inv = ev.Killer.GetInventory();
+					foreach (Item i in inv)
+					{
+						switch (i.ItemType)
+						{
+							case ItemType.COM15:
+							case ItemType.E11_STANDARD_RIFLE:
+							case ItemType.LOGICER:
+							case ItemType.MICROHID:
+							case ItemType.MP4:
+							case ItemType.P90:
+							case ItemType.POSITRON_GRENADE:
+								inv.Remove(i);
+								break;
+						}
+					}
+				}
+				else if (this.plugin.teamkillCounter[ev.Killer.SteamId] >= this.plugin.GetConfigInt("friendly_fire_autoban_amount")) {
+					plugin.Info("Player " + ev.Killer.Name + " " + ev.Killer.SteamId + " " + ev.Killer.IpAddress + " has been banned for " + this.plugin.GetConfigInt("friendly_fire_autoban_length") + " minutes after teamkilling " + this.plugin.teamkillCounter[ev.Killer.SteamId] + " players.");
 					ev.Killer.Ban(this.plugin.GetConfigInt("friendly_fire_autoban_length"));
 				}
 				ev.SpawnRagdoll = true;
