@@ -12,10 +12,10 @@ namespace FriendlyFireAutoban
 		name = "Friendly Fire Autoban",
 		description = "Plugin that autobans players for friendly firing.",
 		id = "patpeter.friendly.fire.autoban",
-		version = "1.3.1.15",
+		version = "1.4.0.16",
 		SmodMajor = 3,
 		SmodMinor = 1,
-		SmodRevision = 3
+		SmodRevision = 4
 		)]
 	class FriendlyFireAutobanPlugin : Plugin
 	{
@@ -25,11 +25,23 @@ namespace FriendlyFireAutoban
 
 		public override void OnEnable()
 		{
-			this.Info("friendly_fire_autoban_enable value: " + this.GetConfigBool("friendly_fire_autoban_enable"));
-			this.Info("friendly_fire_autoban_amount value: " + this.GetConfigInt("friendly_fire_autoban_amount"));
-			this.Info("friendly_fire_autoban_length value: " + this.GetConfigInt("friendly_fire_autoban_length"));
-			this.Info("friendly_fire_autoban_noguns value: " + this.GetConfigInt("friendly_fire_autoban_noguns"));
-			this.Info("friendly_fire_autoban_matrix value: " + this.GetConfigList("friendly_fire_autoban_matrix").ToString());
+			this.Info("friendly_fire_autoban_enable default value: " + this.GetConfigBool("friendly_fire_autoban_enable"));
+			this.Info("friendly_fire_autoban_amount default value: " + this.GetConfigInt("friendly_fire_autoban_amount"));
+			this.Info("friendly_fire_autoban_length default value: " + this.GetConfigInt("friendly_fire_autoban_length"));
+			this.Info("friendly_fire_autoban_noguns default value: " + this.GetConfigInt("friendly_fire_autoban_noguns"));
+			this.Info("friendly_fire_autoban_tospec default value: " + this.GetConfigInt("friendly_fire_autoban_tospec"));
+			string matrix = "";
+			foreach (string s in this.GetConfigList("friendly_fire_autoban_matrix"))
+			{
+				if (matrix.Length == 0)
+				{
+					matrix += s;
+				} else
+				{
+					matrix += ',' + s;
+				}
+			}
+			this.Info("friendly_fire_autoban_matrix default value: " + matrix);
 		}
 
 		public override void OnDisable()
@@ -46,8 +58,9 @@ namespace FriendlyFireAutoban
 			// Register config settings
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_enable", true, Smod2.Config.SettingType.BOOL, true, "Enable Friendly Fire Autoban."));
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_amount", 5, Smod2.Config.SettingType.NUMERIC, true, "Friendly Fire Autoban amount of teamkills before a ban will be issued."));
-			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_length", 3600, Smod2.Config.SettingType.NUMERIC, true, "Friendly Fire Autoban length in minutes."));
+			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_length", 1440, Smod2.Config.SettingType.NUMERIC, true, "Friendly Fire Autoban length in minutes."));
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_noguns", 0, Smod2.Config.SettingType.NUMERIC, true, "Number of kills to remove the player's guns as a warning for teamkilling."));
+			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_tospec", 0, Smod2.Config.SettingType.NUMERIC, true, "Number of kills at which to put a player into spectator."));
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_matrix", new string[] { "1:1", "2:2", "3:3", "4:4", "1:3", "2:4", "3:1", "4:2" }, Smod2.Config.SettingType.LIST, true, "Matrix of killer:victim tuples that are considered teamkills."));
 		}
 	}
