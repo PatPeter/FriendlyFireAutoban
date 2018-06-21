@@ -26,7 +26,7 @@ namespace FriendlyFireAutoban.EventHandlers
 			this.plugin.Debug("friendly_fire_autoban_tospec value: " + this.plugin.GetConfigInt("friendly_fire_autoban_tospec"));
 			this.plugin.duringRound = true;
 			this.plugin.teamkillCounter = new Dictionary<string, int>();
-			this.plugin.teamkillMatrix = new Dictionary<int, int>();
+			this.plugin.teamkillMatrix = new List<TeamkillTuple>();
 			string[] teamkillMatrix = this.plugin.GetConfigList("friendly_fire_autoban_matrix");
 			foreach (string pair in teamkillMatrix)
 			{
@@ -43,6 +43,7 @@ namespace FriendlyFireAutoban.EventHandlers
 					continue;
 				}
 
+				this.plugin.teamkillMatrix.Add(new TeamkillTuple(tuple0, tuple1));
 			}
 		}
 	}
@@ -160,9 +161,9 @@ namespace FriendlyFireAutoban.EventHandlers
 			}
 
 			bool isTeamkill = false;
-			foreach (KeyValuePair<int, int> entry in this.plugin.teamkillMatrix)
+			foreach (TeamkillTuple teamkill in this.plugin.teamkillMatrix)
 			{
-				if (killerTeam == entry.Key && victimTeam == entry.Value)
+				if (killerTeam == teamkill.killerRole && victimTeam == teamkill.victimRole)
 				{
 					isTeamkill = true;
 				}

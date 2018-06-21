@@ -12,7 +12,7 @@ namespace FriendlyFireAutoban
 		name = "Friendly Fire Autoban",
 		description = "Plugin that autobans players for friendly firing.",
 		id = "patpeter.friendly.fire.autoban",
-		version = "1.4.0.18",
+		version = "1.5.0.19",
 		SmodMajor = 3,
 		SmodMinor = 1,
 		SmodRevision = 3
@@ -21,7 +21,7 @@ namespace FriendlyFireAutoban
 	{
 		internal bool duringRound = false;
 		internal Dictionary<string, int> teamkillCounter = new Dictionary<string, int>();
-		internal Dictionary<int, int> teamkillMatrix = new Dictionary<int, int>();
+		internal List<TeamkillTuple> teamkillMatrix = new List<TeamkillTuple>();
 
 		public override void OnEnable()
 		{
@@ -62,6 +62,17 @@ namespace FriendlyFireAutoban
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_noguns", 0, Smod2.Config.SettingType.NUMERIC, true, "Number of kills to remove the player's guns as a warning for teamkilling."));
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_tospec", 0, Smod2.Config.SettingType.NUMERIC, true, "Number of kills at which to put a player into spectator."));
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_matrix", new string[] { "1:1", "2:2", "3:3", "4:4", "1:3", "2:4", "3:1", "4:2" }, Smod2.Config.SettingType.LIST, true, "Matrix of killer:victim tuples that are considered teamkills."));
+		}
+	}
+
+	struct TeamkillTuple
+	{
+		public int killerRole, victimRole;
+
+		public TeamkillTuple(int killerRole, int victimRole)
+		{
+			this.killerRole = killerRole;
+			this.victimRole = victimRole;
 		}
 	}
 }
