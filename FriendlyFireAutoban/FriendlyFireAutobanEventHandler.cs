@@ -25,7 +25,6 @@ namespace FriendlyFireAutoban.EventHandlers
 			this.plugin.Debug("friendly_fire_autoban_noguns value: " + this.plugin.GetConfigInt("friendly_fire_autoban_noguns"));
 			this.plugin.Debug("friendly_fire_autoban_tospec value: " + this.plugin.GetConfigInt("friendly_fire_autoban_tospec"));
 			this.plugin.duringRound = true;
-			this.plugin.Debug("OnRoundStart duringRound: " + this.plugin.duringRound);
 			this.plugin.teamkillCounter = new Dictionary<string, int>();
 			this.plugin.teamkillMatrix = new Dictionary<int, int>();
 			string[] teamkillMatrix = this.plugin.GetConfigList("friendly_fire_autoban_matrix");
@@ -60,7 +59,6 @@ namespace FriendlyFireAutoban.EventHandlers
 		public void OnRoundEnd(RoundEndEvent ev)
 		{
 			this.plugin.duringRound = false;
-			this.plugin.Debug("OnRoundEnd duringRound: " + this.plugin.duringRound);
 			this.plugin.teamkillCounter = new Dictionary<string, int>();
 		}
 	}
@@ -84,7 +82,6 @@ namespace FriendlyFireAutoban.EventHandlers
 
 			if (this.plugin.GetConfigBool("friendly_fire_autoban_enable"))
 			{
-				this.plugin.Debug("Processing Friendly Fire Autoban is running...");
 				string[] killerNameParts = Regex.Split(ev.Killer.ToString(), @"::");
 				if (killerNameParts.Length >= 4)
 				{
@@ -131,12 +128,14 @@ namespace FriendlyFireAutoban.EventHandlers
 							}
 						}
 					}
-					else if (this.plugin.GetConfigInt("friendly_fire_autoban_tospec") > 0 && this.plugin.teamkillCounter[ev.Killer.SteamId] >= this.plugin.GetConfigInt("friendly_fire_autoban_tospec"))
+
+					if (this.plugin.GetConfigInt("friendly_fire_autoban_tospec") > 0 && this.plugin.teamkillCounter[ev.Killer.SteamId] >= this.plugin.GetConfigInt("friendly_fire_autoban_tospec"))
 					{
 						this.plugin.Info("Player " + String.Join(" ", killerNameParts) + " has been moved to spectator for teamkilling.");
 						ev.Killer.ChangeRole(Role.SPECTATOR);
 					}
-					else if (this.plugin.teamkillCounter[ev.Killer.SteamId] >= this.plugin.GetConfigInt("friendly_fire_autoban_amount"))
+
+					if (this.plugin.teamkillCounter[ev.Killer.SteamId] >= this.plugin.GetConfigInt("friendly_fire_autoban_amount"))
 					{
 						this.plugin.Info("Player " + String.Join(" ", killerNameParts) + " has been banned for " + this.plugin.GetConfigInt("friendly_fire_autoban_length") + " minutes after teamkilling " + this.plugin.teamkillCounter[ev.Killer.SteamId] + " players.");
 						ev.Killer.Ban(this.plugin.GetConfigInt("friendly_fire_autoban_length"));
@@ -148,10 +147,6 @@ namespace FriendlyFireAutoban.EventHandlers
 						String.Join(" ", victimNameParts) + " " + ev.Player.TeamRole.Team.ToString() + " and it was not detected as a teamkill.");
 				}
 			}
-			else
-			{
-				this.plugin.Debug("Friendly Fire Autoban is not enabled. " + ev.Killer.ToString() + " kills will not be logged.");
-			}
 		}
 
 		public bool isTeamkill(Player killer, Player victim)
@@ -161,7 +156,6 @@ namespace FriendlyFireAutoban.EventHandlers
 
 			if (killer.SteamId == victim.SteamId)
 			{
-				this.plugin.Debug("Suicide is not banned.");
 				return false;
 			}
 
@@ -170,7 +164,6 @@ namespace FriendlyFireAutoban.EventHandlers
 			{
 				if (killerTeam == entry.Key && victimTeam == entry.Value)
 				{
-					this.plugin.Debug("Teamkill " + entry.Key + ":" + entry.Value + " detected.");
 					isTeamkill = true;
 				}
 			}
