@@ -29,22 +29,23 @@ namespace FriendlyFireAutoban
 		public override void OnEnable()
 		{
 			this.Info("friendly_fire_autoban_enable default value: " + this.GetConfigBool("friendly_fire_autoban_enable"));
-			this.Info("friendly_fire_autoban_amount default value: " + this.GetConfigInt("friendly_fire_autoban_amount"));
-			this.Info("friendly_fire_autoban_length default value: " + this.GetConfigInt("friendly_fire_autoban_length"));
-			this.Info("friendly_fire_autoban_noguns default value: " + this.GetConfigInt("friendly_fire_autoban_noguns"));
-			this.Info("friendly_fire_autoban_tospec default value: " + this.GetConfigInt("friendly_fire_autoban_tospec"));
+			this.Info("friendly_fire_autoban_system default value: " + this.GetConfigInt("friendly_fire_autoban_system"));
 			string matrix = "";
 			foreach (string s in this.GetConfigList("friendly_fire_autoban_matrix"))
 			{
 				if (matrix.Length == 0)
 				{
 					matrix += s;
-				} else
+				}
+				else
 				{
 					matrix += ',' + s;
 				}
 			}
 			this.Info("friendly_fire_autoban_matrix default value: " + matrix);
+			this.Info("friendly_fire_autoban_amount default value: " + this.GetConfigInt("friendly_fire_autoban_amount"));
+			this.Info("friendly_fire_autoban_length default value: " + this.GetConfigInt("friendly_fire_autoban_length"));
+			this.Info("friendly_fire_autoban_expire default value: " + this.GetConfigInt("friendly_fire_autoban_expire"));
 			string scaled = "";
 			foreach (string s in this.GetConfigList("friendly_fire_autoban_scaled"))
 			{
@@ -58,6 +59,9 @@ namespace FriendlyFireAutoban
 				}
 			}
 			this.Info("friendly_fire_autoban_scaled default value: " + scaled);
+			this.Info("friendly_fire_autoban_noguns default value: " + this.GetConfigInt("friendly_fire_autoban_noguns"));
+			this.Info("friendly_fire_autoban_tospec default value: " + this.GetConfigInt("friendly_fire_autoban_tospec"));
+			this.Info("friendly_fire_autoban_kicker default value: " + this.GetConfigInt("friendly_fire_autoban_kicker"));
 		}
 
 		public override void OnDisable()

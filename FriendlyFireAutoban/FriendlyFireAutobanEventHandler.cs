@@ -62,7 +62,7 @@ namespace FriendlyFireAutoban.EventHandlers
 					continue;
 				}
 
-				this.plugin.teamkillScaled.Add(tuple0, tuple1);
+				this.plugin.teamkillScaled[tuple0] = tuple1;
 			}
 		}
 	}
