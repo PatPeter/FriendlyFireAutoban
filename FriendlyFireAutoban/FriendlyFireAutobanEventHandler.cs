@@ -78,7 +78,9 @@ namespace FriendlyFireAutoban.EventHandlers
 
 		public void OnRoundEnd(RoundEndEvent ev)
 		{
-			this.plugin.duringRound = false;
+			if (ev.Round.Duration < 3) {
+				this.plugin.duringRound = false;
+			}
 
 			if (this.plugin.GetConfigInt("friendly_fire_autoban_system") == 3)
 			{
