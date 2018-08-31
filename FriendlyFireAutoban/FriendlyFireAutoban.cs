@@ -1,5 +1,6 @@
 ﻿using FriendlyFireAutoban.EventHandlers;
 using Smod2;
+using Smod2.API;
 using Smod2.Attributes;
 using Smod2.Events;
 using Smod2.EventHandlers;
@@ -13,7 +14,7 @@ namespace FriendlyFireAutoban
 		name = "Friendly Fire Autoban",
 		description = "Plugin that autobans players for friendly firing.",
 		id = "patpeter.friendly.fire.autoban",
-		version = "2.0.3.24",
+		version = "2.1.0.25",
 		SmodMajor = 3,
 		SmodMinor = 1,
 		SmodRevision = 12
@@ -90,6 +91,31 @@ namespace FriendlyFireAutoban
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_noguns", 0, Smod2.Config.SettingType.NUMERIC, true, "Number of kills to remove the player's guns as a warning for teamkilling."));
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_tospec", 0, Smod2.Config.SettingType.NUMERIC, true, "Number of kills at which to put a player into spectator as a warning for teamkilling."));
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_kicker", 0, Smod2.Config.SettingType.NUMERIC, true, "Number of kills at which to kick as a warning for teamkilling."));
+
+			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_immune", new string[] { "owner", "admin", "moderator" }, Smod2.Config.SettingType.LIST, true, "Ranks that are immune to being autobanned."));
+		}
+
+		public void Ban(Player player, string playerName, int banLength, int teamkills)
+		{
+			string[] immuneRanks = this.GetConfigList("friendly_fire_autoban_immune");
+			bool isImmune = false;
+			foreach (string rank in immuneRanks)
+			{
+				if (rank.Equals(player.GetUserGroup().Name))
+				{
+					isImmune = true;
+					break;
+				}
+			}
+			if (isImmune)
+			{
+				this.Info("Admin/Moderator " + playerName + " has avoided a ban for " + banLength + " minutes after teamkilling " + teamkills + " players during the round.");
+			}
+			else
+			{
+				player.Ban(banLength);
+				this.Info("Player " + playerName + " has been banned for " + banLength + " minutes after teamkilling " + teamkills + " players during the round.");
+			}
 		}
 	}
 

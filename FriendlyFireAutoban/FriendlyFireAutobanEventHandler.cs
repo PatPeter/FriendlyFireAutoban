@@ -98,8 +98,7 @@ namespace FriendlyFireAutoban.EventHandlers
 						if (this.plugin.teamkillScaled.ContainsKey(teamkills))
 						{
 							int banLength = this.plugin.teamkillScaled[teamkills];
-							player.Ban(banLength);
-							this.plugin.Info("Player " + player.ToString() + " has been banned for " + banLength + " minutes after committing " + teamkills + " teamkills during the round.");
+							this.plugin.Ban(player, player.Name, banLength, teamkills);
 						}
 						else
 						{
@@ -196,8 +195,7 @@ namespace FriendlyFireAutoban.EventHandlers
 
 					if (this.plugin.GetConfigInt("friendly_fire_autoban_system") == 1 && this.plugin.teamkillCounter[ev.Killer.SteamId] >= this.plugin.GetConfigInt("friendly_fire_autoban_amount"))
 					{
-						this.plugin.Info("Player " + String.Join(" ", killerNameParts) + " has been banned for " + this.plugin.GetConfigInt("friendly_fire_autoban_length") + " minutes after teamkilling " + this.plugin.teamkillCounter[ev.Killer.SteamId] + " players.");
-						ev.Killer.Ban(this.plugin.GetConfigInt("friendly_fire_autoban_length"));
+						this.plugin.Ban(ev.Killer, String.Join(" ", killerNameParts), this.plugin.GetConfigInt("friendly_fire_autoban_length"), this.plugin.teamkillCounter[ev.Killer.SteamId]);
 					}
 
 					if (this.plugin.GetConfigInt("friendly_fire_autoban_system") == 2)
@@ -215,14 +213,20 @@ namespace FriendlyFireAutoban.EventHandlers
 							t = new Timer
 							{
 								Interval = this.plugin.GetConfigInt("friendly_fire_autoban_expire") * 1000,
-								AutoReset = false,
+								AutoReset = true,
 								Enabled = true
 							};
 							t.Elapsed += delegate
 							{
-								this.plugin.teamkillCounter[ev.Killer.SteamId]--;
-								t.Enabled = false;
-								this.plugin.Debug("Player " + String.Join(" ", killerNameParts) + " " + ev.Killer.TeamRole.Team.ToString() + " teamkill expired, counter now at " + this.plugin.teamkillCounter[ev.Killer.SteamId] + ".");
+								if (this.plugin.teamkillCounter[ev.Killer.SteamId] > 0)
+								{
+									this.plugin.teamkillCounter[ev.Killer.SteamId]--;
+									this.plugin.Info("Player " + String.Join(" ", killerNameParts) + " " + ev.Killer.TeamRole.Team.ToString() + " teamkill expired, counter now at " + this.plugin.teamkillCounter[ev.Killer.SteamId] + ".");
+								}
+								else
+								{
+									t.Enabled = false;
+								}
 							};
 							this.plugin.teamkillTimers[ev.Killer.SteamId] = t;
 						}
@@ -230,8 +234,7 @@ namespace FriendlyFireAutoban.EventHandlers
 						if (this.plugin.teamkillCounter[ev.Killer.SteamId] >= this.plugin.GetConfigInt("friendly_fire_autoban_amount"))
 						{
 							t.Stop();
-							this.plugin.Info("Player " + String.Join(" ", killerNameParts) + " has been banned for " + this.plugin.GetConfigInt("friendly_fire_autoban_length") + " minutes after teamkilling " + this.plugin.teamkillCounter[ev.Killer.SteamId] + " players.");
-							ev.Killer.Ban(this.plugin.GetConfigInt("friendly_fire_autoban_length"));
+							this.plugin.Ban(ev.Killer, String.Join(" ", killerNameParts), this.plugin.GetConfigInt("friendly_fire_autoban_length"), this.plugin.teamkillCounter[ev.Killer.SteamId]);
 						}
 					}
 				}
