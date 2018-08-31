@@ -46,6 +46,8 @@ namespace FriendlyFireAutoban.EventHandlers
 
 				this.plugin.teamkillMatrix.Add(new TeamkillTuple(tuple0, tuple1));
 			}
+
+			this.plugin.teamkillScaled = new Dictionary<int, int>();
 			string[] teamkillScaled = this.plugin.GetConfigList("friendly_fire_autoban_scaled");
 			foreach (string pair in teamkillScaled)
 			{
@@ -62,7 +64,10 @@ namespace FriendlyFireAutoban.EventHandlers
 					continue;
 				}
 
-				this.plugin.teamkillScaled[tuple0] = tuple1;
+				if (!this.plugin.teamkillScaled.ContainsKey(tuple0))
+				{
+					this.plugin.teamkillScaled[tuple0] = tuple1;
+				}
 			}
 		}
 	}
