@@ -14,7 +14,7 @@ namespace FriendlyFireAutoban
 		name = "Friendly Fire Autoban",
 		description = "Plugin that autobans players for friendly firing.",
 		id = "patpeter.friendly.fire.autoban",
-		version = "2.1.1.28",
+		version = "2.1.1.29",
 		SmodMajor = 3,
 		SmodMinor = 1,
 		SmodRevision = 12
@@ -63,7 +63,6 @@ namespace FriendlyFireAutoban
 			this.Info("friendly_fire_autoban_noguns default value: " + this.GetConfigInt("friendly_fire_autoban_noguns"));
 			this.Info("friendly_fire_autoban_tospec default value: " + this.GetConfigInt("friendly_fire_autoban_tospec"));
 			this.Info("friendly_fire_autoban_kicker default value: " + this.GetConfigInt("friendly_fire_autoban_kicker"));
-			this.Info("friendly_fire_autoban_immune default value: " + this.GetConfigInt("friendly_fire_autoban_immune"));
 			string immune = "";
 			foreach (string s in this.GetConfigList("friendly_fire_autoban_immune"))
 			{
