@@ -64,6 +64,19 @@ namespace FriendlyFireAutoban
 			this.Info("friendly_fire_autoban_tospec default value: " + this.GetConfigInt("friendly_fire_autoban_tospec"));
 			this.Info("friendly_fire_autoban_kicker default value: " + this.GetConfigInt("friendly_fire_autoban_kicker"));
 			this.Info("friendly_fire_autoban_immune default value: " + this.GetConfigInt("friendly_fire_autoban_immune"));
+			string immune = "";
+			foreach (string s in this.GetConfigList("friendly_fire_autoban_immune"))
+			{
+				if (immune.Length == 0)
+				{
+					immune += s;
+				}
+				else
+				{
+					immune += ',' + s;
+				}
+			}
+			this.Info("friendly_fire_autoban_immune default value: " + immune);
 		}
 
 		public override void OnDisable()
