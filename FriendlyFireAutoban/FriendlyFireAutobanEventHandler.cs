@@ -182,6 +182,7 @@ namespace FriendlyFireAutoban.EventHandlers
 								case ItemType.MP4:
 								case ItemType.P90:
 								case ItemType.FRAG_GRENADE:
+								case ItemType.FLASHBANG:
 									inv[i].Remove();
 									break;
 							}

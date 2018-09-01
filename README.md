@@ -6,7 +6,7 @@ Config Setting | Value Type | Default Value | Description
 --- | --- | --- | ---
 friendly_fire_autoban_enable | boolean | true | `Enable` or `Disable` the plugin on each server
 friendly_fire_autoban_system | integer | 1 | Change system for processing teamkills: basic counter (1), timer-based counter (2), or end-of-round counter (3).
-friendly_fire_autoban_matrix | dictionary | 1:1,2:2,3:3,4:4,1:3,2:4,3:1,4:2 | Matrix of `killer:victim` tuples that the plugins considers teamkills
+friendly_fire_autoban_matrix | list | 1:1,2:2,3:3,4:4,1:3,2:4,3:1,4:2 | Matrix of `killer:victim` tuples that the plugins considers teamkills
 friendly_fire_autoban_amount | integer | 5 | Amount of teamkills before a ban will be issued.
 friendly_fire_autoban_length | integer | 3600 | Length of ban in minutes.
 friendly_fire_autoban_expire | integer | 60 | For ban system #2, Time it takes in seconds for teamkill to degrade and not count towards ban.
