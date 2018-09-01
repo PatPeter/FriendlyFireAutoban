@@ -14,7 +14,7 @@ namespace FriendlyFireAutoban
 		name = "Friendly Fire Autoban",
 		description = "Plugin that autobans players for friendly firing.",
 		id = "patpeter.friendly.fire.autoban",
-		version = "2.1.0.25",
+		version = "2.1.1.26",
 		SmodMajor = 3,
 		SmodMinor = 1,
 		SmodRevision = 12
@@ -63,6 +63,7 @@ namespace FriendlyFireAutoban
 			this.Info("friendly_fire_autoban_noguns default value: " + this.GetConfigInt("friendly_fire_autoban_noguns"));
 			this.Info("friendly_fire_autoban_tospec default value: " + this.GetConfigInt("friendly_fire_autoban_tospec"));
 			this.Info("friendly_fire_autoban_kicker default value: " + this.GetConfigInt("friendly_fire_autoban_kicker"));
+			this.Info("friendly_fire_autoban_immune default value: " + this.GetConfigInt("friendly_fire_autoban_immune"));
 		}
 
 		public override void OnDisable()
@@ -101,7 +102,8 @@ namespace FriendlyFireAutoban
 			bool isImmune = false;
 			foreach (string rank in immuneRanks)
 			{
-				if (rank.Equals(player.GetUserGroup().Name))
+				this.Debug("Does immune rank " + rank + " equal " + player.GetUserGroup().Name + " or " + player.GetRankName() + "?");
+				if (rank.Equals(player.GetUserGroup().Name) || rank.Equals(player.GetRankName()))
 				{
 					isImmune = true;
 					break;

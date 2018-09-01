@@ -87,7 +87,14 @@ namespace FriendlyFireAutoban.EventHandlers
 				this.plugin.duringRound = false;
 			}
 
-			if (this.plugin.GetConfigInt("friendly_fire_autoban_system") == 3)
+			if (this.plugin.GetConfigInt("friendly_fire_autoban_system") == 2)
+			{
+				foreach (Timer timer in this.plugin.teamkillTimers.Values)
+				{
+					timer.Enabled = false;
+				}
+			}
+			else if (this.plugin.GetConfigInt("friendly_fire_autoban_system") == 3)
 			{
 				foreach (Player player in ev.Server.GetPlayers())
 				{
