@@ -70,7 +70,7 @@ namespace FriendlyFireAutoban.EventHandlers
                 }
             }
 
-            //FFimproved
+            //for friendly_fire__<class name>__<damage type>
             this.plugin.weaponKillCounter = new Dictionary<string, Dictionary<string, int>>();
         }
     }
@@ -159,11 +159,11 @@ namespace FriendlyFireAutoban.EventHandlers
             {
                 if (this.plugin.GetConfigBool("friendly_fire_autoban_enable"))
                 {
-                    string[] TeamWeapon = new string[] { FFImproved.TeamResolver(ev.Killer.TeamRole.Team), ev.DamageTypeVar.ToString().ToLower() };
+                    string[] TeamWeapon = new string[] { TeamResolver(ev.Killer.TeamRole.Team), ev.DamageTypeVar.ToString().ToLower() };
                     string confVar = "friendly_fire__" + String.Join("__", TeamWeapon);
                     if (this.plugin.teamkillCounter.ContainsKey(ev.Killer.SteamId))
                     {
-                        if (this.plugin.GetConfigInt(confVar) > 0)
+                        if (this.plugin.GetConfigInt(confVar) > 0 && TeamWeapon[0] != "none")
                         {
                             if (this.plugin.weaponKillCounter.ContainsKey(ev.Killer.SteamId))
                             {
@@ -194,7 +194,7 @@ namespace FriendlyFireAutoban.EventHandlers
                     else
                     {
                         this.plugin.teamkillCounter[ev.Killer.SteamId] = 0;
-                        if (this.plugin.GetConfigInt(confVar) > 0)
+                        if (this.plugin.GetConfigInt(confVar) > 0 && TeamWeapon[0] != "none")
                         {
                             this.plugin.weaponKillCounter[ev.Killer.SteamId] = new Dictionary<string, int>();
                             plugin.Info("WEAPONKILLCNT: " + this.plugin.weaponKillCounter[ev.Killer.SteamId]);
@@ -245,7 +245,8 @@ namespace FriendlyFireAutoban.EventHandlers
 
                     if (this.plugin.GetConfigInt("friendly_fire_autoban_system") == 1)
                     {
-                        if (this.plugin.GetConfigInt(confVar) > 0 && this.plugin.weaponKillCounter[ev.Killer.SteamId].ContainsKey(TeamWeapon[1]) && this.plugin.weaponKillCounter[ev.Killer.SteamId][TeamWeapon[1]] >= this.plugin.GetConfigInt(confVar))
+                        if (this.plugin.GetConfigInt(confVar) > 0 && TeamWeapon[0] != "none" && this.plugin.weaponKillCounter[ev.Killer.SteamId].ContainsKey(TeamWeapon[1]) &&
+                            this.plugin.weaponKillCounter[ev.Killer.SteamId][TeamWeapon[1]] >= this.plugin.GetConfigInt(confVar))
                         {
                             this.plugin.Ban(ev.Killer, String.Join(" ", killerNameParts), this.plugin.GetConfigInt("friendly_fire_autoban_length"), this.plugin.teamkillCounter[ev.Killer.SteamId]);
                         }
@@ -328,6 +329,23 @@ namespace FriendlyFireAutoban.EventHandlers
             }
 
             return isTeamkill;
+        }
+        //for friendly_fire__<class name>__<damage type>
+        public static string TeamResolver(Team team)
+        {
+            Dictionary<Team, string> teams = new Dictionary<Team, string>();
+            teams[Team.CHAOS_INSURGENCY] = "ci";
+            teams[Team.CLASSD] = "classd";
+            teams[Team.NINETAILFOX] = "mtf";
+            teams[Team.SCIENTISTS] = "sci";
+            if (teams.ContainsKey(team))
+            {
+                return teams[team];
+            }
+            else
+            {
+                return "none";
+            }
         }
     }
 }

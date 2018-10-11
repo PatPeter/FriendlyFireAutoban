@@ -27,7 +27,7 @@ namespace FriendlyFireAutoban
         internal Dictionary<string, Timer> teamkillTimers = new Dictionary<string, Timer>();
         internal Dictionary<int, int> teamkillScaled = new Dictionary<int, int>();
 
-        //FFimproved
+        //for friendly_fire__<class name>__<damage type>
         internal Dictionary<string, Dictionary<string, int>> weaponKillCounter = new Dictionary<string, Dictionary<string, int>>();
 
         public override void OnEnable()
@@ -114,7 +114,7 @@ namespace FriendlyFireAutoban
 
             this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_immune", new string[] { "owner", "admin", "moderator" }, Smod2.Config.SettingType.LIST, true, "Ranks that are immune to being autobanned."));
 
-            //FFimproved
+            //for friendly_fire__<class name>__<damage type>
             this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_silent_defaults", false, Smod2.Config.SettingType.BOOL, true, "Silenece messages about default config vars."));
             this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire__ci__frag", -1, Smod2.Config.SettingType.NUMERIC, true, "Custom teankill ban for frag granade teamkills in Chaos Insurgensy"));
             this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire__ci__e11_standard_rifle", -1, Smod2.Config.SettingType.NUMERIC, true, "Custom teankill ban for E11 Rifle teamkills in Chaos Insurgensy"));
@@ -163,25 +163,6 @@ namespace FriendlyFireAutoban
             {
                 player.Ban(banLength, "You have been banned for teamkilling");
                 this.Info("Player " + playerName + " has been banned for " + banLength + " minutes after teamkilling " + teamkills + " players during the round.");
-            }
-        }
-    }
-    class FFImproved
-    {
-        public static string TeamResolver(Team team)
-        {
-            Dictionary<Team, string> teams = new Dictionary<Team, string>();
-            teams[Team.CHAOS_INSURGENCY] = "ci";
-            teams[Team.CLASSD] = "classd";
-            teams[Team.NINETAILFOX] = "mtf";
-            teams[Team.SCIENTISTS] = "sci";
-            if (teams.ContainsKey(team))
-            {
-                return teams[team];
-            }
-            else
-            {
-                return "none";
             }
         }
     }
