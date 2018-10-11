@@ -15,4 +15,4 @@ friendly_fire_autoban_noguns | integer | 0 | Number of kills to remove the playe
 friendly_fire_autoban_tospec | integer | 0 | Number of kills at which to put a player into spectator as a warning for teamkilling.
 friendly_fire_autoban_kicker | integer | 0 | Number of kills at which to kick the player as a warning for teamkilling.
 friendly_fire_autoban_immune | string | owner,admin,moderator | Groups that are immune to being autobanned.
-friendly_fire__\<class\>__\<damage type\> | integer | -1 | sets special teamkill amount for **class** (ci / mtf / sci / classd) and **damage type** - lower case of type of damage from [Smod2 Wiki](https://github.com/Grover-c13/Smod2/wiki/Enum-Lists#damagetype). Consider two '_' before **class** and **damage type**
+friendly_fire__\<class\>__\<damage type\> | integer | -1 | sets special teamkill amount for **class** (ci / mtf / sci / classd) and **damage type** - lower case of type of damage from [Smod2 Wiki](https://github.com/Grover-c13/Smod2/wiki/Enum-Lists#damagetype). Consider two '_' before **class** and **damage type**.
