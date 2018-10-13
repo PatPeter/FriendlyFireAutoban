@@ -195,7 +195,7 @@ namespace FriendlyFireAutoban.EventHandlers
 						ev.Killer.ChangeRole(Role.SPECTATOR);
 					}
 
-					if (this.plugin.GetConfigInt("friendly_fire_autoban_kicker") > 0 && this.plugin.teamkillCounter[ev.Killer.SteamId] >= this.plugin.GetConfigInt("friendly_fire_autoban_kicker"))
+					if (this.plugin.GetConfigInt("friendly_fire_autoban_kicker") > 0 && this.plugin.teamkillCounter[ev.Killer.SteamId] == this.plugin.GetConfigInt("friendly_fire_autoban_kicker"))
 					{
 						this.plugin.Info("Player " + String.Join(" ", killerNameParts) + " has been kicked for teamkilling " + this.plugin.teamkillCounter[ev.Killer.SteamId] + " times.");
 						ev.Killer.Ban(0);
