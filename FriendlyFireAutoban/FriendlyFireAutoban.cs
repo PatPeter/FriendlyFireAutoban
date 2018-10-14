@@ -6,6 +6,7 @@ using Smod2.Events;
 using Smod2.EventHandlers;
 using System.Collections.Generic;
 using System.Timers;
+using System;
 
 namespace FriendlyFireAutoban
 {
@@ -14,7 +15,7 @@ namespace FriendlyFireAutoban
 		name = "Friendly Fire Autoban",
 		description = "Plugin that autobans players for friendly firing.",
 		id = "patpeter.friendly.fire.autoban",
-		version = "2.1.2.30",
+		version = "2.2.0.31",
 		SmodMajor = 3,
 		SmodMinor = 1,
 		SmodRevision = 19
@@ -97,7 +98,7 @@ namespace FriendlyFireAutoban
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_amount", 5, Smod2.Config.SettingType.NUMERIC, true, "Amount of teamkills before a ban will be issued."));
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_length", 1440, Smod2.Config.SettingType.NUMERIC, true, "Length of ban in minutes."));
 			// 2
-			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_expire", 60, Smod2.Config.SettingType.NUMERIC, true, "For ban system #2, Time it takes in seconds for teamkill to degrade and not count towards ban."));
+			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_expire", 60, Smod2.Config.SettingType.NUMERIC, true, "Time it takes in seconds for teamkill to degrade and not count towards ban."));
 			// 3
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_scaled", new string[] { "1:0", "2:1", "3:5", "4:15", "5:30", "6:60", "7:180", "8:300", "9:480", "10:720", "11:1440", "12:4320", "13:10080", "14:20160", "15:43200", "16:43200", "17:14400", "18:525600", "19:2628000", "20:26280000" }, Smod2.Config.SettingType.LIST, true, "For ban system #3, dictionary of amount of teamkills:length of ban that will be processed at the end of the round."));
 
@@ -108,27 +109,33 @@ namespace FriendlyFireAutoban
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_immune", new string[] { "owner", "admin", "moderator" }, Smod2.Config.SettingType.LIST, true, "Ranks that are immune to being autobanned."));
 		}
 
-		public void Ban(Player player, string playerName, int banLength, int teamkills)
+		public bool isImmune(Player player)
 		{
 			string[] immuneRanks = this.GetConfigList("friendly_fire_autoban_immune");
-			bool isImmune = false;
 			foreach (string rank in immuneRanks)
 			{
 				this.Debug("Does immune rank " + rank + " equal " + player.GetUserGroup().Name + " or " + player.GetRankName() + "?");
-				if (rank.Equals(player.GetUserGroup().Name) || rank.Equals(player.GetRankName()))
+				if (String.Equals(rank, player.GetUserGroup().Name, StringComparison.CurrentCultureIgnoreCase) || String.Equals(rank, player.GetRankName(), StringComparison.CurrentCultureIgnoreCase))
 				{
-					isImmune = true;
-					break;
+					return true;
 				}
 			}
-			if (isImmune)
+			return false;
+		}
+
+		public bool Ban(Player player, string playerName, int banLength, int teamkills)
+		{
+			bool immune = isImmune(player);
+			if (immune)
 			{
 				this.Info("Admin/Moderator " + playerName + " has avoided a ban for " + banLength + " minutes after teamkilling " + teamkills + " players during the round.");
+				return false;
 			}
 			else
 			{
 				player.Ban(banLength);
 				this.Info("Player " + playerName + " has been banned for " + banLength + " minutes after teamkilling " + teamkills + " players during the round.");
+				return true;
 			}
 		}
 	}
