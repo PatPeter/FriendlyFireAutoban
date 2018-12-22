@@ -280,4 +280,37 @@ namespace FriendlyFireAutoban.EventHandlers
 			return false;
 		}
 	}
+
+	class PlayerHurtHandler : IEventHandlerPlayerHurt
+	{
+		private FriendlyFireAutobanPlugin plugin;
+
+		public PlayerHurtHandler(Plugin plugin)
+		{
+			this.plugin = (FriendlyFireAutobanPlugin)plugin;
+		}
+
+
+		public void OnPlayerHurt(PlayerHurtEvent ev)
+		{
+			if (this.plugin.GetConfigBool("friendly_fire_autoban_enable"))
+			{
+				if (ev.Player.PlayerId == ev.Attacker.PlayerId && ev.DamageType == DamageType.FRAG)
+				{
+					int damage = (int) ev.Damage;
+					ev.Damage = 0;
+					Timer t = new Timer
+					{
+						Interval = 2000,
+						AutoReset = true,
+						Enabled = true
+					};
+					t.Elapsed += delegate
+					{
+						ev.Attacker.Damage(damage, DamageType.FRAG);
+					};
+				}
+			}
+		}
+	}
 }
