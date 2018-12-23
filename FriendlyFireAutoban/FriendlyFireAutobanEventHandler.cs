@@ -23,7 +23,9 @@ namespace FriendlyFireAutoban.EventHandlers
 			this.plugin.duringRound = true;
 			this.plugin.teamkillCounter = new Dictionary<string, int>();
 			this.plugin.teamkillMatrix = new List<TeamkillTuple>();
-			if (this.plugin.GetConfigBool("friendly_fire_autoban_outall"))
+			this.plugin.enabled = this.plugin.GetConfigBool("friendly_fire_autoban_enable");
+			this.plugin.debug = this.plugin.GetConfigBool("friendly_fire_autoban_outall");
+			if (this.plugin.debug)
 			{
 				this.plugin.Info("friendly_fire_autoban_enable value: " + this.plugin.GetConfigBool("friendly_fire_autoban_enable"));
 				this.plugin.Info("friendly_fire_autoban_amount value: " + this.plugin.GetConfigInt("friendly_fire_autoban_amount"));
@@ -37,7 +39,7 @@ namespace FriendlyFireAutoban.EventHandlers
 				string[] tuple = pair.Split(':');
 				if (tuple.Length != 2)
 				{
-					if (this.plugin.GetConfigBool("friendly_fire_autoban_outall"))
+					if (this.plugin.debug)
 					{
 						plugin.Info("Tuple " + pair + " does not have a single : in it.");
 					}
@@ -46,7 +48,7 @@ namespace FriendlyFireAutoban.EventHandlers
 				int tuple0 = -1, tuple1 = -1;
 				if (!int.TryParse(tuple[0], out tuple0) || !int.TryParse(tuple[1], out tuple1))
 				{
-					if (this.plugin.GetConfigBool("friendly_fire_autoban_outall"))
+					if (this.plugin.debug)
 					{
 						plugin.Info("Either " + tuple[0] + " or " + tuple[1] + " could not be parsed as an int.");
 					}
@@ -63,7 +65,7 @@ namespace FriendlyFireAutoban.EventHandlers
 				string[] tuple = pair.Split(':');
 				if (tuple.Length != 2)
 				{
-					if (this.plugin.GetConfigBool("friendly_fire_autoban_outall"))
+					if (this.plugin.debug)
 					{
 						plugin.Info("Tuple " + pair + " does not have a single : in it.");
 					}
@@ -72,7 +74,7 @@ namespace FriendlyFireAutoban.EventHandlers
 				int tuple0 = -1, tuple1 = -1;
 				if (!int.TryParse(tuple[0], out tuple0) || !int.TryParse(tuple[1], out tuple1))
 				{
-					if (this.plugin.GetConfigBool("friendly_fire_autoban_outall"))
+					if (this.plugin.debug)
 					{
 						plugin.Info("Either " + tuple[0] + " or " + tuple[1] + " could not be parsed as an int.");
 					}
@@ -116,7 +118,7 @@ namespace FriendlyFireAutoban.EventHandlers
 					if (this.plugin.teamkillCounter.ContainsKey(player.SteamId))
 					{
 						int teamkills = this.plugin.teamkillCounter[player.SteamId];
-						if (this.plugin.GetConfigBool("friendly_fire_autoban_outall"))
+						if (this.plugin.debug)
 						{
 							this.plugin.Info("Player " + player.ToString() + " has committed " + teamkills + " teamkills.");
 						}
@@ -127,7 +129,7 @@ namespace FriendlyFireAutoban.EventHandlers
 						}
 						else
 						{
-							if (this.plugin.GetConfigBool("friendly_fire_autoban_outall"))
+							if (this.plugin.debug)
 							{
 								this.plugin.Info(teamkills + " teamkills is not bannable.");
 							}
@@ -135,7 +137,7 @@ namespace FriendlyFireAutoban.EventHandlers
 					}
 					else
 					{
-						if (this.plugin.GetConfigBool("friendly_fire_autoban_outall"))
+						if (this.plugin.debug)
 						{
 							this.plugin.Info("Player " + player.ToString() + " has committed no teamkills.");
 						}
@@ -278,7 +280,7 @@ namespace FriendlyFireAutoban.EventHandlers
 			}
 			else
 			{
-				if (this.plugin.GetConfigBool("friendly_fire_autoban_outall"))
+				if (this.plugin.debug)
 				{
 					this.plugin.Info("Player " + String.Join(" ", killerNameParts) + " " + ev.Killer.TeamRole.Team.ToString() + " killed " +
 						String.Join(" ", victimNameParts) + " " + ev.Player.TeamRole.Team.ToString() + " and it was not detected as a teamkill.");

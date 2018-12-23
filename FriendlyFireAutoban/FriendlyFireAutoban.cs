@@ -23,6 +23,8 @@ namespace FriendlyFireAutoban
 	class FriendlyFireAutobanPlugin : Plugin
 	{
 		internal bool duringRound = false;
+		internal bool enabled = true;
+		internal bool debug = false;
 		internal Dictionary<string, int> teamkillCounter = new Dictionary<string, int>();
 		internal List<TeamkillTuple> teamkillMatrix = new List<TeamkillTuple>();
 		internal Dictionary<string, Timer> teamkillTimers = new Dictionary<string, Timer>();
@@ -117,7 +119,7 @@ namespace FriendlyFireAutoban
 			string[] immuneRanks = this.GetConfigList("friendly_fire_autoban_immune");
 			foreach (string rank in immuneRanks)
 			{
-				if (this.GetConfigBool("friendly_fire_autoban_outall"))
+				if (this.debug)
 				{
 					this.Info("Does immune rank " + rank + " equal " + player.GetUserGroup().Name + " or " + player.GetRankName() + "?");
 				}
