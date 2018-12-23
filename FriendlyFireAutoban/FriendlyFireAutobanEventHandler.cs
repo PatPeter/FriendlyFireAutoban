@@ -20,27 +20,36 @@ namespace FriendlyFireAutoban.EventHandlers
 
 		public void OnRoundStart(RoundStartEvent ev)
 		{
-			this.plugin.Debug("friendly_fire_autoban_enable value: " + this.plugin.GetConfigBool("friendly_fire_autoban_enable"));
-			this.plugin.Debug("friendly_fire_autoban_amount value: " + this.plugin.GetConfigInt("friendly_fire_autoban_amount"));
-			this.plugin.Debug("friendly_fire_autoban_length value: " + this.plugin.GetConfigInt("friendly_fire_autoban_length"));
-			this.plugin.Debug("friendly_fire_autoban_noguns value: " + this.plugin.GetConfigInt("friendly_fire_autoban_noguns"));
-			this.plugin.Debug("friendly_fire_autoban_tospec value: " + this.plugin.GetConfigInt("friendly_fire_autoban_tospec"));
 			this.plugin.duringRound = true;
 			this.plugin.teamkillCounter = new Dictionary<string, int>();
 			this.plugin.teamkillMatrix = new List<TeamkillTuple>();
+			if (this.plugin.GetConfigBool("friendly_fire_autoban_outall"))
+			{
+				this.plugin.Info("friendly_fire_autoban_enable value: " + this.plugin.GetConfigBool("friendly_fire_autoban_enable"));
+				this.plugin.Info("friendly_fire_autoban_amount value: " + this.plugin.GetConfigInt("friendly_fire_autoban_amount"));
+				this.plugin.Info("friendly_fire_autoban_length value: " + this.plugin.GetConfigInt("friendly_fire_autoban_length"));
+				this.plugin.Info("friendly_fire_autoban_noguns value: " + this.plugin.GetConfigInt("friendly_fire_autoban_noguns"));
+				this.plugin.Info("friendly_fire_autoban_tospec value: " + this.plugin.GetConfigInt("friendly_fire_autoban_tospec"));
+			}
 			string[] teamkillMatrix = this.plugin.GetConfigList("friendly_fire_autoban_matrix");
 			foreach (string pair in teamkillMatrix)
 			{
 				string[] tuple = pair.Split(':');
 				if (tuple.Length != 2)
 				{
-					plugin.Debug("Tuple " + pair + " does not have a single : in it.");
+					if (this.plugin.GetConfigBool("friendly_fire_autoban_outall"))
+					{
+						plugin.Info("Tuple " + pair + " does not have a single : in it.");
+					}
 					continue;
 				}
 				int tuple0 = -1, tuple1 = -1;
 				if (!int.TryParse(tuple[0], out tuple0) || !int.TryParse(tuple[1], out tuple1))
 				{
-					plugin.Debug("Either " + tuple[0] + " or " + tuple[1] + " could not be parsed as an int.");
+					if (this.plugin.GetConfigBool("friendly_fire_autoban_outall"))
+					{
+						plugin.Info("Either " + tuple[0] + " or " + tuple[1] + " could not be parsed as an int.");
+					}
 					continue;
 				}
 
@@ -54,13 +63,19 @@ namespace FriendlyFireAutoban.EventHandlers
 				string[] tuple = pair.Split(':');
 				if (tuple.Length != 2)
 				{
-					plugin.Debug("Tuple " + pair + " does not have a single : in it.");
+					if (this.plugin.GetConfigBool("friendly_fire_autoban_outall"))
+					{
+						plugin.Info("Tuple " + pair + " does not have a single : in it.");
+					}
 					continue;
 				}
 				int tuple0 = -1, tuple1 = -1;
 				if (!int.TryParse(tuple[0], out tuple0) || !int.TryParse(tuple[1], out tuple1))
 				{
-					plugin.Debug("Either " + tuple[0] + " or " + tuple[1] + " could not be parsed as an int.");
+					if (this.plugin.GetConfigBool("friendly_fire_autoban_outall"))
+					{
+						plugin.Info("Either " + tuple[0] + " or " + tuple[1] + " could not be parsed as an int.");
+					}
 					continue;
 				}
 
@@ -101,7 +116,10 @@ namespace FriendlyFireAutoban.EventHandlers
 					if (this.plugin.teamkillCounter.ContainsKey(player.SteamId))
 					{
 						int teamkills = this.plugin.teamkillCounter[player.SteamId];
-						this.plugin.Debug("Player " + player.ToString() + " has committed " + teamkills + " teamkills.");
+						if (this.plugin.GetConfigBool("friendly_fire_autoban_outall"))
+						{
+							this.plugin.Info("Player " + player.ToString() + " has committed " + teamkills + " teamkills.");
+						}
 						if (this.plugin.teamkillScaled.ContainsKey(teamkills))
 						{
 							int banLength = this.plugin.teamkillScaled[teamkills];
@@ -109,12 +127,18 @@ namespace FriendlyFireAutoban.EventHandlers
 						}
 						else
 						{
-							this.plugin.Debug(teamkills + " teamkills is not bannable.");
+							if (this.plugin.GetConfigBool("friendly_fire_autoban_outall"))
+							{
+								this.plugin.Info(teamkills + " teamkills is not bannable.");
+							}
 						}
 					}
 					else
 					{
-						this.plugin.Debug("Player " + player.ToString() + " has committed no teamkills.");
+						if (this.plugin.GetConfigBool("friendly_fire_autoban_outall"))
+						{
+							this.plugin.Info("Player " + player.ToString() + " has committed no teamkills.");
+						}
 					}
 				}
 			}
@@ -136,7 +160,7 @@ namespace FriendlyFireAutoban.EventHandlers
 		{
 			if (!this.plugin.duringRound)
 			{
-				this.plugin.Debug("Skipping OnPlayerDie for being outside of a round.");
+				this.plugin.Info("Skipping OnPlayerDie for being outside of a round.");
 				return;
 			}
 			string[] killerNameParts = Regex.Split(ev.Killer.ToString(), @"::");
@@ -254,8 +278,11 @@ namespace FriendlyFireAutoban.EventHandlers
 			}
 			else
 			{
-				this.plugin.Debug("Player " + String.Join(" ", killerNameParts) + " " + ev.Killer.TeamRole.Team.ToString() + " killed " +
-					String.Join(" ", victimNameParts) + " " + ev.Player.TeamRole.Team.ToString() + " and it was not detected as a teamkill.");
+				if (this.plugin.GetConfigBool("friendly_fire_autoban_outall"))
+				{
+					this.plugin.Info("Player " + String.Join(" ", killerNameParts) + " " + ev.Killer.TeamRole.Team.ToString() + " killed " +
+						String.Join(" ", victimNameParts) + " " + ev.Player.TeamRole.Team.ToString() + " and it was not detected as a teamkill.");
+				}
 			}
 		}
 
@@ -307,6 +334,7 @@ namespace FriendlyFireAutoban.EventHandlers
 					t.Elapsed += delegate
 					{
 						ev.Attacker.Damage(damage, DamageType.NONE);
+						t.Enabled = false;
 					};
 				}
 			}

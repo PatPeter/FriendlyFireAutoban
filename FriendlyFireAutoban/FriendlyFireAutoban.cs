@@ -15,7 +15,7 @@ namespace FriendlyFireAutoban
 		name = "Friendly Fire Autoban",
 		description = "Plugin that autobans players for friendly firing.",
 		id = "patpeter.friendly.fire.autoban",
-		version = "2.2.2.33",
+		version = "2.2.2.34",
 		SmodMajor = 3,
 		SmodMinor = 1,
 		SmodRevision = 20
@@ -94,6 +94,7 @@ namespace FriendlyFireAutoban
 
 			// Register config settings
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_enable", true, Smod2.Config.SettingType.BOOL, true, "Enable Friendly Fire Autoban."));
+			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_outall", true, Smod2.Config.SettingType.BOOL, false, "Alterantive to sm_debug, which is just all config setting spam."));
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_system", 1, Smod2.Config.SettingType.NUMERIC, true, "Change system for processing teamkills: basic counter (1), timer-based counter (2), or end-of-round counter (3)."));
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_matrix", new string[] { "1:1", "2:2", "3:3", "4:4", "1:3", "2:4", "3:1", "4:2" }, Smod2.Config.SettingType.LIST, true, "Matrix of killer:victim tuples that are considered teamkills."));
 			// 1
@@ -116,7 +117,10 @@ namespace FriendlyFireAutoban
 			string[] immuneRanks = this.GetConfigList("friendly_fire_autoban_immune");
 			foreach (string rank in immuneRanks)
 			{
-				this.Debug("Does immune rank " + rank + " equal " + player.GetUserGroup().Name + " or " + player.GetRankName() + "?");
+				if (this.GetConfigBool("friendly_fire_autoban_outall"))
+				{
+					this.Info("Does immune rank " + rank + " equal " + player.GetUserGroup().Name + " or " + player.GetRankName() + "?");
+				}
 				if (String.Equals(rank, player.GetUserGroup().Name, StringComparison.CurrentCultureIgnoreCase) || String.Equals(rank, player.GetRankName(), StringComparison.CurrentCultureIgnoreCase))
 				{
 					return true;
