@@ -301,14 +301,12 @@ namespace FriendlyFireAutoban.EventHandlers
 					ev.Damage = 0;
 					Timer t = new Timer
 					{
-						Interval = 2000,
-						AutoReset = true,
+						Interval = 500,
 						Enabled = true
 					};
 					t.Elapsed += delegate
 					{
-						ev.Attacker.Damage(damage, DamageType.FRAG);
-						t.Enabled = false;
+						ev.Attacker.Damage(damage, DamageType.NONE);
 					};
 				}
 			}

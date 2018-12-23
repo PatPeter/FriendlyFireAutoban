@@ -15,7 +15,7 @@ namespace FriendlyFireAutoban
 		name = "Friendly Fire Autoban",
 		description = "Plugin that autobans players for friendly firing.",
 		id = "patpeter.friendly.fire.autoban",
-		version = "2.2.2.34",
+		version = "2.2.2.33",
 		SmodMajor = 3,
 		SmodMinor = 1,
 		SmodRevision = 20
