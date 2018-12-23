@@ -308,6 +308,7 @@ namespace FriendlyFireAutoban.EventHandlers
 					t.Elapsed += delegate
 					{
 						ev.Attacker.Damage(damage, DamageType.FRAG);
+						t.Enabled = false;
 					};
 				}
 			}
