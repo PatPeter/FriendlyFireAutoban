@@ -96,7 +96,7 @@ namespace FriendlyFireAutoban
 
 			// Register config settings
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_enable", true, Smod2.Config.SettingType.BOOL, true, "Enable Friendly Fire Autoban."));
-			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_outall", true, Smod2.Config.SettingType.BOOL, false, "Alterantive to sm_debug, which is just all config setting spam."));
+			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_outall", false, Smod2.Config.SettingType.BOOL, true, "Alterantive to sm_debug, which is just all config setting spam."));
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_system", 1, Smod2.Config.SettingType.NUMERIC, true, "Change system for processing teamkills: basic counter (1), timer-based counter (2), or end-of-round counter (3)."));
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_matrix", new string[] { "1:1", "2:2", "3:3", "4:4", "1:3", "2:4", "3:1", "4:2" }, Smod2.Config.SettingType.LIST, true, "Matrix of killer:victim tuples that are considered teamkills."));
 			// 1
