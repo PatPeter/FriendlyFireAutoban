@@ -15,7 +15,7 @@ namespace FriendlyFireAutoban
 		name = "Friendly Fire Autoban",
 		description = "Plugin that autobans players for friendly firing.",
 		id = "patpeter.friendly.fire.autoban",
-		version = "2.2.2.35",
+		version = "2.2.3.36",
 		SmodMajor = 3,
 		SmodMinor = 1,
 		SmodRevision = 20
@@ -90,7 +90,10 @@ namespace FriendlyFireAutoban
 
 		public override void OnDisable()
 		{
-
+			foreach (Timer t in teamkillTimers.Values)
+			{
+				t.Dispose();
+			}
 		}
 
 		public override void Register()
