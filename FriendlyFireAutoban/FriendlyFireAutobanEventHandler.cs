@@ -4,8 +4,9 @@ using Smod2.Events;
 using Smod2.EventHandlers;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using System;
+using System.Linq;
 using System.Timers;
+using System;
 
 namespace FriendlyFireAutoban.EventHandlers
 {
@@ -21,8 +22,14 @@ namespace FriendlyFireAutoban.EventHandlers
 		public void OnRoundStart(RoundStartEvent ev)
 		{
 			this.plugin.duringRound = true;
-			this.plugin.teamkillCounter = new Dictionary<string, int>();
-			this.plugin.teamkillMatrix = new List<TeamkillTuple>();
+			// Remove if teamkills can be removed for memory cleanup
+			/**
+			 * MEMORY CLEANUP
+			 */
+			this.plugin.ipAddressToSteamList = new Dictionary<string, List<string>>();
+			this.plugin.teamkillCounter = new Dictionary<string, List<Teamkill>>();
+			this.plugin.teamkillTimers = new Dictionary<string, Timer>();
+
 			this.plugin.enable = this.plugin.GetConfigBool("friendly_fire_autoban_enable");
 			this.plugin.outall = this.plugin.GetConfigBool("friendly_fire_autoban_outall");
 			this.plugin.system = this.plugin.GetConfigInt("friendly_fire_autoban_system");
@@ -32,6 +39,7 @@ namespace FriendlyFireAutoban.EventHandlers
 			this.plugin.noguns = this.plugin.GetConfigInt("friendly_fire_autoban_noguns");
 			this.plugin.tospec = this.plugin.GetConfigInt("friendly_fire_autoban_tospec");
 			this.plugin.kicker = this.plugin.GetConfigInt("friendly_fire_autoban_kicker");
+			this.plugin.bomber = this.plugin.GetConfigInt("friendly_fire_autoban_bomber");
 			if (this.plugin.outall)
 			{
 				this.plugin.Info("friendly_fire_autoban_enable value: " + this.plugin.GetConfigBool("friendly_fire_autoban_enable"));
@@ -43,7 +51,10 @@ namespace FriendlyFireAutoban.EventHandlers
 				this.plugin.Info("friendly_fire_autoban_noguns value: " + this.plugin.GetConfigInt("friendly_fire_autoban_noguns"));
 				this.plugin.Info("friendly_fire_autoban_tospec value: " + this.plugin.GetConfigInt("friendly_fire_autoban_tospec"));
 				this.plugin.Info("friendly_fire_autoban_kicker value: " + this.plugin.GetConfigInt("friendly_fire_autoban_kicker"));
+				this.plugin.Info("friendly_fire_autoban_bomber value: " + this.plugin.GetConfigInt("friendly_fire_autoban_bomber"));
 			}
+
+			this.plugin.teamkillMatrix = new List<TeamkillTuple>();
 			string[] teamkillMatrix = this.plugin.GetConfigList("friendly_fire_autoban_matrix");
 			foreach (string pair in teamkillMatrix)
 			{
@@ -97,6 +108,12 @@ namespace FriendlyFireAutoban.EventHandlers
 					this.plugin.teamkillScaled[tuple0] = tuple1;
 				}
 			}
+
+			// Add back if we want to keep track of which teamkills are removed
+			//foreach (Timer timer in this.plugin.teamkillTimers.Values)
+			//{
+			//	timer.Enabled = true;
+			//}
 		}
 	}
 
@@ -117,32 +134,35 @@ namespace FriendlyFireAutoban.EventHandlers
 
 			//if (this.plugin.GetConfigInt("friendly_fire_autoban_system") == 2)
 			//{
-				foreach (Timer timer in this.plugin.teamkillTimers.Values)
-				{
-					timer.Enabled = false;
-				}
+			foreach (Timer timer in this.plugin.teamkillTimers.Values)
+			{
+				//timer.Enabled = false;
+				timer.Dispose();
+			}
 			//} else 
-			if (this.plugin.GetConfigInt("friendly_fire_autoban_system") == 3)
+			if (this.plugin.system == 3)
 			{
 				foreach (Player player in ev.Server.GetPlayers())
 				{
 					if (this.plugin.teamkillCounter.ContainsKey(player.SteamId))
 					{
-						int teamkills = this.plugin.teamkillCounter[player.SteamId];
+						int teamkills = this.plugin.teamkillCounter[player.SteamId].Count;
 						if (this.plugin.outall)
 						{
 							this.plugin.Info("Player " + player.ToString() + " has committed " + teamkills + " teamkills.");
 						}
-						if (this.plugin.teamkillScaled.ContainsKey(teamkills))
+
+						int banLength = this.plugin.GetScaledBanAmount(player.SteamId);
+						if (banLength > 0)
 						{
-							int banLength = this.plugin.teamkillScaled[teamkills];
-							this.plugin.Ban(player, player.Name, banLength, teamkills);
+							//int banLength = this.plugin.teamkillScaled[teamkills];
+							this.plugin.Ban(player, player.Name, banLength, this.plugin.teamkillCounter[player.SteamId]);
 						}
 						else
 						{
 							if (this.plugin.outall)
 							{
-								this.plugin.Info(teamkills + " teamkills is not bannable.");
+								this.plugin.Info("Player " + player.SteamId + " " + this.plugin.teamkillCounter[player.SteamId].Count + " teamkills is not bannable.");
 							}
 						}
 					}
@@ -156,7 +176,12 @@ namespace FriendlyFireAutoban.EventHandlers
 				}
 			}
 
-			this.plugin.teamkillCounter = new Dictionary<string, int>();
+			/*
+			 * MEMORY CLEANUP
+			 */
+			this.plugin.ipAddressToSteamList = new Dictionary<string, List<string>>();
+			this.plugin.teamkillCounter = new Dictionary<string, List<Teamkill>>();
+			this.plugin.teamkillTimers = new Dictionary<string, Timer>();
 		}
 	}
 
@@ -176,125 +201,176 @@ namespace FriendlyFireAutoban.EventHandlers
 				this.plugin.Info("Skipping OnPlayerDie for being outside of a round.");
 				return;
 			}
-			string[] killerNameParts = Regex.Split(ev.Killer.ToString(), @"::");
+
+			Player killer = ev.Killer;
+			string killerOutput = killer.Name + " " + killer.SteamId + " " + killer.IpAddress;
+			Player victim = ev.Player;
+			string victimOutput = victim.Name + " " + victim.SteamId + " " + victim.IpAddress;
+
+			/*string[] killerNameParts = Regex.Split(killer.ToString(), @"::");
 			if (killerNameParts.Length >= 4)
 			{
 				killerNameParts = new string[] { killerNameParts[0], "::" + killerNameParts[2], killerNameParts[3] };
 			}
-			string[] victimNameParts = Regex.Split(ev.Player.ToString(), @"::");
+			string[] victimNameParts = Regex.Split(victim.ToString(), @"::");
 			if (victimNameParts.Length >= 4)
 			{
 				victimNameParts = new string[] { victimNameParts[0], "::" + victimNameParts[2], victimNameParts[3] };
-			}
+			}*/
 
-			if (isTeamkill(ev.Killer, ev.Player))
+			if (isTeamkill(killer, victim))
 			{
-				if (this.plugin.GetConfigBool("friendly_fire_autoban_enable"))
+				if (this.plugin.enable)
 				{
-					if (this.plugin.teamkillCounter.ContainsKey(ev.Killer.SteamId))
+					Teamkill teamkill = new Teamkill(killer.Name, killer.SteamId, killer.TeamRole, victim.Name, victim.SteamId, victim.TeamRole);
+					this.plugin.teamkillVictims[ev.Player.SteamId] = teamkill;
+					
+					if (this.plugin.teamkillCounter.ContainsKey(killer.SteamId))
 					{
-						this.plugin.teamkillCounter[ev.Killer.SteamId]++;
-						plugin.Info("Player " + String.Join(" ", killerNameParts) + " " + ev.Killer.TeamRole.Team.ToString() + " teamkilled " +
-							String.Join(" ", victimNameParts) + " " + ev.Player.TeamRole.Team.ToString() + ", for a total of " + this.plugin.teamkillCounter[ev.Killer.SteamId] + " teamkills.");
+						this.plugin.teamkillCounter[killer.SteamId].Add(teamkill);
+						plugin.Info("Player " + killerOutput + " " + killer.TeamRole.Team.ToString() + " teamkilled " +
+							victimOutput + " " + victim.TeamRole.Team.ToString() + ", for a total of " + this.plugin.teamkillCounter[killer.SteamId] + " teamkills.");
 					}
 					else
 					{
-						this.plugin.teamkillCounter[ev.Killer.SteamId] = 1;
-						plugin.Info("Player " + String.Join(" ", killerNameParts) + " " + ev.Killer.TeamRole.Team.ToString() + " teamkilled " +
-							String.Join(" ", victimNameParts) + " " + ev.Player.TeamRole.Team.ToString() + ", for a total of 1 teamkill.");
+						this.plugin.teamkillCounter[killer.SteamId] = new List<Teamkill>();
+						this.plugin.teamkillCounter[killer.SteamId].Add(teamkill);
+						plugin.Info("Player " + killerOutput + " " + killer.TeamRole.Team.ToString() + " teamkilled " +
+							victimOutput + " " + victim.TeamRole.Team.ToString() + ", for a total of 1 teamkill.");
 					}
 
-					if (this.plugin.GetConfigInt("friendly_fire_autoban_noguns") > 0 && this.plugin.teamkillCounter[ev.Killer.SteamId] >= this.plugin.GetConfigInt("friendly_fire_autoban_noguns") && !this.plugin.isImmune(ev.Killer))
+					this.plugin.CheckRemoveGuns(ev.Killer);
+
+					if (this.plugin.tospec > 0 && this.plugin.teamkillCounter[killer.SteamId].Count >= this.plugin.tospec && !this.plugin.isImmune(killer))
 					{
-						this.plugin.Info("Player " + String.Join(" ", killerNameParts) + " has had his/her guns removed for teamkilling.");
-						List<Item> inv = ev.Killer.GetInventory();
-						for (int i = 0; i < inv.Count; i++)
+						killer.PersonalBroadcast(5, "You have been moved to spectate for teamkilling.", false);
+						this.plugin.Info("Player " + killerOutput + " has been moved to spectator for teamkilling " + this.plugin.teamkillCounter[killer.SteamId] + " times.");
+						killer.ChangeRole(Role.SPECTATOR);
+					}
+
+					if (this.plugin.kicker > 0 && this.plugin.teamkillCounter[killer.SteamId].Count == this.plugin.kicker && !this.plugin.isImmune(killer))
+					{
+						killer.PersonalBroadcast(1, "You will be kicked for teamkilling.", false);
+						this.plugin.Info("Player " + killerOutput + " has been kicked for teamkilling " + this.plugin.teamkillCounter[killer.SteamId] + " times.");
+						killer.Ban(0);
+					}
+
+					/*
+					 * If ban system is #1, do not create timers and perform a ban based on a static number of teamkills
+					 */
+					if (this.plugin.system == 1)
+					{
+						if (this.plugin.teamkillCounter[killer.SteamId].Count >= this.plugin.amount)
 						{
-							switch (inv[i].ItemType)
+							this.plugin.Ban(killer, killerOutput, this.plugin.length, this.plugin.teamkillCounter[killer.SteamId]);
+						}
+						else
+						{
+							if (this.plugin.amount - this.plugin.teamkillCounter[killer.SteamId].Count == 1)
 							{
-								case ItemType.COM15:
-								case ItemType.E11_STANDARD_RIFLE:
-								case ItemType.LOGICER:
-								case ItemType.MICROHID:
-								case ItemType.MP4:
-								case ItemType.P90:
-								case ItemType.FRAG_GRENADE:
-								case ItemType.FLASHBANG:
-									inv[i].Remove();
-									break;
+								killer.PersonalBroadcast(5, "If you teamkill 1 more time you will be banned. Your teamkills will expire next round.", false);
+							}
+							else if (this.plugin.amount - this.plugin.teamkillCounter[killer.SteamId].Count == 2)
+							{
+								killer.PersonalBroadcast(5, "If you teamkill 2 more times you will be banned. Your teamkills will expire next round.", false);
 							}
 						}
 					}
-
-					if (this.plugin.GetConfigInt("friendly_fire_autoban_tospec") > 0 && this.plugin.teamkillCounter[ev.Killer.SteamId] >= this.plugin.GetConfigInt("friendly_fire_autoban_tospec") && !this.plugin.isImmune(ev.Killer))
+					else
 					{
-						this.plugin.Info("Player " + String.Join(" ", killerNameParts) + " has been moved to spectator for teamkilling " + this.plugin.teamkillCounter[ev.Killer.SteamId] + " times.");
-						ev.Killer.ChangeRole(Role.SPECTATOR);
-					}
-
-					if (this.plugin.GetConfigInt("friendly_fire_autoban_kicker") > 0 && this.plugin.teamkillCounter[ev.Killer.SteamId] == this.plugin.GetConfigInt("friendly_fire_autoban_kicker") && !this.plugin.isImmune(ev.Killer))
-					{
-						this.plugin.Info("Player " + String.Join(" ", killerNameParts) + " has been kicked for teamkilling " + this.plugin.teamkillCounter[ev.Killer.SteamId] + " times.");
-						ev.Killer.Ban(0);
-					}
-
-					//if (this.plugin.GetConfigInt("friendly_fire_autoban_system") == 1 && this.plugin.teamkillCounter[ev.Killer.SteamId] >= this.plugin.GetConfigInt("friendly_fire_autoban_amount"))
-					//{
-					//	this.plugin.Ban(ev.Killer, String.Join(" ", killerNameParts), this.plugin.GetConfigInt("friendly_fire_autoban_length"), this.plugin.teamkillCounter[ev.Killer.SteamId]);
-					//}
-
-					//if (this.plugin.GetConfigInt("friendly_fire_autoban_expire") > 0)
-					//{
 						Timer t;
-						if (this.plugin.teamkillTimers.ContainsKey(ev.Killer.SteamId))
+						if (this.plugin.teamkillTimers.ContainsKey(killer.SteamId))
 						{
-							t = this.plugin.teamkillTimers[ev.Killer.SteamId];
+							/*
+							 * If ban system is #3, allow the player to continue teamkilling
+							 */
+							t = this.plugin.teamkillTimers[killer.SteamId];
 							t.Stop();
-							t.Interval = this.plugin.GetConfigInt("friendly_fire_autoban_expire") * 1000;
+							t.Interval = this.plugin.expire * 1000;
 							t.Start();
 						}
 						else
 						{
 							t = new Timer
 							{
-								Interval = this.plugin.GetConfigInt("friendly_fire_autoban_expire") * 1000,
+								Interval = this.plugin.expire * 1000,
 								AutoReset = true,
 								Enabled = true
 							};
 							t.Elapsed += delegate
 							{
-								if (this.plugin.teamkillCounter[ev.Killer.SteamId] > 0)
+								/*
+								 * If ban system is #3, every player teamkill cancels and restarts the timer
+								 * Wait until the timer expires after the teamkilling has ended to find out 
+								 * how much teamkilling the player has done.
+								 */
+								if (this.plugin.system == 3)
 								{
-									this.plugin.teamkillCounter[ev.Killer.SteamId]--;
-									this.plugin.Info("Player " + String.Join(" ", killerNameParts) + " " + ev.Killer.TeamRole.Team.ToString() + " teamkill expired, counter now at " + this.plugin.teamkillCounter[ev.Killer.SteamId] + ".");
+									int banLength = this.plugin.GetScaledBanAmount(killer.SteamId);
+									if (banLength > 0)
+									{
+										//int banLength = this.plugin.teamkillScaled[teamkills];
+										this.plugin.Ban(killer, killer.Name, banLength, this.plugin.teamkillCounter[killer.SteamId]);
+									}
+									else
+									{
+										if (this.plugin.outall)
+										{
+											this.plugin.Info("Player " + killer.SteamId + " " + this.plugin.teamkillCounter[killer.SteamId].Count + " teamkills is not bannable.");
+										}
+									}
+								}
+
+								if (this.plugin.teamkillCounter[killer.SteamId].Count > 0)
+								{
+									Teamkill firstTeamkill = this.plugin.teamkillCounter[killer.SteamId][0];
+									this.plugin.teamkillCounter[killer.SteamId].RemoveAt(0);
+									this.plugin.Info("Player " + killerOutput + " " + killer.TeamRole.Team.ToString() + " teamkill expired, counter now at " + this.plugin.teamkillCounter[killer.SteamId] + ".");
 								}
 								else
 								{
 									t.Enabled = false;
 								}
 							};
-							this.plugin.teamkillTimers[ev.Killer.SteamId] = t;
+							this.plugin.teamkillTimers[killer.SteamId] = t;
 						}
 
-						if (this.plugin.GetConfigInt("friendly_fire_autoban_system") < 3 && this.plugin.teamkillCounter[ev.Killer.SteamId] >= this.plugin.GetConfigInt("friendly_fire_autoban_amount"))
+						/*
+						 * If ban system is #2, allow the teamkills to expire
+						 */
+						if (this.plugin.system == 2)
 						{
-							t.Stop();
-							this.plugin.Ban(ev.Killer, String.Join(" ", killerNameParts), this.plugin.GetConfigInt("friendly_fire_autoban_length"), this.plugin.teamkillCounter[ev.Killer.SteamId]);
+							if (this.plugin.teamkillCounter[killer.SteamId].Count >= this.plugin.amount)
+							{
+								t.Stop();
+								this.plugin.Ban(killer, killerOutput, this.plugin.length, this.plugin.teamkillCounter[killer.SteamId]);
+							}
+							else
+							{
+								if (this.plugin.amount - this.plugin.teamkillCounter[killer.SteamId].Count == 1)
+								{
+									killer.PersonalBroadcast(5, "If you teamkill 1 more time you will be banned. One teamkill will expire in " + this.plugin.expire + " seconds.", false);
+								}
+								else if (this.plugin.amount - this.plugin.teamkillCounter[killer.SteamId].Count == 2)
+								{
+									killer.PersonalBroadcast(5, "If you teamkill 2 more times you will be banned. One teamkill will expire in " + this.plugin.expire + " seconds.", false);
+								}
+							}
 						}
-					//}
+					}
 				}
 				else
 				{
-					plugin.Info("Player " + String.Join(" ", killerNameParts) + " " + ev.Killer.TeamRole.Team.ToString() + " teamkilled " +
-						String.Join(" ", victimNameParts) + " " + ev.Player.TeamRole.Team.ToString() + ".");
+					plugin.Info("Player " + killerOutput + " " + killer.TeamRole.Team.ToString() + " teamkilled " +
+						victimOutput + " " + victim.TeamRole.Team.ToString() + ".");
 				}
 			}
 			else
 			{
 				if (this.plugin.outall)
 				{
-					this.plugin.Info("Player " + String.Join(" ", killerNameParts) + " " + ev.Killer.TeamRole.Team.ToString() + " killed " +
-						String.Join(" ", victimNameParts) + " " + ev.Player.TeamRole.Team.ToString() + " and it was not detected as a teamkill.");
+					this.plugin.Info("Player " + killerOutput + " " + killer.TeamRole.Team.ToString() + " killed " +
+						victimOutput + " " + victim.TeamRole.Team.ToString() + " and it was not detected as a teamkill.");
 				}
 			}
 		}
@@ -330,26 +406,271 @@ namespace FriendlyFireAutoban.EventHandlers
 			this.plugin = (FriendlyFireAutobanPlugin)plugin;
 		}
 
-
 		public void OnPlayerHurt(PlayerHurtEvent ev)
 		{
 			if (this.plugin.enable)
 			{
 				if (ev.Player.PlayerId == ev.Attacker.PlayerId && ev.DamageType == DamageType.FRAG)
 				{
-					//int damage = (int) ev.Damage;
-					ev.Damage = 0;
-					/*Timer t = new Timer
+					if (this.plugin.bomber == 2)
 					{
-						Interval = 500,
-						Enabled = true
-					};
-					t.Elapsed += delegate
+						int damage = (int)ev.Damage;
+						ev.Damage = 0;
+						Timer t = new Timer
+						{
+							Interval = 500,
+							Enabled = true
+						};
+						t.Elapsed += delegate
+						{
+							ev.Attacker.Damage(damage, DamageType.FALLDOWN);
+							t.Enabled = false;
+						};
+					}
+					else if (this.plugin.bomber == 1)
 					{
-						ev.Attacker.Damage(damage, DamageType.FALLDOWN);
-						t.Enabled = false;
-					};*/
+						ev.Damage = 0;
+					}
 				}
+			}
+		}
+	}
+
+	class PlayerJoinHandler : IEventHandlerPlayerJoin
+	{
+		private FriendlyFireAutobanPlugin plugin;
+
+		public PlayerJoinHandler(Plugin plugin)
+		{
+			this.plugin = (FriendlyFireAutobanPlugin)plugin;
+		}
+
+		public void OnPlayerJoin(PlayerJoinEvent ev)
+		{
+			if (this.plugin.enable && this.plugin.system == 3)
+			{
+				if (!this.plugin.ipAddressToSteamList.ContainsKey(ev.Player.IpAddress))
+				{
+					this.plugin.ipAddressToSteamList[ev.Player.IpAddress] = new List<string>();
+				}
+				this.plugin.ipAddressToSteamList[ev.Player.IpAddress].Add(ev.Player.SteamId);
+			}
+		}
+	}
+
+	/*class PlayerConnectHandler : IEventHandlerConnect
+	{
+		private FriendlyFireAutobanPlugin plugin;
+
+		public PlayerConnectHandler(Plugin plugin)
+		{
+			this.plugin = (FriendlyFireAutobanPlugin)plugin;
+		}
+
+		public void OnConnect(ConnectEvent ev)
+		{
+			
+		}
+	}*/
+
+	class PlayerDisconnectHandler : IEventHandlerDisconnect
+	{
+		private FriendlyFireAutobanPlugin plugin;
+
+		public PlayerDisconnectHandler(Plugin plugin)
+		{
+			this.plugin = (FriendlyFireAutobanPlugin)plugin;
+		}
+
+		public void OnDisconnect(DisconnectEvent ev)
+		{
+			if (this.plugin.enable && this.plugin.system == 3)
+			{
+				string steamId = "";
+				if (this.plugin.ipAddressToSteamList.ContainsKey(ev.Connection.IpAddress))
+				{
+					if (this.plugin.ipAddressToSteamList[ev.Connection.IpAddress].Count == 1)
+					{
+						steamId = this.plugin.ipAddressToSteamList[ev.Connection.IpAddress][0];
+						this.plugin.ipAddressToSteamList.Remove(ev.Connection.IpAddress);
+					}
+					else
+					{
+						HashSet<string> onlineSteamIds = new HashSet<string>(this.plugin.Server.GetPlayers().Select(player => player.SteamId).ToList());
+						HashSet<string> ipSteamIds = new HashSet<string>(this.plugin.ipAddressToSteamList[ev.Connection.IpAddress]);
+						List<string> singleSteamId = ipSteamIds.Where(s => !onlineSteamIds.Contains(s)).ToList();
+						if (singleSteamId.Count == 1)
+						{
+							steamId = singleSteamId[0];
+							// Remove the Steam ID while leaving the other Steam IDs in the array
+							this.plugin.ipAddressToSteamList[ev.Connection.IpAddress].RemoveAll(x => x == steamId);
+						}
+						else
+						{
+							this.plugin.Info("Did not properly clean up IP addresses, multiple disconnected IPs in one array.");
+							this.plugin.ipAddressToSteamList.Remove(ev.Connection.IpAddress);
+						}
+					}
+				}
+
+				if (this.plugin.teamkillCounter.ContainsKey(steamId) && this.plugin.teamkillCounter.Count > 0)
+				{
+					int teamkills = this.plugin.teamkillCounter[steamId].Count;
+					if (this.plugin.outall)
+					{
+						this.plugin.Info("Player " + this.plugin.teamkillCounter[steamId][0].killerName + " has committed " + teamkills + " teamkills.");
+					}
+
+					int banLength = this.plugin.GetScaledBanAmount(steamId);
+					if (banLength > 0)
+					{
+						PluginManager.Manager.Server.BanSteamId(this.plugin.teamkillCounter[steamId][0].killerName, steamId, banLength, "Banned " + banLength + " minutes for teamkilling " + teamkills + " players", "FriendlyFireAutoban");
+						PluginManager.Manager.Server.BanIpAddress(this.plugin.teamkillCounter[steamId][0].killerName, ev.Connection.IpAddress, banLength, "Banned " + banLength + " minutes for teamkilling " + teamkills + " players", "FriendlyFireAutoban");
+						//this.plugin.Ban(player, player.Name, banLength, this.plugin.teamkillCounter[player.SteamId]);
+					}
+					else
+					{
+						if (this.plugin.outall)
+						{
+							this.plugin.Info("Player " + this.plugin.teamkillCounter[steamId][0].killerName + " " + this.plugin.teamkillCounter[steamId].Count + " teamkills is not bannable.");
+						}
+					}
+				}
+				else
+				{
+					if (this.plugin.outall)
+					{
+						this.plugin.Info("Player " + steamId + " has committed no teamkills.");
+					}
+				}
+			}
+		}
+	}
+
+	class SpawnHandler : IEventHandlerSpawn
+	{
+		private FriendlyFireAutobanPlugin plugin;
+
+		public SpawnHandler(Plugin plugin)
+		{
+			this.plugin = (FriendlyFireAutobanPlugin)plugin;
+		}
+
+		public void OnSpawn(PlayerSpawnEvent ev)
+		{
+			if (this.plugin.enable)
+			{
+				this.plugin.CheckRemoveGuns(ev.Player);
+			}
+		}
+	}
+
+	class SetRoleHandler : IEventHandlerSetRole
+	{
+		private FriendlyFireAutobanPlugin plugin;
+
+		public SetRoleHandler(Plugin plugin)
+		{
+			this.plugin = (FriendlyFireAutobanPlugin)plugin;
+		}
+
+		public void OnSetRole(PlayerSetRoleEvent ev)
+		{
+			if (this.plugin.enable)
+			{
+				this.plugin.CheckRemoveGuns(ev.Player);
+			}
+		}
+	}
+
+	class PlayerPickupItemHandler : IEventHandlerPlayerPickupItem
+	{
+		private FriendlyFireAutobanPlugin plugin;
+
+		public PlayerPickupItemHandler(Plugin plugin)
+		{
+			this.plugin = (FriendlyFireAutobanPlugin)plugin;
+		}
+
+		public void OnPlayerPickupItem(PlayerPickupItemEvent ev)
+		{
+			if (this.plugin.enable)
+			{
+				this.plugin.CheckRemoveGuns(ev.Player);
+			}
+		}
+	}
+
+	class CallCommandHandler : IEventHandlerCallCommand
+	{
+		private FriendlyFireAutobanPlugin plugin;
+
+		public CallCommandHandler(Plugin plugin)
+		{
+			this.plugin = (FriendlyFireAutobanPlugin)plugin;
+		}
+
+		public void OnCallCommand(PlayerCallCommandEvent ev)
+		{
+			string command = ev.Command.Split(' ')[0];
+			string[] quotedArgs = Regex.Matches(ev.Command, "[^\\s\"\']+|\"([^\"]*)\"|\'([^\']*)\'")
+				.Cast<Match>()
+				.Select(m => m.Value)
+				.ToArray()
+				.Skip(1)
+				.ToArray();
+			
+			switch (command)
+			{
+				case "forgive":
+					if (this.plugin.teamkillVictims.ContainsKey(ev.Player.SteamId))
+					{
+						Teamkill teamkill = this.plugin.teamkillVictims[ev.Player.SteamId];
+
+						if (this.plugin.teamkillCounter.ContainsKey(teamkill.killerSteamId))
+						{
+							// Can 
+							int removedBans = this.plugin.teamkillCounter[teamkill.killerSteamId].RemoveAll(x => x.Equals(teamkill));
+							if (removedBans > 0)
+							{
+								// No need for broadcast with return message
+								//ev.Player.PersonalBroadcast(5, "You forgave this player.", false);
+								// TODO: Send a broadcast to the killer
+								ev.ReturnMessage = "You have forgiven this player!";
+							}
+							else
+							{
+								ev.ReturnMessage = "You already forgave this player.";
+							}
+						}
+						else
+						{
+							ev.ReturnMessage = "The player has disconnected.";
+						}
+
+						this.plugin.teamkillVictims.Remove(ev.Player.SteamId);
+					} else
+					{
+						ev.ReturnMessage = "There is no teamkill for you to forgive.";
+					}
+					break;
+
+				case "tks":
+					if (quotedArgs.Length == 1)
+					{
+						string retval = "";
+						List<Teamkill> teamkills = this.plugin.teamkillCounter.Select(x => x.Value.Select(y => y.killerName.Contains(quotedArgs[1])).Cast<List<Teamkill>>()).Cast<List<Teamkill>>().Single();
+						foreach (Teamkill tk in teamkills)
+						{
+							retval += tk.killerName + " (" + tk.killerTeamRole + ") teamkilled " + tk.victimName + " (" + tk.victimTeamRole + "). \n";
+						}
+						ev.ReturnMessage = retval;
+					}
+					else
+					{
+						ev.ReturnMessage = "Player name not provided or not quoted.";
+					}
+					break;
 			}
 		}
 	}

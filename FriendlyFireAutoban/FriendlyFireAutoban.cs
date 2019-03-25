@@ -4,8 +4,10 @@ using Smod2.API;
 using Smod2.Attributes;
 using Smod2.Events;
 using Smod2.EventHandlers;
+using Smod2.Commands;
 using System.Collections.Generic;
 using System.Timers;
+using System.Linq;
 using System;
 
 namespace FriendlyFireAutoban
@@ -15,10 +17,10 @@ namespace FriendlyFireAutoban
 		name = "Friendly Fire Autoban",
 		description = "Plugin that autobans players for friendly firing.",
 		id = "patpeter.friendly.fire.autoban",
-		version = "2.2.3.36",
+		version = "3.0.0.38",
 		SmodMajor = 3,
-		SmodMinor = 1,
-		SmodRevision = 20
+		SmodMinor = 2,
+		SmodRevision = 2
 		)]
 	class FriendlyFireAutobanPlugin : Plugin
 	{
@@ -32,60 +34,67 @@ namespace FriendlyFireAutoban
 		internal int noguns = 0;
 		internal int tospec = 0;
 		internal int kicker = 0;
-		internal Dictionary<string, int> teamkillCounter = new Dictionary<string, int>();
+		internal int bomber = 0;
+		internal Dictionary<string, List<string>> ipAddressToSteamList = new Dictionary<string, List<string>>();
 		internal List<TeamkillTuple> teamkillMatrix = new List<TeamkillTuple>();
-		internal Dictionary<string, Timer> teamkillTimers = new Dictionary<string, Timer>();
 		internal Dictionary<int, int> teamkillScaled = new Dictionary<int, int>();
+
+		internal Dictionary<string, List<Teamkill>> teamkillCounter = new Dictionary<string, List<Teamkill>>();
+		internal Dictionary<string, Timer> teamkillTimers = new Dictionary<string, Timer>();
+		internal Dictionary<string, Teamkill> teamkillVictims = new Dictionary<string, Teamkill>();
 
 		public override void OnEnable()
 		{
-			/*this.Info("friendly_fire_autoban_enable default value: " + this.GetConfigBool("friendly_fire_autoban_enable"));
-			this.Info("friendly_fire_autoban_system default value: " + this.GetConfigInt("friendly_fire_autoban_system"));
-			string matrix = "";
-			foreach (string s in this.GetConfigList("friendly_fire_autoban_matrix"))
+			if (this.outall)
 			{
-				if (matrix.Length == 0)
+				this.Info("friendly_fire_autoban_enable default value: " + this.GetConfigBool("friendly_fire_autoban_enable"));
+				this.Info("friendly_fire_autoban_system default value: " + this.GetConfigInt("friendly_fire_autoban_system"));
+				string matrix = "";
+				foreach (string s in this.GetConfigList("friendly_fire_autoban_matrix"))
 				{
-					matrix += s;
+					if (matrix.Length == 0)
+					{
+						matrix += s;
+					}
+					else
+					{
+						matrix += ',' + s;
+					}
 				}
-				else
+				this.Info("friendly_fire_autoban_matrix default value: " + matrix);
+				this.Info("friendly_fire_autoban_amount default value: " + this.GetConfigInt("friendly_fire_autoban_amount"));
+				this.Info("friendly_fire_autoban_length default value: " + this.GetConfigInt("friendly_fire_autoban_length"));
+				this.Info("friendly_fire_autoban_expire default value: " + this.GetConfigInt("friendly_fire_autoban_expire"));
+				string scaled = "";
+				foreach (string s in this.GetConfigList("friendly_fire_autoban_scaled"))
 				{
-					matrix += ',' + s;
+					if (scaled.Length == 0)
+					{
+						scaled += s;
+					}
+					else
+					{
+						scaled += ',' + s;
+					}
 				}
+				this.Info("friendly_fire_autoban_scaled default value: " + scaled);
+				this.Info("friendly_fire_autoban_noguns default value: " + this.GetConfigInt("friendly_fire_autoban_noguns"));
+				this.Info("friendly_fire_autoban_tospec default value: " + this.GetConfigInt("friendly_fire_autoban_tospec"));
+				this.Info("friendly_fire_autoban_kicker default value: " + this.GetConfigInt("friendly_fire_autoban_kicker"));
+				string immune = "";
+				foreach (string s in this.GetConfigList("friendly_fire_autoban_immune"))
+				{
+					if (immune.Length == 0)
+					{
+						immune += s;
+					}
+					else
+					{
+						immune += ',' + s;
+					}
+				}
+				this.Info("friendly_fire_autoban_immune default value: " + immune);
 			}
-			this.Info("friendly_fire_autoban_matrix default value: " + matrix);
-			this.Info("friendly_fire_autoban_amount default value: " + this.GetConfigInt("friendly_fire_autoban_amount"));
-			this.Info("friendly_fire_autoban_length default value: " + this.GetConfigInt("friendly_fire_autoban_length"));
-			this.Info("friendly_fire_autoban_expire default value: " + this.GetConfigInt("friendly_fire_autoban_expire"));
-			string scaled = "";
-			foreach (string s in this.GetConfigList("friendly_fire_autoban_scaled"))
-			{
-				if (scaled.Length == 0)
-				{
-					scaled += s;
-				}
-				else
-				{
-					scaled += ',' + s;
-				}
-			}
-			this.Info("friendly_fire_autoban_scaled default value: " + scaled);
-			this.Info("friendly_fire_autoban_noguns default value: " + this.GetConfigInt("friendly_fire_autoban_noguns"));
-			this.Info("friendly_fire_autoban_tospec default value: " + this.GetConfigInt("friendly_fire_autoban_tospec"));
-			this.Info("friendly_fire_autoban_kicker default value: " + this.GetConfigInt("friendly_fire_autoban_kicker"));
-			string immune = "";
-			foreach (string s in this.GetConfigList("friendly_fire_autoban_immune"))
-			{
-				if (immune.Length == 0)
-				{
-					immune += s;
-				}
-				else
-				{
-					immune += ',' + s;
-				}
-			}
-			this.Info("friendly_fire_autoban_immune default value: " + immune);*/
 		}
 
 		public override void OnDisable()
@@ -113,10 +122,16 @@ namespace FriendlyFireAutoban
 		public override void Register()
 		{
 			// Register Events
-			this.AddEventHandler(typeof(IEventHandlerRoundStart), new RoundStartHandler(this), Priority.Highest);
-			this.AddEventHandler(typeof(IEventHandlerRoundEnd), new RoundEndHandler(this), Priority.Highest);
-			this.AddEventHandler(typeof(IEventHandlerPlayerDie), new PlayerDieHandler(this), Priority.Highest);
-			this.AddEventHandler(typeof(IEventHandlerPlayerHurt), new PlayerHurtHandler(this), Priority.Highest);
+			this.AddEventHandler(typeof(IEventHandlerRoundStart), new RoundStartHandler(this), Priority.Normal);
+			this.AddEventHandler(typeof(IEventHandlerRoundEnd), new RoundEndHandler(this), Priority.Normal);
+			this.AddEventHandler(typeof(IEventHandlerPlayerDie), new PlayerDieHandler(this), Priority.Normal);
+			this.AddEventHandler(typeof(IEventHandlerPlayerHurt), new PlayerHurtHandler(this), Priority.Normal);
+			this.AddEventHandler(typeof(IEventHandlerPlayerJoin), new PlayerJoinHandler(this), Priority.Normal);
+			this.AddEventHandler(typeof(IEventHandlerDisconnect), new PlayerDisconnectHandler(this), Priority.Normal);
+			this.AddEventHandler(typeof(IEventHandlerSpawn), new SpawnHandler(this), Priority.Normal);
+			this.AddEventHandler(typeof(IEventHandlerSetRole), new SetRoleHandler(this), Priority.Normal);
+			this.AddEventHandler(typeof(IEventHandlerPlayerPickupItem), new PlayerPickupItemHandler(this), Priority.Normal);
+			this.AddEventHandler(typeof(IEventHandlerCallCommand), new CallCommandHandler(this), Priority.Normal);
 
 			// Register config settings
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_enable", true, Smod2.Config.SettingType.BOOL, true, "Enable Friendly Fire Autoban."));
@@ -129,13 +144,37 @@ namespace FriendlyFireAutoban
 			// 2
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_expire", 60, Smod2.Config.SettingType.NUMERIC, true, "Time it takes in seconds for teamkill to degrade and not count towards ban."));
 			// 3
-			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_scaled", new string[] { "1:0", "2:1", "3:5", "4:15", "5:30", "6:60", "7:180", "8:300", "9:480", "10:720", "11:1440", "12:4320", "13:10080", "14:20160", "15:43200", "16:43200", "17:14400", "18:525600", "19:2628000", "20:26280000" }, Smod2.Config.SettingType.LIST, true, "For ban system #3, dictionary of amount of teamkills:length of ban that will be processed at the end of the round."));
+			/*
+			 * 0 - kick
+			 * 1 - 1 minute
+			 * 5 - 5 minutes
+			 * 15 - 15 minutes
+			 * 30 - 30 minutes
+			 * 60 - 1 hour
+			 * 180 - 3 hours
+			 * 300 - 5 hours
+			 * 480 - 8 hours
+			 * 720 - 12 hours
+			 * 1440 - 1 day
+			 * 4320 - 3 days
+			 * 10080 - 1 week
+			 * 20160 - 2 weeks
+			 * 43200 - 1 month
+			 * 129600 - 3 months
+			 * 525600 - 1 year
+			 * 26280000 - 50 years
+			 */
+			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_scaled", new string[] { "4:1440", "5:4320", "6:4320", "7:10080", "8:10080", "9:43800", "10:43800", "11:129600", "12:129600", "13:525600" }, Smod2.Config.SettingType.LIST, true, "For ban system #3, dictionary of amount of teamkills:length of ban that will be processed at the end of the round."));
 
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_noguns", 0, Smod2.Config.SettingType.NUMERIC, true, "Number of kills to remove the player's guns as a warning for teamkilling."));
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_tospec", 0, Smod2.Config.SettingType.NUMERIC, true, "Number of kills at which to put a player into spectator as a warning for teamkilling."));
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_kicker", 0, Smod2.Config.SettingType.NUMERIC, true, "Number of kills at which to kick as a warning for teamkilling."));
 
+			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_bomber", 0, Smod2.Config.SettingType.NUMERIC, true, "Whether to delay grenade damage of thrower [experimental] (2), make player immune to grenade damage (1), or keep disabled (0)."));
+
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_immune", new string[] { "owner", "admin", "moderator" }, Smod2.Config.SettingType.LIST, true, "Ranks that are immune to being autobanned."));
+			
+			this.AddCommand("friendly_fire_autoban_toggle", new ToggleCommand(this));
 		}
 
 		public bool isImmune(Player player)
@@ -155,7 +194,7 @@ namespace FriendlyFireAutoban
 			return false;
 		}
 
-		public bool Ban(Player player, string playerName, int banLength, int teamkills)
+		public bool Ban(Player player, string playerName, int banLength, List<Teamkill> teamkills)
 		{
 			bool immune = isImmune(player);
 			if (immune)
@@ -165,10 +204,135 @@ namespace FriendlyFireAutoban
 			}
 			else
 			{
-				player.Ban(banLength);
+				if (teamkills.Count > 3)
+				{
+					player.Ban(banLength, "Banned " + banLength + " minutes for teamkilling " + teamkills.Count + " players");
+				}
+				else
+				{
+					player.Ban(banLength , "Banned " + banLength + " minutes for teamkilling player(s) " + string.Join(", ", teamkills.Select(teamkill => teamkill.victimName).ToArray()) );
+				}
 				this.Info("Player " + playerName + " has been banned for " + banLength + " minutes after teamkilling " + teamkills + " players during the round.");
+				this.Server.Map.Broadcast(3, "Player " + playerName + " has been banned for teamkilling " + teamkills.Count + " players.", false);
 				return true;
 			}
+		}
+
+		public int GetScaledBanAmount(string steamId)
+		{
+			int banLength = 0;
+			foreach (int banAmount in this.teamkillScaled.Keys.OrderBy(k => k))
+			{
+				// If ban kills is less than player's kills, set the banLength
+				// This will ensure that players who teamkill more than the maximum
+				// will still serve the maximum ban length
+				if (banAmount < this.teamkillCounter[steamId].Count)
+				{
+					banLength = this.teamkillScaled[banAmount];
+				}
+				// Exact ban amount match is found, set
+				else if (banAmount == this.teamkillCounter[steamId].Count)
+				{
+					banLength = this.teamkillScaled[banAmount];
+					break;
+				}
+				// If the smallest ban amount is larger than the player's bans,
+				// then the player will not be banned.
+				// If banAmount has not been found, it will still be set to 0
+				else if (banAmount > this.teamkillCounter[steamId].Count)
+				{
+					break;
+				}
+			}
+			return banLength;
+		}
+
+		public bool CheckRemoveGuns(Player killer)
+		{
+			if (this.noguns > 0 && this.teamkillCounter[killer.SteamId].Count >= this.noguns && !this.isImmune(killer))
+			{
+				this.Info("Player " + killer.Name + " " + killer.SteamId + " " + killer.IpAddress + " has had his/her guns removed for teamkilling.");
+				List<Item> inv = killer.GetInventory();
+				for (int i = 0; i < inv.Count; i++)
+				{
+					switch (inv[i].ItemType)
+					{
+						case ItemType.COM15:
+						case ItemType.E11_STANDARD_RIFLE:
+						case ItemType.LOGICER:
+						case ItemType.MICROHID:
+						case ItemType.MP4:
+						case ItemType.P90:
+						case ItemType.FRAG_GRENADE:
+						case ItemType.FLASHBANG:
+							inv[i].Remove();
+							break;
+					}
+				}
+				killer.PersonalBroadcast(5, "Your guns have been removed for teamkilling. You will get them back when your teamkill expires.", false);
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+	}
+
+	class ToggleCommand : ICommandHandler
+	{
+		private readonly FriendlyFireAutobanPlugin plugin;
+
+		public ToggleCommand(FriendlyFireAutobanPlugin plugin)
+		{
+			this.plugin = plugin;
+		}
+
+		public string GetCommandDescription()
+		{
+			return "Toggle Friendly Fire Autoban on and off.";
+		}
+
+		public string GetUsage()
+		{
+			return "FRIENDLY_FIRE_AUTOBAN_TOGGLE";
+		}
+
+		public string[] OnCall(ICommandSender sender, string[] args)
+		{
+			Player caller = sender as Player;
+
+			if (this.plugin.enable)
+			{
+				this.plugin.enable = false;
+				return new string[] { "Friendly fire autoban has been disabled." };
+			}
+			else
+			{
+				this.plugin.enable = true;
+				return new string[] { "Friendly fire autoban has been enabled." };
+			}
+			
+		}
+	}
+
+	class Teamkill
+	{
+		public string killerName;
+		public string killerSteamId;
+		public TeamRole killerTeamRole;
+		public string victimName;
+		public string victimSteamId;
+		public TeamRole victimTeamRole;
+
+		public Teamkill(string killerName, string killerSteamId, TeamRole killerTeamRole, string victimName, string victimSteamId, TeamRole victimTeamRole)
+		{
+			this.killerName = killerName;
+			this.killerSteamId = killerSteamId;
+			this.killerTeamRole = killerTeamRole;
+			this.victimName = victimName;
+			this.victimSteamId = victimSteamId;
+			this.victimTeamRole = victimTeamRole;
 		}
 	}
 

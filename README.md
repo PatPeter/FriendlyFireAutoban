@@ -10,8 +10,9 @@ friendly_fire_autoban_matrix | list | 1:1,2:2,3:3,4:4,1:3,2:4,3:1,4:2 | Matrix o
 friendly_fire_autoban_amount | integer | 5 | Amount of teamkills before a ban will be issued.
 friendly_fire_autoban_length | integer | 3600 | Length of ban in minutes.
 friendly_fire_autoban_expire | integer | 60 | For ban system #2, Time it takes in seconds for teamkill to degrade and not count towards ban.
-friendly_fire_autoban_scaled | dictionary | 1:0,2:1,3:5,4:15,5:30,6:60, 7:180,8:300,9:480, 10:720,11:1440,12:4320, 13:10080,14:20160,15:43200, 16:43200,17:14400,18:525600, 19:2628000,20:26280000 | For ban system #3, dictionary of amount of teamkills:length of ban that will be processed at the end of the round. The default list (remove spaces) is an *example* with every ban quantity in the original release of SCP:SL. **USE YOUR OWN VALUES**
+friendly_fire_autoban_scaled | dictionary |  | For ban system #3, dictionary of amount of teamkills:length of ban that will be processed at the end of the round.
 friendly_fire_autoban_noguns | integer | 0 | Number of kills to remove the player's guns as a warning for teamkilling.
 friendly_fire_autoban_tospec | integer | 0 | Number of kills at which to put a player into spectator as a warning for teamkilling.
 friendly_fire_autoban_kicker | integer | 0 | Number of kills at which to kick the player as a warning for teamkilling.
+friendly_fire_autoban_bomber | integer | 0 | Whether to delay grenade damage of thrower [experimental] (2), make player immune to grenade damage (1), or keep disabled (0).
 friendly_fire_autoban_immune | string | owner,admin,moderator | Groups that are immune to being autobanned.
