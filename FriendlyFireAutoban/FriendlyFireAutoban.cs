@@ -39,7 +39,7 @@ namespace FriendlyFireAutoban
 
 		public override void OnEnable()
 		{
-			this.Info("friendly_fire_autoban_enable default value: " + this.GetConfigBool("friendly_fire_autoban_enable"));
+			/*this.Info("friendly_fire_autoban_enable default value: " + this.GetConfigBool("friendly_fire_autoban_enable"));
 			this.Info("friendly_fire_autoban_system default value: " + this.GetConfigInt("friendly_fire_autoban_system"));
 			string matrix = "";
 			foreach (string s in this.GetConfigList("friendly_fire_autoban_matrix"))
@@ -85,15 +85,29 @@ namespace FriendlyFireAutoban
 					immune += ',' + s;
 				}
 			}
-			this.Info("friendly_fire_autoban_immune default value: " + immune);
+			this.Info("friendly_fire_autoban_immune default value: " + immune);*/
 		}
 
 		public override void OnDisable()
 		{
-			foreach (Timer t in teamkillTimers.Values)
+			/*foreach (Timer t in teamkillTimers.Values)
 			{
 				t.Dispose();
 			}
+			duringRound = false;
+			enable = false;
+			outall = false;
+			system = 1;
+			amount = 5;
+			length = 1440;
+			expire = 60;
+			noguns = 0;
+			tospec = 0;
+			kicker = 0;
+			teamkillCounter = new Dictionary<string, int>();
+			teamkillMatrix = new List<TeamkillTuple>();
+			teamkillTimers = new Dictionary<string, Timer>();
+			teamkillScaled = new Dictionary<int, int>();*/
 		}
 
 		public override void Register()
