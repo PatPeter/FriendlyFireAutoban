@@ -249,7 +249,7 @@ namespace FriendlyFireAutoban
 
 		public bool CheckRemoveGuns(Player killer)
 		{
-			if (this.noguns > 0 && this.teamkillCounter[killer.SteamId].Count >= this.noguns && !this.isImmune(killer))
+			if (this.noguns > 0 && this.teamkillCounter.ContainsKey(killer.SteamId) && this.teamkillCounter[killer.SteamId].Count >= this.noguns && !this.isImmune(killer))
 			{
 				this.Info("Player " + killer.Name + " " + killer.SteamId + " " + killer.IpAddress + " has had his/her guns removed for teamkilling.");
 				List<Item> inv = killer.GetInventory();

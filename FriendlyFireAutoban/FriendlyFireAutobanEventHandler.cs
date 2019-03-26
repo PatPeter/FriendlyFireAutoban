@@ -229,7 +229,7 @@ namespace FriendlyFireAutoban.EventHandlers
 					{
 						this.plugin.teamkillCounter[killer.SteamId].Add(teamkill);
 						plugin.Info("Player " + killerOutput + " " + killer.TeamRole.Team.ToString() + " teamkilled " +
-							victimOutput + " " + victim.TeamRole.Team.ToString() + ", for a total of " + this.plugin.teamkillCounter[killer.SteamId] + " teamkills.");
+							victimOutput + " " + victim.TeamRole.Team.ToString() + ", for a total of " + this.plugin.teamkillCounter[killer.SteamId].Count + " teamkills.");
 					}
 					else
 					{
@@ -244,14 +244,14 @@ namespace FriendlyFireAutoban.EventHandlers
 					if (this.plugin.tospec > 0 && this.plugin.teamkillCounter[killer.SteamId].Count >= this.plugin.tospec && !this.plugin.isImmune(killer))
 					{
 						killer.PersonalBroadcast(5, "You have been moved to spectate for teamkilling.", false);
-						this.plugin.Info("Player " + killerOutput + " has been moved to spectator for teamkilling " + this.plugin.teamkillCounter[killer.SteamId] + " times.");
+						this.plugin.Info("Player " + killerOutput + " has been moved to spectator for teamkilling " + this.plugin.teamkillCounter[killer.SteamId].Count + " times.");
 						killer.ChangeRole(Role.SPECTATOR);
 					}
 
 					if (this.plugin.kicker > 0 && this.plugin.teamkillCounter[killer.SteamId].Count == this.plugin.kicker && !this.plugin.isImmune(killer))
 					{
 						killer.PersonalBroadcast(1, "You will be kicked for teamkilling.", false);
-						this.plugin.Info("Player " + killerOutput + " has been kicked for teamkilling " + this.plugin.teamkillCounter[killer.SteamId] + " times.");
+						this.plugin.Info("Player " + killerOutput + " has been kicked for teamkilling " + this.plugin.teamkillCounter[killer.SteamId].Count + " times.");
 						killer.Ban(0);
 					}
 
@@ -325,7 +325,7 @@ namespace FriendlyFireAutoban.EventHandlers
 								{
 									Teamkill firstTeamkill = this.plugin.teamkillCounter[killer.SteamId][0];
 									this.plugin.teamkillCounter[killer.SteamId].RemoveAt(0);
-									this.plugin.Info("Player " + killerOutput + " " + killer.TeamRole.Team.ToString() + " teamkill expired, counter now at " + this.plugin.teamkillCounter[killer.SteamId] + ".");
+									this.plugin.Info("Player " + killerOutput + " " + killer.TeamRole.Team.ToString() + " teamkill expired, counter now at " + this.plugin.teamkillCounter[killer.SteamId].Count + ".");
 								}
 								else
 								{
@@ -612,65 +612,90 @@ namespace FriendlyFireAutoban.EventHandlers
 
 		public void OnCallCommand(PlayerCallCommandEvent ev)
 		{
-			string command = ev.Command.Split(' ')[0];
-			string[] quotedArgs = Regex.Matches(ev.Command, "[^\\s\"\']+|\"([^\"]*)\"|\'([^\']*)\'")
-				.Cast<Match>()
-				.Select(m => m.Value)
-				.ToArray()
-				.Skip(1)
-				.ToArray();
-			
-			switch (command)
+			if (this.plugin.enable)
 			{
-				case "forgive":
-					if (this.plugin.teamkillVictims.ContainsKey(ev.Player.SteamId))
-					{
-						Teamkill teamkill = this.plugin.teamkillVictims[ev.Player.SteamId];
+				string command = ev.Command.Split(' ')[0];
+				string[] quotedArgs = Regex.Matches(ev.Command, "[^\\s\"\']+|\"([^\"]*)\"|\'([^\']*)\'")
+					.Cast<Match>()
+					.Select(m => m.Value)
+					.ToArray()
+					.Skip(1)
+					.ToArray();
 
-						if (this.plugin.teamkillCounter.ContainsKey(teamkill.killerSteamId))
+				switch (command)
+				{
+					case "forgive":
+						if (this.plugin.teamkillVictims.ContainsKey(ev.Player.SteamId))
 						{
-							// Can 
-							int removedBans = this.plugin.teamkillCounter[teamkill.killerSteamId].RemoveAll(x => x.Equals(teamkill));
-							if (removedBans > 0)
+							Teamkill teamkill = this.plugin.teamkillVictims[ev.Player.SteamId];
+
+							if (this.plugin.teamkillCounter.ContainsKey(teamkill.killerSteamId))
 							{
-								// No need for broadcast with return message
-								//ev.Player.PersonalBroadcast(5, "You forgave this player.", false);
-								// TODO: Send a broadcast to the killer
-								ev.ReturnMessage = "You have forgiven this player!";
+								// Can 
+								int removedBans = this.plugin.teamkillCounter[teamkill.killerSteamId].RemoveAll(x => x.Equals(teamkill));
+								if (removedBans > 0)
+								{
+									// No need for broadcast with return message
+									//ev.Player.PersonalBroadcast(5, "You forgave this player.", false);
+									// TODO: Send a broadcast to the killer
+									ev.ReturnMessage = "You have forgiven this player!";
+								}
+								else
+								{
+									ev.ReturnMessage = "You already forgave this player.";
+								}
 							}
 							else
 							{
-								ev.ReturnMessage = "You already forgave this player.";
+								ev.ReturnMessage = "The player has disconnected.";
+							}
+
+							this.plugin.teamkillVictims.Remove(ev.Player.SteamId);
+						}
+						else
+						{
+							ev.ReturnMessage = "There is no teamkill for you to forgive.";
+						}
+						break;
+
+					case "tks":
+						if (quotedArgs.Length == 1)
+						{
+							List<Teamkill> teamkills = new List<Teamkill>();
+							try
+							{
+								teamkills = this.plugin.teamkillCounter.Values.SelectMany(x => x).ToList();
+								teamkills = teamkills.Where(y => y.killerName.Contains(quotedArgs[1])).ToList();
+								//this.plugin.teamkillCounter.Select(x => x.Value.Select(y => y.killerName.Contains(quotedArgs[1])).Cast<List<Teamkill>>()).Cast<List<Teamkill>>().Single();
+							}
+							catch (Exception e)
+							{
+								//if (this.plugin.outall)
+								//{
+									this.plugin.Error(e.StackTrace);
+								//}
+							}
+
+							if (teamkills.Count == 0)
+							{
+								ev.ReturnMessage = "No players by this name has any teamkills.";
+							}
+							else
+							{
+								string retval = "";
+								foreach (Teamkill tk in teamkills)
+								{
+									retval += tk.killerName + " (" + tk.killerTeamRole + ") teamkilled " + tk.victimName + " (" + tk.victimTeamRole + "). \n";
+								}
+								ev.ReturnMessage = retval;
 							}
 						}
 						else
 						{
-							ev.ReturnMessage = "The player has disconnected.";
+							ev.ReturnMessage = "Player name not provided or not quoted.";
 						}
-
-						this.plugin.teamkillVictims.Remove(ev.Player.SteamId);
-					} else
-					{
-						ev.ReturnMessage = "There is no teamkill for you to forgive.";
-					}
-					break;
-
-				case "tks":
-					if (quotedArgs.Length == 1)
-					{
-						string retval = "";
-						List<Teamkill> teamkills = this.plugin.teamkillCounter.Select(x => x.Value.Select(y => y.killerName.Contains(quotedArgs[1])).Cast<List<Teamkill>>()).Cast<List<Teamkill>>().Single();
-						foreach (Teamkill tk in teamkills)
-						{
-							retval += tk.killerName + " (" + tk.killerTeamRole + ") teamkilled " + tk.victimName + " (" + tk.victimTeamRole + "). \n";
-						}
-						ev.ReturnMessage = retval;
-					}
-					else
-					{
-						ev.ReturnMessage = "Player name not provided or not quoted.";
-					}
-					break;
+						break;
+				}
 			}
 		}
 	}
