@@ -175,6 +175,7 @@ namespace FriendlyFireAutoban
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_immune", new string[] { "owner", "admin", "moderator" }, Smod2.Config.SettingType.LIST, true, "Ranks that are immune to being autobanned."));
 
 			this.AddCommand("friendly_fire_autoban_toggle", new ToggleCommand(this));
+			this.AddCommand("ffa_toggle", new ToggleCommand(this));
 		}
 
 		public bool isImmune(Player player)
@@ -347,7 +348,7 @@ namespace FriendlyFireAutoban
 			switch (killerTeamRole.Role)
 			{
 				case Role.CLASSD:
-					retval += "DCLASS";
+					retval += "D-CLASS";
 					break;
 
 				case Role.SCIENTIST:
@@ -363,15 +364,15 @@ namespace FriendlyFireAutoban
 					break;
 
 				case Role.NTF_LIEUTENANT:
-					retval += "NTF LT";
+					retval += "LIEUTENANT";
 					break;
 
 				case Role.NTF_COMMANDER:
-					retval += "NTF CDR";
+					retval += "COMMANDER";
 					break;
 
 				case Role.NTF_SCIENTIST:
-					retval += "NTF SCT";
+					retval += "NTF SCIENTIST";
 					break;
 
 				case Role.CHAOS_INSURGENCY:
@@ -379,14 +380,14 @@ namespace FriendlyFireAutoban
 					break;
 
 				case Role.TUTORIAL:
-					retval += "TUT";
+					retval += "TUTORIAL";
 					break;
 			}
-			retval += "x";
+			retval += " on ";
 			switch (victimTeamRole.Role)
 			{
 				case Role.CLASSD:
-					retval += "DCLASS";
+					retval += "D-CLASS";
 					break;
 
 				case Role.SCIENTIST:
@@ -402,15 +403,15 @@ namespace FriendlyFireAutoban
 					break;
 
 				case Role.NTF_LIEUTENANT:
-					retval += "NTF LT";
+					retval += "LIEUTENANT";
 					break;
 
 				case Role.NTF_COMMANDER:
-					retval += "NTF CDR";
+					retval += "COMMANDER";
 					break;
 
 				case Role.NTF_SCIENTIST:
-					retval += "NTF SCT";
+					retval += "NTF SCIENTIST";
 					break;
 
 				case Role.CHAOS_INSURGENCY:
@@ -418,7 +419,7 @@ namespace FriendlyFireAutoban
 					break;
 
 				case Role.TUTORIAL:
-					retval += "TUT";
+					retval += "TUTORIAL";
 					break;
 			}
 			retval += ")";
