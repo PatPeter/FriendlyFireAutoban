@@ -17,7 +17,7 @@ namespace FriendlyFireAutoban
 		name = "Friendly Fire Autoban",
 		description = "Plugin that autobans players for friendly firing.",
 		id = "patpeter.friendly.fire.autoban",
-		version = "3.0.2.40",
+		version = "3.0.3.41",
 		SmodMajor = 3,
 		SmodMinor = 2,
 		SmodRevision = 2
@@ -329,9 +329,10 @@ namespace FriendlyFireAutoban
 		public string victimName;
 		public string victimSteamId;
 		public TeamRole victimTeamRole;
+		public bool victimDisarmed;
 		public DamageType damageType;
 
-		public Teamkill(string killerName, string killerSteamId, TeamRole killerTeamRole, string victimName, string victimSteamId, TeamRole victimTeamRole, DamageType damageType)
+		public Teamkill(string killerName, string killerSteamId, TeamRole killerTeamRole, string victimName, string victimSteamId, TeamRole victimTeamRole, bool victimDisarmed, DamageType damageType)
 		{
 			this.killerName = killerName;
 			this.killerSteamId = killerSteamId;
@@ -339,6 +340,7 @@ namespace FriendlyFireAutoban
 			this.victimName = victimName;
 			this.victimSteamId = victimSteamId;
 			this.victimTeamRole = victimTeamRole;
+			this.victimDisarmed = victimDisarmed;
 			this.damageType = damageType;
 		}
 
@@ -384,6 +386,10 @@ namespace FriendlyFireAutoban
 					break;
 			}
 			retval += " on ";
+			if (victimDisarmed)
+			{
+				retval += "DISARMED ";
+			}
 			switch (victimTeamRole.Role)
 			{
 				case Role.CLASSD:

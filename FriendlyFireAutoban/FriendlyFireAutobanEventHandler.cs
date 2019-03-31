@@ -222,7 +222,7 @@ namespace FriendlyFireAutoban.EventHandlers
 			{
 				if (this.plugin.enable)
 				{
-					Teamkill teamkill = new Teamkill(killer.Name, killer.SteamId, killer.TeamRole, victim.Name, victim.SteamId, victim.TeamRole, ev.DamageTypeVar);
+					Teamkill teamkill = new Teamkill(killer.Name, killer.SteamId, killer.TeamRole, victim.Name, victim.SteamId, victim.TeamRole, victim.IsHandcuffed(), ev.DamageTypeVar);
 					this.plugin.teamkillVictims[ev.Player.SteamId] = teamkill;
 					
 					if (this.plugin.teamkillCounter.ContainsKey(killer.SteamId))
@@ -412,13 +412,13 @@ namespace FriendlyFireAutoban.EventHandlers
 						ev.Damage = 0;
 						Timer t = new Timer
 						{
-							Interval = 500,
+							Interval = 1000,
 							Enabled = true
 						};
 						t.Elapsed += delegate
 						{
 							ev.Attacker.Damage(damage, DamageType.FALLDOWN);
-							t.Enabled = false;
+							t.Dispose();
 						};
 					}
 					else if (this.plugin.bomber == 1)
@@ -637,18 +637,27 @@ namespace FriendlyFireAutoban.EventHandlers
 
 							if (this.plugin.teamkillCounter.ContainsKey(teamkill.killerSteamId))
 							{
-								// Can 
-								int removedBans = this.plugin.teamkillCounter[teamkill.killerSteamId].RemoveAll(x => x.Equals(teamkill));
-								if (removedBans > 0)
+								int teamkillIndex = -1;
+								// https://stackoverflow.com/questions/19164310/is-there-a-more-efficient-linq-statement-to-reverse-search-for-a-condition-in-a
+								for (int i = this.plugin.teamkillCounter[teamkill.killerSteamId].Count; i > 0; i++)
+								{
+									if (teamkill.Equals(this.plugin.teamkillCounter[teamkill.killerSteamId][i - 1]))
+									{
+										teamkillIndex = i - 1;
+									}
+								}
+
+								if (teamkillIndex > -1)
 								{
 									// No need for broadcast with return message
 									//ev.Player.PersonalBroadcast(5, "You forgave this player.", false);
 									// TODO: Send a broadcast to the killer
-									ev.ReturnMessage = "You have forgiven this player!";
+									ev.ReturnMessage = "You have forgiven " + this.plugin.teamkillCounter[teamkill.killerSteamId][teamkillIndex].killerName + " " + this.plugin.teamkillCounter[teamkill.killerSteamId][teamkillIndex].getRoleDisplay() + ".";
+									this.plugin.teamkillCounter[teamkill.killerSteamId].RemoveAt(teamkillIndex);
 								}
 								else
 								{
-									ev.ReturnMessage = "You already forgave this player.";
+									ev.ReturnMessage = "You already forgave " + teamkill.killerName + " or this teamkill has expired.";
 								}
 							}
 							else
@@ -656,6 +665,7 @@ namespace FriendlyFireAutoban.EventHandlers
 								ev.ReturnMessage = "The player has disconnected.";
 							}
 
+							// No matter what, remove this teamkill cached in the array
 							this.plugin.teamkillVictims.Remove(ev.Player.SteamId);
 						}
 						else
@@ -678,9 +688,8 @@ namespace FriendlyFireAutoban.EventHandlers
 							List<Teamkill> teamkills = new List<Teamkill>();
 							try
 							{
-								teamkills = this.plugin.teamkillCounter.Values.SelectMany(x => x).ToList();
-								teamkills = teamkills.Where(y => y.killerName.Contains(quotedArgs[1])).ToList();
-								//this.plugin.teamkillCounter.Select(x => x.Value.Select(y => y.killerName.Contains(quotedArgs[1])).Cast<List<Teamkill>>()).Cast<List<Teamkill>>().Single();
+								// https://stackoverflow.com/questions/55436309/how-do-i-use-linq-to-select-from-a-list-inside-a-map
+								teamkills = this.plugin.teamkillCounter.Values.SelectMany(x => x.Where(y => y.killerName.Contains(quotedArgs[1]))).ToList();
 							}
 							catch (Exception e)
 							{
