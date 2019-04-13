@@ -686,7 +686,11 @@ namespace FriendlyFireAutoban.EventHandlers
 							try
 							{
 								// https://stackoverflow.com/questions/55436309/how-do-i-use-linq-to-select-from-a-list-inside-a-map
-								teamkills = this.plugin.teamkillCounter.SelectMany(x => x.Value.Where(y => y.killerName.Contains(quotedArgs[1]))).ToList();
+								teamkills = this.plugin.teamkillCounter.SelectMany(
+									x => x.Value.Where(
+										y => y.killerName.Contains(quotedArgs[0])
+									)
+								).ToList();
 							}
 							catch (Exception e)
 							{
