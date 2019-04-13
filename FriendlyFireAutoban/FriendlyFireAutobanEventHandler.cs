@@ -222,7 +222,7 @@ namespace FriendlyFireAutoban.EventHandlers
 			{
 				if (this.plugin.enable)
 				{
-					Teamkill teamkill = new Teamkill(killer.Name, killer.SteamId, killer.TeamRole, victim.Name, victim.SteamId, victim.TeamRole, victim.IsHandcuffed(), ev.DamageTypeVar);
+					Teamkill teamkill = new Teamkill(killer.Name, killer.SteamId, killer.TeamRole, victim.Name, victim.SteamId, victim.TeamRole, victim.IsHandcuffed(), ev.DamageTypeVar, this.plugin.Server.Round.Duration);
 					this.plugin.teamkillVictims[ev.Player.SteamId] = teamkill;
 					
 					if (this.plugin.teamkillCounter.ContainsKey(killer.SteamId))
@@ -239,7 +239,7 @@ namespace FriendlyFireAutoban.EventHandlers
 							victimOutput + " " + victim.TeamRole.Team.ToString() + ", for a total of 1 teamkill.");
 					}
 
-					string broadcast = "You teamkilled " + victim.Name + " " + teamkill.getRoleDisplay() + ". ";
+					string broadcast = "You teamkilled " + victim.Name + " " + teamkill.GetRoleDisplay() + ". ";
 					if (this.plugin.amount - this.plugin.teamkillCounter[killer.SteamId].Count == 2)
 					{
 						broadcast += "If you teamkill 2 more times you will be banned. ";
@@ -634,35 +634,32 @@ namespace FriendlyFireAutoban.EventHandlers
 						if (this.plugin.teamkillVictims.ContainsKey(ev.Player.SteamId))
 						{
 							Teamkill teamkill = this.plugin.teamkillVictims[ev.Player.SteamId];
-
-							if (this.plugin.teamkillCounter.ContainsKey(teamkill.killerSteamId))
+							if (teamkill != null)
 							{
-								int teamkillIndex = -1;
-								// https://stackoverflow.com/questions/19164310/is-there-a-more-efficient-linq-statement-to-reverse-search-for-a-condition-in-a
-								for (int i = this.plugin.teamkillCounter[teamkill.killerSteamId].Count; i > 0; i++)
-								{
-									if (teamkill.Equals(this.plugin.teamkillCounter[teamkill.killerSteamId][i - 1]))
-									{
-										teamkillIndex = i - 1;
-									}
-								}
 
-								if (teamkillIndex > -1)
+								if (this.plugin.teamkillCounter.ContainsKey(teamkill.killerSteamId))
 								{
-									// No need for broadcast with return message
-									//ev.Player.PersonalBroadcast(5, "You forgave this player.", false);
-									// TODO: Send a broadcast to the killer
-									ev.ReturnMessage = "You have forgiven " + this.plugin.teamkillCounter[teamkill.killerSteamId][teamkillIndex].killerName + " " + this.plugin.teamkillCounter[teamkill.killerSteamId][teamkillIndex].getRoleDisplay() + ".";
-									this.plugin.teamkillCounter[teamkill.killerSteamId].RemoveAt(teamkillIndex);
+									int removedBans = this.plugin.teamkillCounter[teamkill.killerSteamId].RemoveAll(x => x.Equals(teamkill));
+									if (removedBans > 0)
+									{
+										// No need for broadcast with return message
+										//ev.Player.PersonalBroadcast(5, "You forgave this player.", false);
+										// TODO: Send a broadcast to the killer
+										ev.ReturnMessage = "You have forgiven " + teamkill.killerName + " " + teamkill.GetRoleDisplay() + "!";
+									}
+									else
+									{
+										ev.ReturnMessage = "You already forgave " + teamkill.killerName + " " + teamkill.GetRoleDisplay() + ".";
+									}
 								}
 								else
 								{
-									ev.ReturnMessage = "You already forgave " + teamkill.killerName + " or this teamkill has expired.";
+									ev.ReturnMessage = "The player has disconnected.";
 								}
 							}
 							else
 							{
-								ev.ReturnMessage = "The player has disconnected.";
+								ev.ReturnMessage = "You have not been teamkilled yet.";
 							}
 
 							// No matter what, remove this teamkill cached in the array
@@ -689,7 +686,7 @@ namespace FriendlyFireAutoban.EventHandlers
 							try
 							{
 								// https://stackoverflow.com/questions/55436309/how-do-i-use-linq-to-select-from-a-list-inside-a-map
-								teamkills = this.plugin.teamkillCounter.Values.SelectMany(x => x.Where(y => y.killerName.Contains(quotedArgs[1]))).ToList();
+								teamkills = this.plugin.teamkillCounter.SelectMany(x => x.Value.Where(y => y.killerName.Contains(quotedArgs[1]))).ToList();
 							}
 							catch (Exception e)
 							{
@@ -709,7 +706,7 @@ namespace FriendlyFireAutoban.EventHandlers
 								string retval = "";
 								foreach (Teamkill tk in teamkills)
 								{
-									retval += tk.killerName + " teamkilled " + tk.victimName + " " + tk.getRoleDisplay() + ". \n";
+									retval += tk.killerName + " teamkilled " + tk.victimName + " " + tk.GetRoleDisplay() + ". \n";
 								}
 								ev.ReturnMessage = retval;
 							}
