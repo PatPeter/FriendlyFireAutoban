@@ -17,31 +17,76 @@ namespace FriendlyFireAutoban
 		name = "Friendly Fire Autoban",
 		description = "Plugin that autobans players for friendly firing.",
 		id = "patpeter.friendly.fire.autoban",
-		version = "3.0.5.43",
+		version = "4.0.0.44",
 		SmodMajor = 3,
 		SmodMinor = 2,
 		SmodRevision = 2
 		)]
 	class FriendlyFireAutobanPlugin : Plugin
 	{
-		internal bool duringRound = false;
+		internal bool DuringRound = false;
+		internal bool ProcessingDisconnect = false;
+
+		/*
+		 * Config variables
+		 * 
+		 * Keep lowercase six-character naming scheme from config
+		 */
 		internal bool enable = true;
 		internal bool outall = false;
 		internal int system = 1;
+		internal List<TeamTuple> matrix = new List<TeamTuple>();
 		internal int amount = 5;
 		internal int length = 1440;
 		internal int expire = 60;
+		internal Dictionary<int, int> scaled = new Dictionary<int, int>();
 		internal int noguns = 0;
 		internal int tospec = 0;
 		internal int kicker = 0;
 		internal int bomber = 0;
-		internal Dictionary<string, List<string>> ipAddressToSteamList = new Dictionary<string, List<string>>();
-		internal List<TeamkillTuple> teamkillMatrix = new List<TeamkillTuple>();
-		internal Dictionary<int, int> teamkillScaled = new Dictionary<int, int>();
+		internal bool disarm = false;
+		internal List<RoleTuple> rolewl = new List<RoleTuple>();
+		internal int mirror = 0;
+		internal int warntk = -1;
+		internal int votetk = 0;
 
-		internal Dictionary<string, List<Teamkill>> teamkillCounter = new Dictionary<string, List<Teamkill>>();
-		internal Dictionary<string, Timer> teamkillTimers = new Dictionary<string, Timer>();
-		internal Dictionary<string, Teamkill> teamkillVictims = new Dictionary<string, Teamkill>();
+		internal Dictionary<string, Teamkiller> Teamkillers = new Dictionary<string, Teamkiller>();
+		internal Dictionary<string, Timer> TeamkillTimers = new Dictionary<string, Timer>();
+		internal Dictionary<string, Teamkill> TeamkillVictims = new Dictionary<string, Teamkill>();
+
+		internal Dictionary<int, int> inverseTeams = new Dictionary<int, int>()
+		{
+			{ -1, -1 },
+			{ 0, 0 },
+			{ 1, 2 },
+			{ 2, 1 },
+			{ 3, 4 },
+			{ 4, 3 },
+			{ 5, 5 },
+			{ 6, 6 }
+		};
+		internal Dictionary<int, int> inverseRoles = new Dictionary<int, int>()
+		{
+			{ -1, -1 },
+			{ 0, 0 },
+			{ 1, 6 },
+			{ 2, 2 },
+			{ 3, 3 },
+			{ 4, 8 },
+			{ 5, 5 },
+			{ 6, 1 },
+			{ 7, 7 },
+			{ 8, 12 },
+			{ 9, 9 },
+			{ 10, 10 },
+			{ 11, 8 },
+			{ 12, 8 },
+			{ 13, 8 },
+			{ 14, 14 },
+			{ 15, 8 },
+			{ 16, 17 },
+			{ 17, 16 }
+		};
 
 		public override void OnEnable()
 		{
@@ -172,7 +217,12 @@ namespace FriendlyFireAutoban
 
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_bomber", 0, Smod2.Config.SettingType.NUMERIC, true, "Whether to delay grenade damage of thrower [experimental] (2), make player immune to grenade damage (1), or keep disabled (0)."));
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_disarm", false, Smod2.Config.SettingType.BOOL, true, "If teamkilling disarmed players should count as a teamkill set to true."));
+			// NTF roleplay settings:
+			// 12:11,12:4,12:13,12:15,4:11,4:13,4:15,11:13,11:15,13:15
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_rolewl", new string[] {  }, Smod2.Config.SettingType.LIST, true, "Whitelist of roles that are allowed to kill each other."));
+			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_mirror", 0, Smod2.Config.SettingType.NUMERIC, true, "Mirror friendly fire damage to the person causing the damage. Increasing past 1 will increase the multiplayer."));
+			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_warntk", -1, Smod2.Config.SettingType.NUMERIC, true, "The number of TKs to warn for before banning, (0) for a generic warning after every TK, and (-1) for no warning."));
+			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_votetk", 0, Smod2.Config.SettingType.NUMERIC, true, "Number of TKs at which to trigger a vote via the callvote plugin."));
 
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_immune", new string[] { "owner", "admin", "moderator" }, Smod2.Config.SettingType.LIST, true, "Ranks that are immune to being autobanned."));
 
@@ -197,6 +247,43 @@ namespace FriendlyFireAutoban
 			return false;
 		}
 
+		public bool isTeamkill(Player killer, Player victim)
+		{
+			int killerTeam = (int)killer.TeamRole.Team;
+			int victimTeam = (int)victim.TeamRole.Team;
+			int killerRole = (int)killer.TeamRole.Role;
+			int victimRole = (int)victim.TeamRole.Role;
+
+			if (String.Equals(killer.SteamId, victim.SteamId))
+			{
+				return false;
+			}
+
+			if (this.disarm && victim.IsHandcuffed())
+			{
+				victimTeam = this.inverseTeams[victimTeam];
+				victimRole = this.inverseRoles[victimRole];
+			}
+
+			foreach (RoleTuple roleTuple in this.rolewl)
+			{
+				if (killerRole == roleTuple.KillerRole && victimRole == roleTuple.VictimRole)
+				{
+					return false;
+				}
+			}
+
+			foreach (TeamTuple teamTuple in this.matrix)
+			{
+				if (killerTeam == teamTuple.KillerTeam && victimTeam == teamTuple.VictimTeam)
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
+
 		public bool Ban(Player player, string playerName, int banLength, List<Teamkill> teamkills)
 		{
 			bool immune = isImmune(player);
@@ -213,7 +300,7 @@ namespace FriendlyFireAutoban
 				}
 				else
 				{
-					player.Ban(banLength, "Banned " + banLength + " minutes for teamkilling player(s) " + string.Join(", ", teamkills.Select(teamkill => teamkill.victimName).ToArray()));
+					player.Ban(banLength, "Banned " + banLength + " minutes for teamkilling player(s) " + string.Join(", ", teamkills.Select(teamkill => teamkill.VictimName).ToArray()));
 				}
 				this.Info("Player " + playerName + " has been banned for " + banLength + " minutes after teamkilling " + teamkills + " players during the round.");
 				this.Server.Map.Broadcast(3, "Player " + playerName + " has been banned for teamkilling " + teamkills.Count + " players.", false);
@@ -224,28 +311,28 @@ namespace FriendlyFireAutoban
 		public int GetScaledBanAmount(string steamId)
 		{
 			int banLength = 0;
-			foreach (int banAmount in this.teamkillScaled.Keys.OrderBy(k => k))
+			foreach (int banAmount in this.scaled.Keys.OrderBy(k => k))
 			{
 				if (this.outall) this.Info("Ban length set to " + banLength + ". Checking ban amount for key " + banAmount);
 				// If ban kills is less than player's kills, set the banLength
 				// This will ensure that players who teamkill more than the maximum
 				// will still serve the maximum ban length
-				if (banAmount < this.teamkillCounter[steamId].Count)
+				if (banAmount < this.Teamkillers[steamId].Teamkills.Count)
 				{
 					if (this.outall) this.Info("Ban amount is less than player teamkills.");
-					banLength = this.teamkillScaled[banAmount];
+					banLength = this.scaled[banAmount];
 				}
 				// Exact ban amount match is found, set
-				else if (banAmount == this.teamkillCounter[steamId].Count)
+				else if (banAmount == this.Teamkillers[steamId].Teamkills.Count)
 				{
 					if (this.outall) this.Info("Ban amount is equal to player teamkills.");
-					banLength = this.teamkillScaled[banAmount];
+					banLength = this.scaled[banAmount];
 					break;
 				}
 				// If the smallest ban amount is larger than the player's bans,
 				// then the player will not be banned.
 				// If banAmount has not been found, it will still be set to 0
-				else if (banAmount > this.teamkillCounter[steamId].Count)
+				else if (banAmount > this.Teamkillers[steamId].Teamkills.Count)
 				{
 					if (this.outall) this.Info("Ban amount is greater than player teamkills.");
 					break;
@@ -256,7 +343,7 @@ namespace FriendlyFireAutoban
 
 		public bool CheckRemoveGuns(Player killer)
 		{
-			if (this.noguns > 0 && this.teamkillCounter.ContainsKey(killer.SteamId) && this.teamkillCounter[killer.SteamId].Count >= this.noguns && !this.isImmune(killer))
+			if (this.noguns > 0 && this.Teamkillers.ContainsKey(killer.SteamId) && this.Teamkillers[killer.SteamId].Teamkills.Count >= this.noguns && !this.isImmune(killer))
 			{
 				this.Info("Player " + killer.Name + " " + killer.SteamId + " " + killer.IpAddress + " has had his/her guns removed for teamkilling.");
 				List<Item> inv = killer.GetInventory();
@@ -323,35 +410,78 @@ namespace FriendlyFireAutoban
 		}
 	}
 
+	class Teamkiller
+	{
+		public int PlayerId;
+		public string Name;
+		public string SteamId;
+		public string IpAddress;
+		public List<Teamkill> Teamkills = new List<Teamkill>();
+		//public Timer Timer;
+
+		public Teamkiller(int playerId, string name, string steamId, string ipAddress)
+		{
+			this.PlayerId = playerId;
+			this.Name = name;
+			this.SteamId = steamId;
+			this.IpAddress = ipAddress;
+		}
+
+		public override bool Equals(object obj)
+		{
+			var teamkiller = obj as Teamkiller;
+			return teamkiller != null &&
+				   PlayerId == teamkiller.PlayerId &&
+				   Name == teamkiller.Name &&
+				   SteamId == teamkiller.SteamId &&
+				   IpAddress == teamkiller.IpAddress;
+		}
+
+		public override int GetHashCode()
+		{
+			var hashCode = -1156428363;
+			hashCode = hashCode * -1521134295 + PlayerId.GetHashCode();
+			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Name);
+			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(SteamId);
+			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(IpAddress);
+			return hashCode;
+		}
+
+		public override string ToString()
+		{
+			return PlayerId + " " + Name + " " + SteamId + " " + IpAddress;
+		}
+	}
+
 	class Teamkill
 	{
-		public string killerName;
-		public string killerSteamId;
-		public TeamRole killerTeamRole;
-		public string victimName;
-		public string victimSteamId;
-		public TeamRole victimTeamRole;
-		public bool victimDisarmed;
-		public DamageType damageType;
-		public int duration;
+		public string KillerName;
+		public string KillerSteamId;
+		public TeamRole KillerTeamRole;
+		public string VictimName;
+		public string VictimSteamId;
+		public TeamRole VictimTeamRole;
+		public bool VictimDisarmed;
+		public DamageType DamageType;
+		public int Duration;
 
 		public Teamkill(string killerName, string killerSteamId, TeamRole killerTeamRole, string victimName, string victimSteamId, TeamRole victimTeamRole, bool victimDisarmed, DamageType damageType, int duration)
 		{
-			this.killerName = killerName;
-			this.killerSteamId = killerSteamId;
-			this.killerTeamRole = killerTeamRole;
-			this.victimName = victimName;
-			this.victimSteamId = victimSteamId;
-			this.victimTeamRole = victimTeamRole;
-			this.victimDisarmed = victimDisarmed;
-			this.damageType = damageType;
-			this.duration = duration;
+			this.KillerName = killerName;
+			this.KillerSteamId = killerSteamId;
+			this.KillerTeamRole = killerTeamRole;
+			this.VictimName = victimName;
+			this.VictimSteamId = victimSteamId;
+			this.VictimTeamRole = victimTeamRole;
+			this.VictimDisarmed = victimDisarmed;
+			this.DamageType = damageType;
+			this.Duration = duration;
 		}
 
 		public string GetRoleDisplay()
 		{
 			string retval = "(";
-			switch (killerTeamRole.Role)
+			switch (KillerTeamRole.Role)
 			{
 				case Role.CLASSD:
 					retval += "D-CLASS";
@@ -390,11 +520,11 @@ namespace FriendlyFireAutoban
 					break;
 			}
 			retval += " on ";
-			if (victimDisarmed)
+			if (VictimDisarmed)
 			{
 				retval += "DISARMED ";
 			}
-			switch (victimTeamRole.Role)
+			switch (VictimTeamRole.Role)
 			{
 				case Role.CLASSD:
 					retval += "D-CLASS";
@@ -440,52 +570,52 @@ namespace FriendlyFireAutoban
 		{
 			var teamkill = obj as Teamkill;
 			return teamkill != null &&
-				   killerName == teamkill.killerName &&
-				   killerSteamId == teamkill.killerSteamId &&
-				   EqualityComparer<TeamRole>.Default.Equals(killerTeamRole, teamkill.killerTeamRole) &&
-				   victimName == teamkill.victimName &&
-				   victimSteamId == teamkill.victimSteamId &&
-				   EqualityComparer<TeamRole>.Default.Equals(victimTeamRole, teamkill.victimTeamRole) &&
-				   victimDisarmed == teamkill.victimDisarmed &&
-				   damageType == teamkill.damageType &&
-				   duration == teamkill.duration;
+				   KillerName == teamkill.KillerName &&
+				   KillerSteamId == teamkill.KillerSteamId &&
+				   EqualityComparer<TeamRole>.Default.Equals(KillerTeamRole, teamkill.KillerTeamRole) &&
+				   VictimName == teamkill.VictimName &&
+				   VictimSteamId == teamkill.VictimSteamId &&
+				   EqualityComparer<TeamRole>.Default.Equals(VictimTeamRole, teamkill.VictimTeamRole) &&
+				   VictimDisarmed == teamkill.VictimDisarmed &&
+				   DamageType == teamkill.DamageType &&
+				   Duration == teamkill.Duration;
 		}
 
 		public override int GetHashCode()
 		{
 			var hashCode = -153347006;
-			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(killerName);
-			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(killerSteamId);
-			hashCode = hashCode * -1521134295 + EqualityComparer<TeamRole>.Default.GetHashCode(killerTeamRole);
-			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(victimName);
-			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(victimSteamId);
-			hashCode = hashCode * -1521134295 + EqualityComparer<TeamRole>.Default.GetHashCode(victimTeamRole);
-			hashCode = hashCode * -1521134295 + victimDisarmed.GetHashCode();
-			hashCode = hashCode * -1521134295 + damageType.GetHashCode();
-			hashCode = hashCode * -1521134295 + duration.GetHashCode();
+			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(KillerName);
+			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(KillerSteamId);
+			hashCode = hashCode * -1521134295 + EqualityComparer<TeamRole>.Default.GetHashCode(KillerTeamRole);
+			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(VictimName);
+			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(VictimSteamId);
+			hashCode = hashCode * -1521134295 + EqualityComparer<TeamRole>.Default.GetHashCode(VictimTeamRole);
+			hashCode = hashCode * -1521134295 + VictimDisarmed.GetHashCode();
+			hashCode = hashCode * -1521134295 + DamageType.GetHashCode();
+			hashCode = hashCode * -1521134295 + Duration.GetHashCode();
 			return hashCode;
 		}
 	}
 
-	struct TeamkillTuple
+	struct TeamTuple
 	{
-		public int killerRole, victimRole;
+		public int KillerTeam, VictimTeam;
 
-		public TeamkillTuple(int killerRole, int victimRole)
+		public TeamTuple(int killerTeam, int victimRole)
 		{
-			this.killerRole = killerRole;
-			this.victimRole = victimRole;
+			this.KillerTeam = killerTeam;
+			this.VictimTeam = victimRole;
 		}
 	}
 
-	/*struct ScaledTuple
+	struct RoleTuple
 	{
-		public int teamkillAmount, banLength;
+		public int KillerRole, VictimRole;
 
-		public ScaledTuple(int teamkillAmount, int banLength)
+		public RoleTuple(int killerRole, int victimRole)
 		{
-			this.teamkillAmount = teamkillAmount;
-			this.banLength = banLength;
+			this.KillerRole = killerRole;
+			this.VictimRole = victimRole;
 		}
-	}*/
+	}
 }
