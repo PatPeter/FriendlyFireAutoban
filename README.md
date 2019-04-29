@@ -22,3 +22,8 @@ friendly_fire_autoban_mirror | integer | 0 | Whether damage should be mirrored b
 friendly_fire_autoban_warntk | integer | -1 | How many teamkills before a ban should a teamkiller be warned (>=1), give a generic warning (0), or give no warning (-1).
 friendly_fire_autoban_votetk | integer | 0 | [not implemented yet] The number of teamkills at which to call a vote via the callvote plugin to ban a user by the ban amount.
 friendly_fire_autoban_immune | string | owner,admin,moderator | Groups that are immune to being autobanned.
+
+## Commands
+Key | Aliases | Parameters | Description
+--- | --- | --- | ---
+friendly_fire_autoban_toggle | ffa_toggle |  | Toggles friendly fire autoban on or off.
