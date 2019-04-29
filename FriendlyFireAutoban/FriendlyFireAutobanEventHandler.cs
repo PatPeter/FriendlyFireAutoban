@@ -458,7 +458,7 @@ namespace FriendlyFireAutoban.EventHandlers
 				{
 					if (this.plugin.isTeamkill(ev.Attacker, ev.Player))
 					{
-						ev.Damage = ev.Damage * this.plugin.mirror;
+						ev.Attacker.Damage((int) (ev.Damage * this.plugin.mirror));
 					}
 				}
 			}
