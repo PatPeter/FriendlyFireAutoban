@@ -1,16 +1,19 @@
 ﻿using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using FriendlyFireAutoban;
+using System.Linq;
+using Smod2.Attributes;
 
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("ExamplePlugin")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("FriendlyFireAutoban")]
+[assembly: AssemblyDescription("Plugin that autobans players for friendly firing.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("ExamplePlugin")]
-[assembly: AssemblyCopyright("Copyright ©  2018")]
+[assembly: AssemblyCompany("Universal Gaming Alliance")]
+[assembly: AssemblyProduct("FriendlyFireAutoban")]
+[assembly: AssemblyCopyright("Copyright © 2018 Nicholas Solin a.k.a. PatPeter")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -32,5 +35,6 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+//(typeof(FriendlyFireAutobanPlugin).GetCustomAttributes(typeof(PluginDetails), true).FirstOrDefault() as PluginDetails).version
+[assembly: AssemblyVersion("4.0.1.45")]
+[assembly: AssemblyFileVersion("4.0.1.45")]

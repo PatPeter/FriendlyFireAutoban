@@ -17,7 +17,7 @@ namespace FriendlyFireAutoban
 		name = "Friendly Fire Autoban",
 		description = "Plugin that autobans players for friendly firing.",
 		id = "patpeter.friendly.fire.autoban",
-		version = "4.0.0.44",
+		version = "4.0.1.45",
 		SmodMajor = 3,
 		SmodMinor = 2,
 		SmodRevision = 2
@@ -92,53 +92,7 @@ namespace FriendlyFireAutoban
 		{
 			if (this.outall)
 			{
-				this.Info("friendly_fire_autoban_enable default value: " + this.GetConfigBool("friendly_fire_autoban_enable"));
-				this.Info("friendly_fire_autoban_system default value: " + this.GetConfigInt("friendly_fire_autoban_system"));
-				string matrix = "";
-				foreach (string s in this.GetConfigList("friendly_fire_autoban_matrix"))
-				{
-					if (matrix.Length == 0)
-					{
-						matrix += s;
-					}
-					else
-					{
-						matrix += ',' + s;
-					}
-				}
-				this.Info("friendly_fire_autoban_matrix default value: " + matrix);
-				this.Info("friendly_fire_autoban_amount default value: " + this.GetConfigInt("friendly_fire_autoban_amount"));
-				this.Info("friendly_fire_autoban_length default value: " + this.GetConfigInt("friendly_fire_autoban_length"));
-				this.Info("friendly_fire_autoban_expire default value: " + this.GetConfigInt("friendly_fire_autoban_expire"));
-				string scaled = "";
-				foreach (string s in this.GetConfigList("friendly_fire_autoban_scaled"))
-				{
-					if (scaled.Length == 0)
-					{
-						scaled += s;
-					}
-					else
-					{
-						scaled += ',' + s;
-					}
-				}
-				this.Info("friendly_fire_autoban_scaled default value: " + scaled);
-				this.Info("friendly_fire_autoban_noguns default value: " + this.GetConfigInt("friendly_fire_autoban_noguns"));
-				this.Info("friendly_fire_autoban_tospec default value: " + this.GetConfigInt("friendly_fire_autoban_tospec"));
-				this.Info("friendly_fire_autoban_kicker default value: " + this.GetConfigInt("friendly_fire_autoban_kicker"));
-				string immune = "";
-				foreach (string s in this.GetConfigList("friendly_fire_autoban_immune"))
-				{
-					if (immune.Length == 0)
-					{
-						immune += s;
-					}
-					else
-					{
-						immune += ',' + s;
-					}
-				}
-				this.Info("friendly_fire_autoban_immune default value: " + immune);
+				this.PrintConfigs();
 			}
 		}
 
@@ -228,6 +182,64 @@ namespace FriendlyFireAutoban
 
 			this.AddCommand("friendly_fire_autoban_toggle", new ToggleCommand(this));
 			this.AddCommand("ffa_toggle", new ToggleCommand(this));
+		}
+
+		public void PrintConfigs()
+		{
+			this.Info("friendly_fire_autoban_enable default value: " + this.GetConfigBool("friendly_fire_autoban_enable"));
+			this.Info("friendly_fire_autoban_system default value: " + this.GetConfigInt("friendly_fire_autoban_system"));
+			string matrix = "";
+			foreach (string s in this.GetConfigList("friendly_fire_autoban_matrix"))
+			{
+				if (matrix.Length == 0)
+				{
+					matrix += s;
+				}
+				else
+				{
+					matrix += ',' + s;
+				}
+			}
+			this.Info("friendly_fire_autoban_matrix default value: " + matrix);
+			this.Info("friendly_fire_autoban_amount default value: " + this.GetConfigInt("friendly_fire_autoban_amount"));
+			this.Info("friendly_fire_autoban_length default value: " + this.GetConfigInt("friendly_fire_autoban_length"));
+			this.Info("friendly_fire_autoban_expire default value: " + this.GetConfigInt("friendly_fire_autoban_expire"));
+			string scaled = "";
+			foreach (string s in this.GetConfigList("friendly_fire_autoban_scaled"))
+			{
+				if (scaled.Length == 0)
+				{
+					scaled += s;
+				}
+				else
+				{
+					scaled += ',' + s;
+				}
+			}
+			this.Info("friendly_fire_autoban_scaled default value: " + scaled);
+			this.Info("friendly_fire_autoban_noguns default value: " + this.GetConfigInt("friendly_fire_autoban_noguns"));
+			this.Info("friendly_fire_autoban_tospec default value: " + this.GetConfigInt("friendly_fire_autoban_tospec"));
+			this.Info("friendly_fire_autoban_kicker default value: " + this.GetConfigInt("friendly_fire_autoban_kicker"));
+			this.Info("friendly_fire_autoban_bomber default value: " + this.GetConfigInt("friendly_fire_autoban_kicker"));
+			this.Info("friendly_fire_autoban_disarm default value: " + this.GetConfigBool("friendly_fire_autoban_kicker"));
+			this.Info("friendly_fire_autoban_rolewl default value: " + this.GetConfigList("friendly_fire_autoban_kicker"));
+			this.Info("friendly_fire_autoban_mirror default value: " + this.GetConfigInt("friendly_fire_autoban_kicker"));
+			this.Info("friendly_fire_autoban_warntk default value: " + this.GetConfigInt("friendly_fire_autoban_kicker"));
+			this.Info("friendly_fire_autoban_votetk default value: " + this.GetConfigInt("friendly_fire_autoban_kicker"));
+
+			string immune = "";
+			foreach (string s in this.GetConfigList("friendly_fire_autoban_immune"))
+			{
+				if (immune.Length == 0)
+				{
+					immune += s;
+				}
+				else
+				{
+					immune += ',' + s;
+				}
+			}
+			this.Info("friendly_fire_autoban_immune default value: " + immune);
 		}
 
 		public bool isImmune(Player player)

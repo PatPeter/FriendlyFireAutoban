@@ -98,7 +98,6 @@ namespace FriendlyFireAutoban.EventHandlers
 			this.plugin.kicker = this.plugin.GetConfigInt("friendly_fire_autoban_kicker");
 			this.plugin.bomber = this.plugin.GetConfigInt("friendly_fire_autoban_bomber");
 			this.plugin.disarm = this.plugin.GetConfigBool("friendly_fire_autoban_disarm");
-			//this.plugin.rolewl = this.plugin.GetConfigList("friendly_fire_autoban_rolewl");
 
 			this.plugin.rolewl = new List<RoleTuple>();
 			string[] roleWhitelist = this.plugin.GetConfigList("friendly_fire_autoban_rolewl");
@@ -127,8 +126,8 @@ namespace FriendlyFireAutoban.EventHandlers
 			}
 
 			this.plugin.mirror = this.plugin.GetConfigInt("friendly_fire_autoban_mirror");
-			this.plugin.bomber = this.plugin.GetConfigInt("friendly_fire_autoban_warntk");
-			this.plugin.bomber = this.plugin.GetConfigInt("friendly_fire_autoban_votetk");
+			this.plugin.warntk = this.plugin.GetConfigInt("friendly_fire_autoban_warntk");
+			this.plugin.votetk = this.plugin.GetConfigInt("friendly_fire_autoban_votetk");
 
 			// Add back if we want to keep track of which teamkills are removed
 			//foreach (Timer timer in this.plugin.teamkillTimers.Values)
@@ -138,16 +137,7 @@ namespace FriendlyFireAutoban.EventHandlers
 
 			if (this.plugin.outall)
 			{
-				this.plugin.Info("friendly_fire_autoban_enable value: " + this.plugin.GetConfigBool("friendly_fire_autoban_enable"));
-				this.plugin.Info("friendly_fire_autoban_system value: " + this.plugin.GetConfigInt("friendly_fire_autoban_system"));
-				this.plugin.Info("friendly_fire_autoban_matrix value: " + this.plugin.GetConfigInt("friendly_fire_autoban_matrix"));
-				this.plugin.Info("friendly_fire_autoban_amount value: " + this.plugin.GetConfigInt("friendly_fire_autoban_amount"));
-				this.plugin.Info("friendly_fire_autoban_length value: " + this.plugin.GetConfigInt("friendly_fire_autoban_length"));
-				this.plugin.Info("friendly_fire_autoban_expire value: " + this.plugin.GetConfigInt("friendly_fire_autoban_expire"));
-				this.plugin.Info("friendly_fire_autoban_noguns value: " + this.plugin.GetConfigInt("friendly_fire_autoban_noguns"));
-				this.plugin.Info("friendly_fire_autoban_tospec value: " + this.plugin.GetConfigInt("friendly_fire_autoban_tospec"));
-				this.plugin.Info("friendly_fire_autoban_kicker value: " + this.plugin.GetConfigInt("friendly_fire_autoban_kicker"));
-				this.plugin.Info("friendly_fire_autoban_bomber value: " + this.plugin.GetConfigInt("friendly_fire_autoban_bomber"));
+				this.plugin.PrintConfigs();
 			}
 		}
 	}
@@ -285,7 +275,9 @@ namespace FriendlyFireAutoban.EventHandlers
 							victimOutput + " " + victim.TeamRole.Team.ToString() + ", for a total of 1 teamkill.");
 					}
 
-					if (this.plugin.warntk > -1)
+					victim.PersonalBroadcast(5, killer.Name + " teamkilled you. If this was an accidental teamkill, please press ~ and then type .forgive to prevent this user from being banned.", false);
+
+					if (this.plugin.warntk != -1)
 					{
 						string broadcast = "You teamkilled " + victim.Name + " " + teamkill.GetRoleDisplay() + ". ";
 						if (this.plugin.warntk > 0)
