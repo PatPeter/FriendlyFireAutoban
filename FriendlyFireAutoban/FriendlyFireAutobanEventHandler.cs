@@ -156,15 +156,11 @@ namespace FriendlyFireAutoban.EventHandlers
 			if (ev.Round.Duration >= 3) {
 				this.plugin.DuringRound = false;
 			}
-
-			//if (this.plugin.GetConfigInt("friendly_fire_autoban_system") == 2)
-			//{
+			
 			foreach (Timer timer in this.plugin.TeamkillTimers.Values)
 			{
-				//timer.Enabled = false;
 				timer.Dispose();
 			}
-			//} else 
 			if (this.plugin.system == 3)
 			{
 				foreach (Player player in ev.Server.GetPlayers())
@@ -180,8 +176,7 @@ namespace FriendlyFireAutoban.EventHandlers
 						int banLength = this.plugin.GetScaledBanAmount(player.SteamId);
 						if (banLength > 0)
 						{
-							//int banLength = this.plugin.teamkillScaled[teamkills];
-							this.plugin.Ban(player, player.Name, banLength, this.plugin.Teamkillers[player.SteamId].Teamkills);
+							this.plugin.OnBan(player, player.Name, banLength, this.plugin.Teamkillers[player.SteamId].Teamkills);
 						}
 						else
 						{
@@ -243,17 +238,6 @@ namespace FriendlyFireAutoban.EventHandlers
 			Player victim = ev.Player;
 			string victimOutput = victim.Name + " " + victim.SteamId + " " + victim.IpAddress;
 
-			/*string[] killerNameParts = Regex.Split(killer.ToString(), @"::");
-			if (killerNameParts.Length >= 4)
-			{
-				killerNameParts = new string[] { killerNameParts[0], "::" + killerNameParts[2], killerNameParts[3] };
-			}
-			string[] victimNameParts = Regex.Split(victim.ToString(), @"::");
-			if (victimNameParts.Length >= 4)
-			{
-				victimNameParts = new string[] { victimNameParts[0], "::" + victimNameParts[2], victimNameParts[3] };
-			}*/
-
 			if (this.plugin.isTeamkill(killer, victim))
 			{
 				if (this.plugin.enable)
@@ -275,7 +259,7 @@ namespace FriendlyFireAutoban.EventHandlers
 							victimOutput + " " + victim.TeamRole.Team.ToString() + ", for a total of 1 teamkill.");
 					}
 
-					victim.PersonalBroadcast(5, killer.Name + " teamkilled you. If this was an accidental teamkill, please press ~ and then type .forgive to prevent this user from being banned.", false);
+					victim.PersonalBroadcast(10, killer.Name + " teamkilled you. If this was an accidental teamkill, please press ~ and then type .forgive to prevent this user from being banned.", false);
 
 					if (this.plugin.warntk != -1)
 					{
@@ -295,28 +279,18 @@ namespace FriendlyFireAutoban.EventHandlers
 						killer.PersonalBroadcast(5, broadcast, false);
 					}
 
-					this.plugin.CheckRemoveGuns(ev.Killer);
+					this.plugin.OnCheckRemoveGuns(ev.Killer);
 
-					if (this.plugin.tospec > 0 && this.plugin.Teamkillers[killer.SteamId].Teamkills.Count >= this.plugin.tospec && !this.plugin.isImmune(killer))
-					{
-						killer.PersonalBroadcast(5, "You have been moved to spectate for teamkilling.", false);
-						this.plugin.Info("Player " + killerOutput + " has been moved to spectator for teamkilling " + this.plugin.Teamkillers[killer.SteamId].Teamkills.Count + " times.");
-						killer.ChangeRole(Role.SPECTATOR);
-					}
+					this.plugin.OnCheckToSpectator(ev.Killer);
 
-					if (this.plugin.kicker > 0 && this.plugin.Teamkillers[killer.SteamId].Teamkills.Count == this.plugin.kicker && !this.plugin.isImmune(killer))
-					{
-						killer.PersonalBroadcast(1, "You will be kicked for teamkilling.", false);
-						this.plugin.Info("Player " + killerOutput + " has been kicked for teamkilling " + this.plugin.Teamkillers[killer.SteamId].Teamkills.Count + " times.");
-						killer.Ban(0);
-					}
+					this.plugin.OnCheckKick(ev.Killer);
 
 					/*
 					 * If ban system is #1, do not create timers and perform a ban based on a static number of teamkills
 					 */
 					if (this.plugin.system == 1 && this.plugin.Teamkillers[killer.SteamId].Teamkills.Count >= this.plugin.amount)
 					{
-						this.plugin.Ban(killer, killer.Name, this.plugin.length, this.plugin.Teamkillers[killer.SteamId].Teamkills);
+						this.plugin.OnBan(killer, killer.Name, this.plugin.length, this.plugin.Teamkillers[killer.SteamId].Teamkills);
 					}
 					else
 					{
@@ -353,15 +327,14 @@ namespace FriendlyFireAutoban.EventHandlers
 										int banLength = this.plugin.GetScaledBanAmount(killer.SteamId);
 										if (banLength > 0)
 										{
-											//int banLength = this.plugin.teamkillScaled[teamkills];
-											this.plugin.Ban(killer, killer.Name, banLength, this.plugin.Teamkillers[killer.SteamId].Teamkills);
+											this.plugin.OnBan(killer, killer.Name, banLength, this.plugin.Teamkillers[killer.SteamId].Teamkills);
 										}
 										else
 										{
-											//if (this.plugin.outall)
-											//{
-											this.plugin.Info("Player " + killer.SteamId + " " + this.plugin.Teamkillers[killer.SteamId].Teamkills.Count + " teamkills is not bannable.");
-											//}
+											if (this.plugin.outall)
+											{
+												this.plugin.Info("Player " + killer.SteamId + " " + this.plugin.Teamkillers[killer.SteamId].Teamkills.Count + " teamkills is not bannable.");
+											}
 										}
 									}
 
@@ -390,7 +363,7 @@ namespace FriendlyFireAutoban.EventHandlers
 						if (this.plugin.system == 2 && this.plugin.Teamkillers[killer.SteamId].Teamkills.Count >= this.plugin.amount)
 						{
 							t.Stop();
-							this.plugin.Ban(killer, killer.Name, this.plugin.length, this.plugin.Teamkillers[killer.SteamId].Teamkills);
+							this.plugin.OnBan(killer, killer.Name, this.plugin.length, this.plugin.Teamkillers[killer.SteamId].Teamkills);
 						}
 					}
 				}
@@ -473,32 +446,8 @@ namespace FriendlyFireAutoban.EventHandlers
 			{
 				this.plugin.Teamkillers[player.SteamId] = new Teamkiller(player.PlayerId, player.Name, player.SteamId, player.IpAddress);
 			}
-
-			/*if (this.plugin.enable && this.plugin.system == 3)
-			{
-				if (!this.plugin.ipAddressToSteamList.ContainsKey(ev.Player.IpAddress))
-				{
-					this.plugin.ipAddressToSteamList[ev.Player.IpAddress] = new List<string>();
-				}
-				this.plugin.ipAddressToSteamList[ev.Player.IpAddress].Add(ev.Player.SteamId);
-			}*/
 		}
 	}
-
-	/*class PlayerConnectHandler : IEventHandlerConnect
-	{
-		private FriendlyFireAutobanPlugin plugin;
-
-		public PlayerConnectHandler(Plugin plugin)
-		{
-			this.plugin = (FriendlyFireAutobanPlugin)plugin;
-		}
-
-		public void OnConnect(ConnectEvent ev)
-		{
-			
-		}
-	}*/
 
 	class PlayerDisconnectHandler : IEventHandlerDisconnect
 	{
@@ -534,15 +483,15 @@ namespace FriendlyFireAutoban.EventHandlers
 								teamkiller.Name,
 								teamkiller.SteamId, 
 								banLength, 
-								"Banned " + banLength + " minutes for teamkilling " + teamkills + " players", 
+								string.Format(this.plugin.GetTranslation("offlineBan"), banLength, teamkills), 
 								"FriendlyFireAutoban"
 							);
 							this.plugin.Info(teamkiller.Name + " / " + teamkiller.SteamId + ": Banned " + banLength + " minutes for teamkilling " + teamkills + " players");
 							PluginManager.Manager.Server.BanIpAddress(
 								teamkiller.Name, 
 								teamkiller.IpAddress, 
-								banLength, 
-								"Banned " + banLength + " minutes for teamkilling " + teamkills + " players", 
+								banLength,
+								string.Format(this.plugin.GetTranslation("offlineBan"), banLength, teamkills), 
 								"FriendlyFireAutoban"
 							);
 							this.plugin.Info(teamkiller.Name + " / " + teamkiller.IpAddress + ": Banned " + banLength + " minutes for teamkilling " + teamkills + " players");
@@ -585,7 +534,7 @@ namespace FriendlyFireAutoban.EventHandlers
 		{
 			if (this.plugin.enable)
 			{
-				this.plugin.CheckRemoveGuns(ev.Player);
+				this.plugin.OnCheckRemoveGuns(ev.Player);
 			}
 		}
 	}
@@ -603,7 +552,7 @@ namespace FriendlyFireAutoban.EventHandlers
 		{
 			if (this.plugin.enable)
 			{
-				this.plugin.CheckRemoveGuns(ev.Player);
+				this.plugin.OnCheckRemoveGuns(ev.Player);
 			}
 		}
 	}
@@ -621,129 +570,7 @@ namespace FriendlyFireAutoban.EventHandlers
 		{
 			if (this.plugin.enable)
 			{
-				this.plugin.CheckRemoveGuns(ev.Player);
-			}
-		}
-	}
-
-	class CallCommandHandler : IEventHandlerCallCommand
-	{
-		private FriendlyFireAutobanPlugin plugin;
-
-		public CallCommandHandler(Plugin plugin)
-		{
-			this.plugin = (FriendlyFireAutobanPlugin)plugin;
-		}
-
-		public void OnCallCommand(PlayerCallCommandEvent ev)
-		{
-			string command = ev.Command.Split(' ')[0];
-			string[] quotedArgs = Regex.Matches(ev.Command, "[^\\s\"\']+|\"([^\"]*)\"|\'([^\']*)\'")
-				.Cast<Match>()
-				.Select(m => m.Value)
-				.ToArray()
-				.Skip(1)
-				.ToArray();
-
-			switch (command)
-			{
-				case "forgive":
-					if (this.plugin.enable)
-					{
-						if (this.plugin.TeamkillVictims.ContainsKey(ev.Player.SteamId))
-						{
-							Teamkill teamkill = this.plugin.TeamkillVictims[ev.Player.SteamId];
-							if (teamkill != null)
-							{
-
-								if (this.plugin.Teamkillers.ContainsKey(teamkill.KillerSteamId))
-								{
-									int removedBans = this.plugin.Teamkillers[teamkill.KillerSteamId].Teamkills.RemoveAll(x => x.Equals(teamkill));
-									if (removedBans > 0)
-									{
-										// No need for broadcast with return message
-										//ev.Player.PersonalBroadcast(5, "You forgave this player.", false);
-										// TODO: Send a broadcast to the killer
-										ev.ReturnMessage = "You have forgiven " + teamkill.KillerName + " " + teamkill.GetRoleDisplay() + "!";
-									}
-									else
-									{
-										ev.ReturnMessage = "You already forgave " + teamkill.KillerName + " " + teamkill.GetRoleDisplay() + ".";
-									}
-								}
-								else
-								{
-									ev.ReturnMessage = "The player has disconnected.";
-								}
-							}
-							else
-							{
-								ev.ReturnMessage = "You have not been teamkilled yet.";
-							}
-
-							// No matter what, remove this teamkill cached in the array
-							this.plugin.TeamkillVictims.Remove(ev.Player.SteamId);
-						}
-						else
-						{
-							ev.ReturnMessage = "There is no teamkill for you to forgive.";
-						}
-					}
-					else
-					{
-						ev.ReturnMessage = "Friendly Fire Autoban is currently disabled.";
-					}
-					break;
-
-				case "tks":
-
-					if (this.plugin.enable)
-					{
-						if (quotedArgs.Length == 1)
-						{
-							List<Teamkill> teamkills = new List<Teamkill>();
-							try
-							{
-								// https://stackoverflow.com/questions/55436309/how-do-i-use-linq-to-select-from-a-list-inside-a-map
-								teamkills = this.plugin.Teamkillers.SelectMany(
-									x => x.Value.Teamkills.Where(
-										y => y.KillerName.Contains(quotedArgs[0])
-									)
-								).ToList();
-							}
-							catch (Exception e)
-							{
-								if (this.plugin.outall)
-								{
-									this.plugin.Error(e.Message);
-									this.plugin.Error(e.StackTrace);
-								}
-							}
-
-							if (teamkills.Count == 0)
-							{
-								ev.ReturnMessage = "No players by this name has any teamkills.";
-							}
-							else
-							{
-								string retval = "";
-								foreach (Teamkill tk in teamkills)
-								{
-									retval += tk.KillerName + " teamkilled " + tk.VictimName + " " + tk.GetRoleDisplay() + ". \n";
-								}
-								ev.ReturnMessage = retval;
-							}
-						}
-						else
-						{
-							ev.ReturnMessage = "Player name not provided or not quoted.";
-						}
-					}
-					else
-					{
-						ev.ReturnMessage = "Friendly Fire Autoban is currently disabled.";
-					}
-					break;
+				this.plugin.OnCheckRemoveGuns(ev.Player);
 			}
 		}
 	}

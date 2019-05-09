@@ -1,4 +1,5 @@
-﻿using Smod2.Commands;
+﻿using Smod2.API;
+using Smod2.Commands;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +18,7 @@ namespace FriendlyFireAutoban
 
 		public string GetCommandDescription()
 		{
-			return "Toggle Friendly Fire Autoban on and off.";
+			return this.plugin.GetTranslation("toggleDescription");
 		}
 
 		public string GetUsage()
@@ -32,12 +33,12 @@ namespace FriendlyFireAutoban
 			if (this.plugin.enable)
 			{
 				this.plugin.enable = false;
-				return new string[] { "Friendly fire autoban has been disabled." };
+				return new string[] { this.plugin.GetTranslation("toggleDisable") };
 			}
 			else
 			{
 				this.plugin.enable = true;
-				return new string[] { "Friendly fire autoban has been enabled." };
+				return new string[] { this.plugin.GetTranslation("toggleEnable") };
 			}
 
 		}

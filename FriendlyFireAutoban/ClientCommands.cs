@@ -33,35 +33,28 @@ namespace FriendlyFireAutoban
 				case "forgive":
 					if (this.plugin.enable)
 					{
-						if (this.plugin.TeamkillVictims.ContainsKey(ev.Player.SteamId))
+						if (this.plugin.TeamkillVictims.ContainsKey(ev.Player.SteamId) &&
+							this.plugin.TeamkillVictims[ev.Player.SteamId] != null)
 						{
 							Teamkill teamkill = this.plugin.TeamkillVictims[ev.Player.SteamId];
-							if (teamkill != null)
+							if (this.plugin.Teamkillers.ContainsKey(teamkill.KillerSteamId))
 							{
-
-								if (this.plugin.Teamkillers.ContainsKey(teamkill.KillerSteamId))
+								int removedBans = this.plugin.Teamkillers[teamkill.KillerSteamId].Teamkills.RemoveAll(x => x.Equals(teamkill));
+								if (removedBans > 0)
 								{
-									int removedBans = this.plugin.Teamkillers[teamkill.KillerSteamId].Teamkills.RemoveAll(x => x.Equals(teamkill));
-									if (removedBans > 0)
-									{
-										// No need for broadcast with return message
-										//ev.Player.PersonalBroadcast(5, "You forgave this player.", false);
-										// TODO: Send a broadcast to the killer
-										ev.ReturnMessage = "You have forgiven " + teamkill.KillerName + " " + teamkill.GetRoleDisplay() + "!";
-									}
-									else
-									{
-										ev.ReturnMessage = "You already forgave " + teamkill.KillerName + " " + teamkill.GetRoleDisplay() + ".";
-									}
+									// No need for broadcast with return message
+									//ev.Player.PersonalBroadcast(5, "You forgave this player.", false);
+									// TODO: Send a broadcast to the killer
+									ev.ReturnMessage = string.Format(this.plugin.GetTranslation("forgiveSuccess"), teamkill.KillerName, teamkill.GetRoleDisplay());
 								}
 								else
 								{
-									ev.ReturnMessage = "The player has disconnected.";
+									ev.ReturnMessage = string.Format(this.plugin.GetTranslation("forgiveDuplicate"), teamkill.KillerName, teamkill.GetRoleDisplay());
 								}
 							}
 							else
 							{
-								ev.ReturnMessage = "You have not been teamkilled yet.";
+								ev.ReturnMessage = this.plugin.GetTranslation("forgiveDisconnect");
 							}
 
 							// No matter what, remove this teamkill cached in the array
@@ -69,12 +62,12 @@ namespace FriendlyFireAutoban
 						}
 						else
 						{
-							ev.ReturnMessage = "There is no teamkill for you to forgive.";
+							ev.ReturnMessage = this.plugin.GetTranslation("forgiveInvalid");
 						}
 					}
 					else
 					{
-						ev.ReturnMessage = "Friendly Fire Autoban is currently disabled.";
+						ev.ReturnMessage = this.plugin.GetTranslation("ffaDisabled");
 					}
 					break;
 
@@ -105,26 +98,33 @@ namespace FriendlyFireAutoban
 
 							if (teamkills.Count == 0)
 							{
-								ev.ReturnMessage = "No players by this name has any teamkills.";
+								ev.ReturnMessage = this.plugin.GetTranslation("tksNoTeamkills");
 							}
 							else
 							{
 								string retval = "";
 								foreach (Teamkill tk in teamkills)
 								{
-									retval += tk.KillerName + " teamkilled " + tk.VictimName + " " + tk.GetRoleDisplay() + ". \n";
+									retval += 
+										string.Format(
+											this.plugin.GetTranslation("tksTeamkillEntry"), 
+											(tk.Duration / 60) + ":" + (tk.Duration % 60), 
+											tk.KillerName, 
+											tk.VictimName, 
+											tk.GetRoleDisplay()
+										) + "\n";
 								}
 								ev.ReturnMessage = retval;
 							}
 						}
 						else
 						{
-							ev.ReturnMessage = "Player name not provided or not quoted.";
+							ev.ReturnMessage = this.plugin.GetTranslation("tksNotFound");
 						}
 					}
 					else
 					{
-						ev.ReturnMessage = "Friendly Fire Autoban is currently disabled.";
+						ev.ReturnMessage = this.plugin.GetTranslation("ffaDisabled");
 					}
 					break;
 			}
