@@ -285,6 +285,8 @@ namespace FriendlyFireAutoban.EventHandlers
 
 					this.plugin.OnCheckKick(ev.Killer);
 
+					this.plugin.OnVoteTeamkill(ev.Killer);
+
 					/*
 					 * If ban system is #1, do not create timers and perform a ban based on a static number of teamkills
 					 */

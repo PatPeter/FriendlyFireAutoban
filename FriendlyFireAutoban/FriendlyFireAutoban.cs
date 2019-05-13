@@ -15,13 +15,13 @@ using Smod2.Piping;
 namespace FriendlyFireAutoban
 {
 	[PluginDetails(
-		author = FriendlyFireAutoban.AssemblyInfo.Author,
-		name = FriendlyFireAutoban.AssemblyInfo.Name,
-		description = FriendlyFireAutoban.AssemblyInfo.Description,
-		id = FriendlyFireAutoban.AssemblyInfo.Id,
-		configPrefix = FriendlyFireAutoban.AssemblyInfo.ConfigPrefix,
-		langFile = FriendlyFireAutoban.AssemblyInfo.LangFile,
-		version = FriendlyFireAutoban.AssemblyInfo.Version,
+		author = AssemblyInfo.Author,
+		name = AssemblyInfo.Name,
+		description = AssemblyInfo.Description,
+		id = AssemblyInfo.Id,
+		configPrefix = AssemblyInfo.ConfigPrefix,
+		langFile = AssemblyInfo.LangFile,
+		version = AssemblyInfo.Version,
 		SmodMajor = 3,
 		SmodMinor = 4,
 		SmodRevision = 0
@@ -512,7 +512,7 @@ namespace FriendlyFireAutoban
 			}
 		}
 
-		[PipeEvent("patpeter.friendly.fire.autoban.OnCheckKick")]
+		[PipeEvent("patpeter.friendly.fire.autoban.OnCheckVote")]
 		public bool OnVoteTeamkill(Player killer)
 		{
 			if (this.votetk > 0 && this.Teamkillers[killer.SteamId].Teamkills.Count >= this.votetk && !this.isImmune(killer))
@@ -521,10 +521,12 @@ namespace FriendlyFireAutoban
 				Dictionary<int, string> options = new Dictionary<int, string>();
 				options[1] = "Yes";
 				options[2] = "No";
+				HashSet<string> votes = new HashSet<string>();
+				Dictionary<int, int> counter = new Dictionary<int, int>();
 
 				if (Voting.Invoke())
 				{
-					return StartVote.Invoke("Ban " + killer.Name + "?", options);
+					return StartVote.Invoke("Ban " + killer.Name + "?", options, votes, counter);
 				}
 				else
 				{
