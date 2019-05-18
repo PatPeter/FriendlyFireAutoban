@@ -125,7 +125,7 @@ namespace FriendlyFireAutoban.EventHandlers
 				this.plugin.rolewl.Add(new RoleTuple(tuple0, tuple1));
 			}
 
-			this.plugin.mirror = this.plugin.GetConfigInt("friendly_fire_autoban_mirror");
+			this.plugin.mirror = this.plugin.GetConfigFloat("friendly_fire_autoban_mirror");
 			this.plugin.warntk = this.plugin.GetConfigInt("friendly_fire_autoban_warntk");
 			this.plugin.votetk = this.plugin.GetConfigInt("friendly_fire_autoban_votetk");
 
@@ -259,22 +259,22 @@ namespace FriendlyFireAutoban.EventHandlers
 							victimOutput + " " + victim.TeamRole.Team.ToString() + ", for a total of 1 teamkill.");
 					}
 
-					victim.PersonalBroadcast(10, killer.Name + " teamkilled you. If this was an accidental teamkill, please press ~ and then type .forgive to prevent this user from being banned.", false);
+					victim.PersonalBroadcast(10, string.Format(this.plugin.GetTranslation("victim_message"), killer.Name), false);
 
 					if (this.plugin.warntk != -1)
 					{
-						string broadcast = "You teamkilled " + victim.Name + " " + teamkill.GetRoleDisplay() + ". ";
+						string broadcast = string.Format(this.plugin.GetTranslation("killer_message"), victim.Name, teamkill.GetRoleDisplay()) + " ";
 						if (this.plugin.warntk > 0)
 						{
 							int teamkillsBeforeBan = this.plugin.amount - this.plugin.Teamkillers[killer.SteamId].Teamkills.Count;
 							if (teamkillsBeforeBan <= this.plugin.warntk)
 							{
-								broadcast += "If you teamkill " + teamkillsBeforeBan + " more times you will be banned. ";
+								broadcast += string.Format(this.plugin.GetTranslation("killer_warning"), teamkillsBeforeBan) + " ";
 							}
 						}
 						else
 						{
-							broadcast += "Please do not teamkill. ";
+							broadcast += this.plugin.GetTranslation("killer_request") + " ";
 						}
 						killer.PersonalBroadcast(5, broadcast, false);
 					}
@@ -421,7 +421,7 @@ namespace FriendlyFireAutoban.EventHandlers
 						ev.Damage = 0;
 					}
 				}
-				else if (this.plugin.mirror > 0)
+				else if (this.plugin.mirror > 0f)
 				{
 					if (this.plugin.isTeamkill(ev.Attacker, ev.Player))
 					{
@@ -485,7 +485,7 @@ namespace FriendlyFireAutoban.EventHandlers
 								teamkiller.Name,
 								teamkiller.SteamId, 
 								banLength, 
-								string.Format(this.plugin.GetTranslation("offlineBan"), banLength, teamkills), 
+								string.Format(this.plugin.GetTranslation("offline_ban"), banLength, teamkills), 
 								"FriendlyFireAutoban"
 							);
 							this.plugin.Info(teamkiller.Name + " / " + teamkiller.SteamId + ": Banned " + banLength + " minutes for teamkilling " + teamkills + " players");
@@ -493,7 +493,7 @@ namespace FriendlyFireAutoban.EventHandlers
 								teamkiller.Name, 
 								teamkiller.IpAddress, 
 								banLength,
-								string.Format(this.plugin.GetTranslation("offlineBan"), banLength, teamkills), 
+								string.Format(this.plugin.GetTranslation("offline_ban"), banLength, teamkills), 
 								"FriendlyFireAutoban"
 							);
 							this.plugin.Info(teamkiller.Name + " / " + teamkiller.IpAddress + ": Banned " + banLength + " minutes for teamkilling " + teamkills + " players");

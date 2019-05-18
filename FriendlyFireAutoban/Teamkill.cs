@@ -38,82 +38,82 @@ namespace FriendlyFireAutoban
 			switch (KillerTeamRole.Role)
 			{
 				case Role.CLASSD:
-					retval += FriendlyFireAutobanPlugin.GetInstance().GetTranslation("roleDclass");
+					retval += FriendlyFireAutobanPlugin.GetInstance().GetTranslation("role_dclass");
 					break;
 
 				case Role.SCIENTIST:
-					retval += FriendlyFireAutobanPlugin.GetInstance().GetTranslation("roleScientist");
+					retval += FriendlyFireAutobanPlugin.GetInstance().GetTranslation("role_scientist");
 					break;
 
 				case Role.FACILITY_GUARD:
-					retval += FriendlyFireAutobanPlugin.GetInstance().GetTranslation("roleGuard");
+					retval += FriendlyFireAutobanPlugin.GetInstance().GetTranslation("role_guard");
 					break;
 
 				case Role.NTF_CADET:
-					retval += FriendlyFireAutobanPlugin.GetInstance().GetTranslation("roleCadet");
+					retval += FriendlyFireAutobanPlugin.GetInstance().GetTranslation("role_cadet");
 					break;
 
 				case Role.NTF_LIEUTENANT:
-					retval += FriendlyFireAutobanPlugin.GetInstance().GetTranslation("roleLieutenant");
+					retval += FriendlyFireAutobanPlugin.GetInstance().GetTranslation("role_lieutenant");
 					break;
 
 				case Role.NTF_COMMANDER:
-					retval += FriendlyFireAutobanPlugin.GetInstance().GetTranslation("roleCommander");
+					retval += FriendlyFireAutobanPlugin.GetInstance().GetTranslation("role_commander");
 					break;
 
 				case Role.NTF_SCIENTIST:
-					retval += FriendlyFireAutobanPlugin.GetInstance().GetTranslation("roleNTFScientist");
+					retval += FriendlyFireAutobanPlugin.GetInstance().GetTranslation("role_ntf_scientist");
 					break;
 
 				case Role.CHAOS_INSURGENCY:
-					retval += FriendlyFireAutobanPlugin.GetInstance().GetTranslation("roleChaos");
+					retval += FriendlyFireAutobanPlugin.GetInstance().GetTranslation("role_chaos");
 					break;
 
 				case Role.TUTORIAL:
-					retval += FriendlyFireAutobanPlugin.GetInstance().GetTranslation("roleTutorial");
+					retval += FriendlyFireAutobanPlugin.GetInstance().GetTranslation("role_tutorial");
 					break;
 			}
-			retval += FriendlyFireAutobanPlugin.GetInstance().GetTranslation("roleSeparator");
+			retval += " " + FriendlyFireAutobanPlugin.GetInstance().GetTranslation("role_separator") + " ";
 			if (VictimDisarmed)
 			{
-				retval += FriendlyFireAutobanPlugin.GetInstance().GetTranslation("roleDisarmed");
+				retval += FriendlyFireAutobanPlugin.GetInstance().GetTranslation("role_disarmed");
 			}
 			switch (VictimTeamRole.Role)
 			{
 				case Role.CLASSD:
-					retval += FriendlyFireAutobanPlugin.GetInstance().GetTranslation("roleDclass");
+					retval += FriendlyFireAutobanPlugin.GetInstance().GetTranslation("role_dclass");
 					break;
 
 				case Role.SCIENTIST:
-					retval += FriendlyFireAutobanPlugin.GetInstance().GetTranslation("roleScientist");
+					retval += FriendlyFireAutobanPlugin.GetInstance().GetTranslation("role_scientist");
 					break;
 
 				case Role.FACILITY_GUARD:
-					retval += FriendlyFireAutobanPlugin.GetInstance().GetTranslation("roleGuard");
+					retval += FriendlyFireAutobanPlugin.GetInstance().GetTranslation("role_guard");
 					break;
 
 				case Role.NTF_CADET:
-					retval += FriendlyFireAutobanPlugin.GetInstance().GetTranslation("roleCadet");
+					retval += FriendlyFireAutobanPlugin.GetInstance().GetTranslation("role_cadet");
 					break;
 
 				case Role.NTF_LIEUTENANT:
-					retval += FriendlyFireAutobanPlugin.GetInstance().GetTranslation("roleLieutenant");
+					retval += FriendlyFireAutobanPlugin.GetInstance().GetTranslation("role_lieutenant");
 					break;
 
 				case Role.NTF_COMMANDER:
-					retval += FriendlyFireAutobanPlugin.GetInstance().GetTranslation("roleCommander");
+					retval += FriendlyFireAutobanPlugin.GetInstance().GetTranslation("role_commander");
 					break;
 
 				case Role.NTF_SCIENTIST:
-					retval += FriendlyFireAutobanPlugin.GetInstance().GetTranslation("roleNTFScientist");
+					retval += FriendlyFireAutobanPlugin.GetInstance().GetTranslation("role_ntf_scientist");
 					break;
 
 				case Role.CHAOS_INSURGENCY:
-					retval += FriendlyFireAutobanPlugin.GetInstance().GetTranslation("roleChaos");
+					retval += FriendlyFireAutobanPlugin.GetInstance().GetTranslation("role_chaos");
 					break;
 
 				case Role.TUTORIAL:
-					retval += FriendlyFireAutobanPlugin.GetInstance().GetTranslation("roleTutorial");
+					retval += FriendlyFireAutobanPlugin.GetInstance().GetTranslation("role_tutorial");
 					break;
 			}
 			retval += ")";

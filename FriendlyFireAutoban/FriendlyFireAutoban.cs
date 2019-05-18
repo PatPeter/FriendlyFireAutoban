@@ -57,7 +57,7 @@ namespace FriendlyFireAutoban
 		internal int bomber = 0;
 		internal bool disarm = false;
 		internal List<RoleTuple> rolewl = new List<RoleTuple>();
-		internal int mirror = 0;
+		internal float mirror = 0;
 		internal int warntk = 0;
 		internal int votetk = 0;
 
@@ -109,6 +109,14 @@ namespace FriendlyFireAutoban
 		 * Ban Events
 		 */
 		[LangOption]
+		public readonly string victimMessage = "{0} teamkilled you. If this was an accidental teamkill, please press ~ and then type .forgive to prevent this user from being banned.";
+		[LangOption]
+		public readonly string killerMessage = "You teamkilled {0} {1}.";
+		[LangOption]
+		public readonly string killerWarning = "If you teamkill {0} more times you will be banned.";
+		[LangOption]
+		public readonly string killerRequest = "Please do not teamkill.";
+		[LangOption]
 		public readonly string nogunsOutput = "Your guns have been removed for teamkilling. You will get them back when your teamkill expires.";
 		[LangOption]
 		public readonly string tospecOutput = "You have been moved to spectate for teamkilling.";
@@ -138,7 +146,7 @@ namespace FriendlyFireAutoban
 		public readonly string roleLieutenant = "LIEUTENANT";
 		[LangOption]
 		public readonly string roleCommander = "COMMANDER";
-		[LangOption]
+		[LangOption("role_ntf_scientist")]
 		public readonly string roleNTFScientist = "NTF SCIENTIST";
 		[LangOption]
 		public readonly string roleChaos = "CHAOS";
@@ -159,6 +167,8 @@ namespace FriendlyFireAutoban
 		 * Client Commands
 		 */
 		[LangOption]
+		public readonly string forgiveCommand = "forgive";
+		[LangOption]
 		public readonly string forgiveSuccess = "You have forgiven {0} {1}!";
 		[LangOption]
 		public readonly string forgiveDuplicate = "You already forgave {0} {1}.";
@@ -166,6 +176,9 @@ namespace FriendlyFireAutoban
 		public readonly string forgiveDisconnect = "The player has disconnected.";
 		[LangOption]
 		public readonly string forgiveInvalid = "You have not been teamkilled yet.";
+
+		[LangOption]
+		public readonly string tksCommand = "tks";
 		[LangOption]
 		public readonly string tksNoTeamkills = "No players by this name has any teamkills.";
 		[LangOption]
@@ -443,7 +456,7 @@ namespace FriendlyFireAutoban
 					player.Ban(banLength, "Banned " + banLength + " minutes for teamkilling player(s) " + string.Join(", ", teamkills.Select(teamkill => teamkill.VictimName).ToArray()));
 				}
 				this.Info("Player " + playerName + " has been banned for " + banLength + " minutes after teamkilling " + teamkills + " players during the round.");
-				this.Server.Map.Broadcast(3, string.Format(this.GetTranslation("bannedOutput"), playerName, teamkills.Count), false);
+				this.Server.Map.Broadcast(3, string.Format(this.GetTranslation("banned_output"), playerName, teamkills.Count), false);
 				return true;
 			}
 		}
@@ -471,7 +484,7 @@ namespace FriendlyFireAutoban
 							break;
 					}
 				}
-				killer.PersonalBroadcast(2, this.GetTranslation("nogunsOutput"), false);
+				killer.PersonalBroadcast(2, this.GetTranslation("noguns_output"), false);
 				return true;
 			}
 			else
@@ -486,7 +499,7 @@ namespace FriendlyFireAutoban
 			if (this.tospec > 0 && this.Teamkillers[killer.SteamId].Teamkills.Count >= this.tospec && !this.isImmune(killer))
 			{
 				this.Info("Player " + killer.Name + " " + killer.SteamId + " " + killer.IpAddress + " has been moved to spectator for teamkilling " + this.Teamkillers[killer.SteamId].Teamkills.Count + " times.");
-				killer.PersonalBroadcast(5, this.GetTranslation("tospecOutput"), false);
+				killer.PersonalBroadcast(5, this.GetTranslation("tospec_output"), false);
 				killer.ChangeRole(Role.SPECTATOR);
 				return true;
 			}
@@ -502,7 +515,7 @@ namespace FriendlyFireAutoban
 			if (this.kicker > 0 && this.Teamkillers[killer.SteamId].Teamkills.Count == this.kicker && !this.isImmune(killer))
 			{
 				this.Info("Player " + killer.Name + " " + killer.SteamId + " " + killer.IpAddress + " has been kicked for teamkilling " + this.Teamkillers[killer.SteamId].Teamkills.Count + " times.");
-				killer.PersonalBroadcast(1, this.GetTranslation("kickerOutput"), false);
+				killer.PersonalBroadcast(1, this.GetTranslation("kicker_output"), false);
 				killer.Ban(0);
 				return true;
 			}

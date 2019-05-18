@@ -18,7 +18,7 @@ namespace FriendlyFireAutoban
 
 		public string GetCommandDescription()
 		{
-			return this.plugin.GetTranslation("toggleDescription");
+			return this.plugin.GetTranslation("toggle_description");
 		}
 
 		public string GetUsage()
@@ -33,14 +33,13 @@ namespace FriendlyFireAutoban
 			if (this.plugin.enable)
 			{
 				this.plugin.enable = false;
-				return new string[] { this.plugin.GetTranslation("toggleDisable") };
+				return new string[] { this.plugin.GetTranslation("toggle_disable") };
 			}
 			else
 			{
 				this.plugin.enable = true;
-				return new string[] { this.plugin.GetTranslation("toggleEnable") };
+				return new string[] { this.plugin.GetTranslation("toggle_enable") };
 			}
-
 		}
 	}
 }

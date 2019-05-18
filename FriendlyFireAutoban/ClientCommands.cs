@@ -28,105 +28,103 @@ namespace FriendlyFireAutoban
 				.Skip(1)
 				.ToArray();
 
-			switch (command)
+			if (command.Equals(this.plugin.GetTranslation("forgive_command")))
 			{
-				case "forgive":
-					if (this.plugin.enable)
+				if (this.plugin.enable)
+				{
+					if (this.plugin.TeamkillVictims.ContainsKey(ev.Player.SteamId) &&
+						this.plugin.TeamkillVictims[ev.Player.SteamId] != null)
 					{
-						if (this.plugin.TeamkillVictims.ContainsKey(ev.Player.SteamId) &&
-							this.plugin.TeamkillVictims[ev.Player.SteamId] != null)
+						Teamkill teamkill = this.plugin.TeamkillVictims[ev.Player.SteamId];
+						if (this.plugin.Teamkillers.ContainsKey(teamkill.KillerSteamId))
 						{
-							Teamkill teamkill = this.plugin.TeamkillVictims[ev.Player.SteamId];
-							if (this.plugin.Teamkillers.ContainsKey(teamkill.KillerSteamId))
+							int removedBans = this.plugin.Teamkillers[teamkill.KillerSteamId].Teamkills.RemoveAll(x => x.Equals(teamkill));
+							if (removedBans > 0)
 							{
-								int removedBans = this.plugin.Teamkillers[teamkill.KillerSteamId].Teamkills.RemoveAll(x => x.Equals(teamkill));
-								if (removedBans > 0)
-								{
-									// No need for broadcast with return message
-									//ev.Player.PersonalBroadcast(5, "You forgave this player.", false);
-									// TODO: Send a broadcast to the killer
-									ev.ReturnMessage = string.Format(this.plugin.GetTranslation("forgiveSuccess"), teamkill.KillerName, teamkill.GetRoleDisplay());
-								}
-								else
-								{
-									ev.ReturnMessage = string.Format(this.plugin.GetTranslation("forgiveDuplicate"), teamkill.KillerName, teamkill.GetRoleDisplay());
-								}
+								// No need for broadcast with return message
+								//ev.Player.PersonalBroadcast(5, "You forgave this player.", false);
+								// TODO: Send a broadcast to the killer
+								ev.ReturnMessage = string.Format(this.plugin.GetTranslation("forgive_success"), teamkill.KillerName, teamkill.GetRoleDisplay());
 							}
 							else
 							{
-								ev.ReturnMessage = this.plugin.GetTranslation("forgiveDisconnect");
-							}
-
-							// No matter what, remove this teamkill cached in the array
-							this.plugin.TeamkillVictims.Remove(ev.Player.SteamId);
-						}
-						else
-						{
-							ev.ReturnMessage = this.plugin.GetTranslation("forgiveInvalid");
-						}
-					}
-					else
-					{
-						ev.ReturnMessage = this.plugin.GetTranslation("ffaDisabled");
-					}
-					break;
-
-				case "tks":
-
-					if (this.plugin.enable)
-					{
-						if (quotedArgs.Length == 1)
-						{
-							List<Teamkill> teamkills = new List<Teamkill>();
-							try
-							{
-								// https://stackoverflow.com/questions/55436309/how-do-i-use-linq-to-select-from-a-list-inside-a-map
-								teamkills = this.plugin.Teamkillers.SelectMany(
-									x => x.Value.Teamkills.Where(
-										y => y.KillerName.Contains(quotedArgs[0])
-									)
-								).ToList();
-							}
-							catch (Exception e)
-							{
-								if (this.plugin.outall)
-								{
-									this.plugin.Error(e.Message);
-									this.plugin.Error(e.StackTrace);
-								}
-							}
-
-							if (teamkills.Count == 0)
-							{
-								ev.ReturnMessage = this.plugin.GetTranslation("tksNoTeamkills");
-							}
-							else
-							{
-								string retval = "";
-								foreach (Teamkill tk in teamkills)
-								{
-									retval += 
-										string.Format(
-											this.plugin.GetTranslation("tksTeamkillEntry"), 
-											(tk.Duration / 60) + ":" + (tk.Duration % 60), 
-											tk.KillerName, 
-											tk.VictimName, 
-											tk.GetRoleDisplay()
-										) + "\n";
-								}
-								ev.ReturnMessage = retval;
+								ev.ReturnMessage = string.Format(this.plugin.GetTranslation("forgive_duplicate"), teamkill.KillerName, teamkill.GetRoleDisplay());
 							}
 						}
 						else
 						{
-							ev.ReturnMessage = this.plugin.GetTranslation("tksNotFound");
+							ev.ReturnMessage = this.plugin.GetTranslation("forgive_disconnect");
+						}
+
+						// No matter what, remove this teamkill cached in the array
+						this.plugin.TeamkillVictims.Remove(ev.Player.SteamId);
+					}
+					else
+					{
+						ev.ReturnMessage = this.plugin.GetTranslation("forgive_invalid");
+					}
+				}
+				else
+				{
+					ev.ReturnMessage = this.plugin.GetTranslation("ffa_disabled");
+				}
+			}
+			else if (command.Equals(this.plugin.GetTranslation("tks_command")))
+			{
+
+				if (this.plugin.enable)
+				{
+					if (quotedArgs.Length == 1)
+					{
+						List<Teamkill> teamkills = new List<Teamkill>();
+						try
+						{
+							// https://stackoverflow.com/questions/55436309/how-do-i-use-linq-to-select-from-a-list-inside-a-map
+							teamkills = this.plugin.Teamkillers.SelectMany(
+								x => x.Value.Teamkills.Where(
+									y => y.KillerName.Contains(quotedArgs[0])
+								)
+							).ToList();
+						}
+						catch (Exception e)
+						{
+							if (this.plugin.outall)
+							{
+								this.plugin.Error(e.Message);
+								this.plugin.Error(e.StackTrace);
+							}
+						}
+
+						if (teamkills.Count == 0)
+						{
+							ev.ReturnMessage = this.plugin.GetTranslation("tksNoTeamkills");
+						}
+						else
+						{
+							string retval = "";
+							foreach (Teamkill tk in teamkills)
+							{
+								retval +=
+									string.Format(
+										this.plugin.GetTranslation("tksTeamkillEntry"),
+										(tk.Duration / 60) + ":" + (tk.Duration % 60),
+										tk.KillerName,
+										tk.VictimName,
+										tk.GetRoleDisplay()
+									) + "\n";
+							}
+							ev.ReturnMessage = retval;
 						}
 					}
 					else
 					{
-						ev.ReturnMessage = this.plugin.GetTranslation("ffaDisabled");
+						ev.ReturnMessage = this.plugin.GetTranslation("tksNotFound");
 					}
-					break;
+				}
+				else
+				{
+					ev.ReturnMessage = this.plugin.GetTranslation("ffaDisabled");
+				}
 			}
 		}
 	}
