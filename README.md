@@ -23,6 +23,30 @@ friendly_fire_autoban_warntk | integer | -1 | How many teamkills before a ban sh
 friendly_fire_autoban_votetk | integer | 0 | [not implemented yet] The number of teamkills at which to call a vote via the callvote plugin to ban a user by the ban amount.
 friendly_fire_autoban_immune | string | owner,admin,moderator | Groups that are immune to being autobanned.
 
+## Example Configuration
+Here is the default configuration for Friendly Fire Autoban that you can copy directly into your config_gameplay.txt:
+
+~~~~
+friendly_fire_autoban_enable: true
+friendly_fire_autoban_outall: false
+friendly_fire_autoban_system: 3
+friendly_fire_autoban_matrix: 1:1,2:2,3:3,4:4,1:3,2:4,3:1,4:2
+friendly_fire_autoban_amount: 4
+friendly_fire_autoban_length: 1440
+friendly_fire_autoban_expire: 60
+friendly_fire_autoban_scaled: 4:1440,5:4320,6:4320,7:10080,8:10080,9:43800,10:43800,11:129600,12:129600,13:525600
+friendly_fire_autoban_noguns: 0
+friendly_fire_autoban_tospec: 0
+friendly_fire_autoban_kicker: 0
+friendly_fire_autoban_bomber: 0
+friendly_fire_autoban_disarm: false
+friendly_fire_autoban_rolewl: 12:11,12:4,12:13,12:15,4:11,4:13,4:15,11:13,11:15,13:15
+friendly_fire_autoban_mirror: 0
+friendly_fire_autoban_warntk: 0
+friendly_fire_autoban_votetk: 0
+friendly_fire_autoban_immune: owner,admin,moderator
+~~~~
+
 ## Commands
 Key | Aliases | Parameters | Description
 --- | --- | --- | ---
