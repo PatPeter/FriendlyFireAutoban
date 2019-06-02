@@ -10,9 +10,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "translations", "translations", "{B9989B96-5BA3-4303-8C58-7934AC2A6E6D}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sm_translations", "sm_translations", "{DE756298-ED83-477E-B38B-808EB0CC66AC}"
 	ProjectSection(SolutionItems) = preProject
-		friendly_fire_autoban.ru.txt = friendly_fire_autoban.ru.txt
+		sm_translations\friendly_fire_autoban.ru.txt = sm_translations\friendly_fire_autoban.ru.txt
 	EndProjectSection
 EndProject
 Global
@@ -28,6 +28,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{DE756298-ED83-477E-B38B-808EB0CC66AC} = {0DE60663-AAB6-436E-AD52-531FC942E3CD}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {93980AF1-83D2-487D-8CDA-F1CD4AB2B304}
