@@ -1,17 +1,21 @@
-﻿noguns_output: Ваше оружие было убрано из-за командного убийства. Вы получите его обратно, когда истечет срок вашего наказания.
+﻿victim_message: {0} убил вас. Если это было случайное убийство, пожалуйста, откройте консоль (кнопка "Ё" в верхнем левом углу), а затем введите .forgive, чтобы этот игрок не получил бан.
+killer_message: Вы убили {0} {1}.
+killer_warning: Если вы убьёте союзников больше {0} раз(а), вы получите бан.
+killer_request: Пожалуйста не убивайте союзников.
+noguns_output: Ваше оружие было убрано из-за командного убийства. Вы получите его обратно, когда истечет срок вашего наказания.
 tospec_output: Вы были перемещены за наблюдателя из-за командного убийства.
 kicker_output: Вы были кикнуты за командное убийство.
 banned_output: Игрок {0} был забанен за убийство {1} игроков.
 offline_ban: Вы забанены на {0} минут за убийство {1} игроков.
 role_disarmed: разоружен
-role_separator: убил
+role_separator: убил союзного
 role_dclass: D-Class
-Роль ученого: Scientist
+role_scientist: Scientist
 role_guard: Guard
 role_cadet: Cadet
 role_lieutenant: Lieutenant
 role_commander: Commander
-role_n_t_f_scientist: NTF Scientist
+role_ntf_scientist: NTF Scientist
 role_chaos: Chaos Insurgency
 role_tutorial: Tutorial
 toggle_description: Переключение FFA на положение включён/выключен.
@@ -24,6 +28,6 @@ forgive_disconnect: Игрок отключился.
 forgive_invalid: Вы еще не были убиты союзником.
 tks_command: .убийствосоюзников
 tks_no_teamkills: Ни у одного из игроков с таким именем нет командных убийств.
-tks_teamkill_entry: {0}: {1} убил союзников {2} {3}.
+tks_teamkill_entry: ({0}) {1} убил союзников {2} {3}.
 tks_not_found: Имя игрока указано не правильно или не найдено.
 ffa_disabled: FFA в текущий момент отключен.
