@@ -133,7 +133,7 @@ namespace FriendlyFireAutoban
 		[LangOption]
 		public readonly string roleDisarmed = "DISARMED ";
 		[LangOption]
-		public readonly string roleSeparator = " on ";
+		public readonly string roleSeparator = "on";
 		[LangOption]
 		public readonly string roleDclass = "D-CLASS";
 		[LangOption]
@@ -182,7 +182,7 @@ namespace FriendlyFireAutoban
 		[LangOption]
 		public readonly string tksNoTeamkills = "No players by this name has any teamkills.";
 		[LangOption]
-		public readonly string tksTeamkillEntry = "{0}: {1} teamkilled {2} {3}.";
+		public readonly string tksTeamkillEntry = "({0}) {1} teamkilled {2} {3}.";
 		[LangOption]
 		public readonly string tksNotFound = "Player name not provided or not quoted.";
 
@@ -436,7 +436,8 @@ namespace FriendlyFireAutoban
 			return banLength;
 		}
 
-		[PipeEvent("patpeter.friendly.fire.autoban.OnBan")]
+		//[PipeEvent("patpeter.friendly.fire.autoban.OnBan")]
+		[PipeMethod]
 		public bool OnBan(Player player, string playerName, int banLength, List<Teamkill> teamkills)
 		{
 			bool immune = isImmune(player);
@@ -461,7 +462,8 @@ namespace FriendlyFireAutoban
 			}
 		}
 
-		[PipeEvent("patpeter.friendly.fire.autoban.OnCheckRemoveGuns")]
+		//[PipeEvent("patpeter.friendly.fire.autoban.OnCheckRemoveGuns")]
+		[PipeMethod]
 		public bool OnCheckRemoveGuns(Player killer)
 		{
 			if (this.noguns > 0 && this.Teamkillers.ContainsKey(killer.SteamId) && this.Teamkillers[killer.SteamId].Teamkills.Count >= this.noguns && !this.isImmune(killer))
@@ -493,7 +495,8 @@ namespace FriendlyFireAutoban
 			}
 		}
 
-		[PipeEvent("patpeter.friendly.fire.autoban.OnCheckToSpectator")]
+		//[PipeEvent("patpeter.friendly.fire.autoban.OnCheckToSpectator")]
+		[PipeMethod]
 		public bool OnCheckToSpectator(Player killer)
 		{
 			if (this.tospec > 0 && this.Teamkillers[killer.SteamId].Teamkills.Count >= this.tospec && !this.isImmune(killer))
@@ -509,7 +512,8 @@ namespace FriendlyFireAutoban
 			}
 		}
 
-		[PipeEvent("patpeter.friendly.fire.autoban.OnCheckKick")]
+		//[PipeEvent("patpeter.friendly.fire.autoban.OnCheckKick")]
+		[PipeMethod]
 		public bool OnCheckKick(Player killer)
 		{
 			if (this.kicker > 0 && this.Teamkillers[killer.SteamId].Teamkills.Count == this.kicker && !this.isImmune(killer))
@@ -525,7 +529,8 @@ namespace FriendlyFireAutoban
 			}
 		}
 
-		[PipeEvent("patpeter.friendly.fire.autoban.OnCheckVote")]
+		//[PipeEvent("patpeter.friendly.fire.autoban.OnCheckVote")]
+		[PipeMethod]
 		public bool OnVoteTeamkill(Player killer)
 		{
 			if (this.votetk > 0 && this.Teamkillers[killer.SteamId].Teamkills.Count >= this.votetk && !this.isImmune(killer))

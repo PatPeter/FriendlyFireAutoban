@@ -97,7 +97,7 @@ namespace FriendlyFireAutoban
 
 						if (teamkills.Count == 0)
 						{
-							ev.ReturnMessage = this.plugin.GetTranslation("tksNoTeamkills");
+							ev.ReturnMessage = this.plugin.GetTranslation("tks_no_teamkills");
 						}
 						else
 						{
@@ -106,7 +106,7 @@ namespace FriendlyFireAutoban
 							{
 								retval +=
 									string.Format(
-										this.plugin.GetTranslation("tksTeamkillEntry"),
+										this.plugin.GetTranslation("tks_teamkill_entry"),
 										(tk.Duration / 60) + ":" + (tk.Duration % 60),
 										tk.KillerName,
 										tk.VictimName,
@@ -118,12 +118,12 @@ namespace FriendlyFireAutoban
 					}
 					else
 					{
-						ev.ReturnMessage = this.plugin.GetTranslation("tksNotFound");
+						ev.ReturnMessage = this.plugin.GetTranslation("tks_not_found");
 					}
 				}
 				else
 				{
-					ev.ReturnMessage = this.plugin.GetTranslation("ffaDisabled");
+					ev.ReturnMessage = this.plugin.GetTranslation("ffa_disabled");
 				}
 			}
 		}
