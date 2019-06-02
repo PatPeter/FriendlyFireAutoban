@@ -1,0 +1,29 @@
+﻿noguns_output: Ваше оружие было убрано из-за командного убийства. Вы получите его обратно, когда истечет срок вашего наказания.
+tospec_output: Вы были перемещены за наблюдателя из-за командного убийства.
+kicker_output: Вы были кикнуты за командное убийство.
+banned_output: Игрок {0} был забанен за убийство {1} игроков.
+offline_ban: Вы забанены на {0} минут за убийство {1} игроков.
+role_disarmed: разоружен
+role_separator: убил
+role_dclass: D-Class
+Роль ученого: Scientist
+role_guard: Guard
+role_cadet: Cadet
+role_lieutenant: Lieutenant
+role_commander: Commander
+role_n_t_f_scientist: NTF Scientist
+role_chaos: Chaos Insurgency
+role_tutorial: Tutorial
+toggle_description: Переключение FFA на положение включён/выключен.
+toggle_disable: FFA отключен.
+toggle_enable: FFA включен.
+forgive_command: .простить
+forgive_success: Вы простили {0} {1}.
+forgive_duplicate: Вы уже простили {0} {1}.
+forgive_disconnect: Игрок отключился.
+forgive_invalid: Вы еще не были убиты союзником.
+tks_command: .убийствосоюзников
+tks_no_teamkills: Ни у одного из игроков с таким именем нет командных убийств.
+tks_teamkill_entry: {0}: {1} убил союзников {2} {3}.
+tks_not_found: Имя игрока указано не правильно или не найдено.
+ffa_disabled: FFA в текущий момент отключен.
