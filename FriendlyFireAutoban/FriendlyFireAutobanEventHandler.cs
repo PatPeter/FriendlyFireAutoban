@@ -399,13 +399,14 @@ namespace FriendlyFireAutoban.EventHandlers
 		{
 			if (this.plugin.enable)
 			{
-				this.plugin.Info("this.plugin.mirror: " + this.plugin.mirror);
-				this.plugin.Info("Is Teamkill? " + ev.Attacker.TeamRole.Role + " " + ev.Player.TeamRole.Role);
 				if (this.plugin.mirror > 0f)
 				{
 					if (this.plugin.isTeamkill(ev.Attacker, ev.Player))
 					{
-						this.plugin.Info("Dealing damage to " + ev.Attacker.Name + ": " + (ev.Damage * this.plugin.mirror));
+						if (this.plugin.outall)
+						{
+							this.plugin.Info("Dealing damage to " + ev.Attacker.Name + ": " + (ev.Damage * this.plugin.mirror));
+						}
 						ev.Attacker.Damage((int)(ev.Damage * this.plugin.mirror));
 					}
 				}

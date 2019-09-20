@@ -281,7 +281,7 @@ namespace FriendlyFireAutoban
 			// NTF roleplay settings:
 			// 12:11,12:4,12:13,12:15,4:11,4:13,4:15,11:13,11:15,13:15
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_rolewl", new string[] {  }, true, "Whitelist of roles that are allowed to kill each other."));
-			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_mirror", 0, true, "Mirror friendly fire damage to the person causing the damage. Increasing past 1 will increase the multiplayer."));
+			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_mirror", 0f, true, "Mirror friendly fire damage to the person causing the damage. Increasing past 1 will increase the multiplayer."));
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_warntk", 0, true, "The number of TKs to warn for before banning, (0) for a generic warning after every TK, and (-1) for no warning."));
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_votetk", 0, true, "Number of TKs at which to trigger a vote via the callvote plugin."));
 
@@ -330,7 +330,7 @@ namespace FriendlyFireAutoban
 			this.Info("friendly_fire_autoban_bomber default value: " + this.GetConfigInt("friendly_fire_autoban_bomber"));
 			this.Info("friendly_fire_autoban_disarm default value: " + this.GetConfigBool("friendly_fire_autoban_disarm"));
 			this.Info("friendly_fire_autoban_rolewl default value: " + this.GetConfigList("friendly_fire_autoban_rolewl"));
-			this.Info("friendly_fire_autoban_mirror default value: " + this.GetConfigInt("friendly_fire_autoban_mirror"));
+			this.Info("friendly_fire_autoban_mirror default value: " + this.GetConfigFloat("friendly_fire_autoban_mirror"));
 			this.Info("friendly_fire_autoban_warntk default value: " + this.GetConfigInt("friendly_fire_autoban_warntk"));
 			this.Info("friendly_fire_autoban_votetk default value: " + this.GetConfigInt("friendly_fire_autoban_votetk"));
 
