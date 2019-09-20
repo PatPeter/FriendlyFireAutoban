@@ -125,7 +125,9 @@ namespace FriendlyFireAutoban.EventHandlers
 				this.plugin.rolewl.Add(new RoleTuple(tuple0, tuple1));
 			}
 
+			this.plugin.invert = this.plugin.GetConfigInt("friendly_fire_autoban_invert");
 			this.plugin.mirror = this.plugin.GetConfigFloat("friendly_fire_autoban_mirror");
+			this.plugin.undead = this.plugin.GetConfigInt("friendly_fire_autoban_undead");
 			this.plugin.warntk = this.plugin.GetConfigInt("friendly_fire_autoban_warntk");
 			this.plugin.votetk = this.plugin.GetConfigInt("friendly_fire_autoban_votetk");
 
@@ -283,6 +285,8 @@ namespace FriendlyFireAutoban.EventHandlers
 
 					this.plugin.OnCheckToSpectator(ev.Killer);
 
+					this.plugin.OnCheckUndead(ev.Killer, ev.Player);
+
 					this.plugin.OnCheckKick(ev.Killer);
 
 					this.plugin.OnVoteTeamkill(ev.Killer);
@@ -403,11 +407,26 @@ namespace FriendlyFireAutoban.EventHandlers
 				{
 					if (this.plugin.isTeamkill(ev.Attacker, ev.Player))
 					{
-						if (this.plugin.outall)
+						if (this.plugin.invert > 0)
 						{
-							this.plugin.Info("Dealing damage to " + ev.Attacker.Name + ": " + (ev.Damage * this.plugin.mirror));
+							if (this.plugin.Teamkillers[ev.Attacker.SteamId].Teamkills.Count >= this.plugin.invert)
+							{
+								if (this.plugin.outall)
+								{
+									this.plugin.Info("Dealing damage to " + ev.Attacker.Name + ": " + (ev.Damage * this.plugin.mirror));
+								}
+								ev.Attacker.Damage((int)(ev.Damage * this.plugin.mirror));
+							}
+							// else do nothing
 						}
-						ev.Attacker.Damage((int)(ev.Damage * this.plugin.mirror));
+						else
+						{
+							if (this.plugin.outall)
+							{
+								this.plugin.Info("Dealing damage to " + ev.Attacker.Name + ": " + (ev.Damage * this.plugin.mirror));
+							}
+							ev.Attacker.Damage((int)(ev.Damage * this.plugin.mirror));
+						}
 					}
 				}
 				else if (ev.Player.PlayerId == ev.Attacker.PlayerId && ev.DamageType == DamageType.FRAG)

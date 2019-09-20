@@ -57,7 +57,9 @@ namespace FriendlyFireAutoban
 		internal int bomber = 0;
 		internal bool disarm = false;
 		internal List<RoleTuple> rolewl = new List<RoleTuple>();
+		internal int invert = 0;
 		internal float mirror = 0;
+		internal int undead = 0;
 		internal int warntk = 0;
 		internal int votetk = 0;
 
@@ -120,6 +122,10 @@ namespace FriendlyFireAutoban
 		public readonly string nogunsOutput = "Your guns have been removed for teamkilling. You will get them back when your teamkill expires.";
 		[LangOption]
 		public readonly string tospecOutput = "You have been moved to spectate for teamkilling.";
+		[LangOption]
+		public readonly string undeadKillerOutput = "{0} has been respawned because you are teamkilling too much. If you continue, you will be banned.";
+		[LangOption]
+		public readonly string undeadVictimOutput = "You have been respawned after being teamkilled by {0}.";
 		[LangOption]
 		public readonly string kickerOutput = "You will be kicked for teamkilling.";
 		[LangOption]
@@ -281,7 +287,9 @@ namespace FriendlyFireAutoban
 			// NTF roleplay settings:
 			// 12:11,12:4,12:13,12:15,4:11,4:13,4:15,11:13,11:15,13:15
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_rolewl", new string[] {  }, true, "Whitelist of roles that are allowed to kill each other."));
+			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_invert", 0, true, "Reverse Friendly Fire. If greater than 0, value of mirror will only apply after this many teamkills."));
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_mirror", 0f, true, "Mirror friendly fire damage to the person causing the damage. Increasing past 1 will increase the multiplayer."));
+			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_undead", 0, true, "Respawns teamkilled players after this many teamkills."));
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_warntk", 0, true, "The number of TKs to warn for before banning, (0) for a generic warning after every TK, and (-1) for no warning."));
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_votetk", 0, true, "Number of TKs at which to trigger a vote via the callvote plugin."));
 
@@ -330,7 +338,9 @@ namespace FriendlyFireAutoban
 			this.Info("friendly_fire_autoban_bomber default value: " + this.GetConfigInt("friendly_fire_autoban_bomber"));
 			this.Info("friendly_fire_autoban_disarm default value: " + this.GetConfigBool("friendly_fire_autoban_disarm"));
 			this.Info("friendly_fire_autoban_rolewl default value: " + this.GetConfigList("friendly_fire_autoban_rolewl"));
+			this.Info("friendly_fire_autoban_invert default value: " + this.GetConfigFloat("friendly_fire_autoban_invert"));
 			this.Info("friendly_fire_autoban_mirror default value: " + this.GetConfigFloat("friendly_fire_autoban_mirror"));
+			this.Info("friendly_fire_autoban_undead default value: " + this.GetConfigFloat("friendly_fire_autoban_undead"));
 			this.Info("friendly_fire_autoban_warntk default value: " + this.GetConfigInt("friendly_fire_autoban_warntk"));
 			this.Info("friendly_fire_autoban_votetk default value: " + this.GetConfigInt("friendly_fire_autoban_votetk"));
 
@@ -504,6 +514,23 @@ namespace FriendlyFireAutoban
 				this.Info("Player " + killer.Name + " " + killer.SteamId + " " + killer.IpAddress + " has been moved to spectator for teamkilling " + this.Teamkillers[killer.SteamId].Teamkills.Count + " times.");
 				killer.PersonalBroadcast(5, this.GetTranslation("tospec_output"), false);
 				killer.ChangeRole(Role.SPECTATOR);
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+
+		[PipeMethod]
+		public bool OnCheckUndead(Player killer, Player victim)
+		{
+			if (this.undead > 0 && this.Teamkillers[killer.SteamId].Teamkills.Count >= this.undead && !this.isImmune(killer))
+			{
+				this.Info("Player " + victim.Name + " " + victim.SteamId + " " + victim.IpAddress + " has been respawned after " + killer.Name + " " + killer.SteamId + " " + killer.IpAddress + " teamkilled " + this.Teamkillers[killer.SteamId].Teamkills.Count + " times.");
+				killer.PersonalBroadcast(5, string.Format(this.GetTranslation("undead_killer_output"), victim.Name), false);
+				victim.PersonalBroadcast(5, string.Format(this.GetTranslation("undead_victim_output"), killer.Name), false);
+				victim.ChangeRole(victim.TeamRole.Role);
 				return true;
 			}
 			else
