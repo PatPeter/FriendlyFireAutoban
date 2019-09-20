@@ -401,7 +401,15 @@ namespace FriendlyFireAutoban.EventHandlers
 			{
 				this.plugin.Info("this.plugin.mirror: " + this.plugin.mirror);
 				this.plugin.Info("Is Teamkill? " + ev.Attacker.TeamRole.Role + " " + ev.Player.TeamRole.Role);
-				if (ev.Player.PlayerId == ev.Attacker.PlayerId && ev.DamageType == DamageType.FRAG)
+				if (this.plugin.mirror > 0f)
+				{
+					if (this.plugin.isTeamkill(ev.Attacker, ev.Player))
+					{
+						this.plugin.Info("Dealing damage to " + ev.Attacker.Name + ": " + (ev.Damage * this.plugin.mirror));
+						ev.Attacker.Damage((int)(ev.Damage * this.plugin.mirror));
+					}
+				}
+				else if (ev.Player.PlayerId == ev.Attacker.PlayerId && ev.DamageType == DamageType.FRAG)
 				{
 					if (this.plugin.bomber == 2)
 					{
@@ -421,14 +429,6 @@ namespace FriendlyFireAutoban.EventHandlers
 					else if (this.plugin.bomber == 1)
 					{
 						ev.Damage = 0;
-					}
-				}
-				else if (this.plugin.mirror > 0f)
-				{
-					if (this.plugin.isTeamkill(ev.Attacker, ev.Player))
-					{
-						this.plugin.Info("Dealing damage to " + ev.Attacker.Name + ": " + (ev.Damage * this.plugin.mirror));
-						ev.Attacker.Damage((int) (ev.Damage * this.plugin.mirror));
 					}
 				}
 			}
