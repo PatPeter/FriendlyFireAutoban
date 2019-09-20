@@ -56,6 +56,6 @@ namespace FriendlyFireAutoban
 		/// <summary>
 		/// The AssemblyFileVersion of this web part
 		/// </summary>
-		internal const string Version = "5.0.2.48";
+		internal const string Version = "5.0.2.49";
 	}
 }
