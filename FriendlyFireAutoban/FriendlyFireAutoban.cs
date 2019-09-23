@@ -35,6 +35,8 @@ namespace FriendlyFireAutoban
 			return instance;
 		}
 
+		internal FriendlyFireAutobanPlugin plugin = null;
+
 		internal bool DuringRound = false;
 		internal bool ProcessingDisconnect = false;
 
@@ -54,6 +56,7 @@ namespace FriendlyFireAutoban
 		internal int noguns = 0;
 		internal int tospec = 0;
 		internal int kicker = 0;
+		internal HashSet<string> immune = new HashSet<string>();
 		internal int bomber = 0;
 		internal bool disarm = false;
 		internal List<RoleTuple> rolewl = new List<RoleTuple>();
@@ -62,10 +65,13 @@ namespace FriendlyFireAutoban
 		internal int undead = 0;
 		internal int warntk = 0;
 		internal int votetk = 0;
+		internal int kdsafe = 0;
 
 		internal Dictionary<string, Teamkiller> Teamkillers = new Dictionary<string, Teamkiller>();
 		internal Dictionary<string, Timer> TeamkillTimers = new Dictionary<string, Timer>();
 		internal Dictionary<string, Teamkill> TeamkillVictims = new Dictionary<string, Teamkill>();
+
+		internal HashSet<string> banWhitelist = new HashSet<string>();
 
 		internal Dictionary<int, int> InverseTeams = new Dictionary<int, int>()
 		{
@@ -111,27 +117,29 @@ namespace FriendlyFireAutoban
 		 * Ban Events
 		 */
 		[LangOption]
-		public readonly string victimMessage = "{0} teamkilled you. If this was an accidental teamkill, please press ~ and then type .forgive to prevent this user from being banned.";
+		public readonly string victimMessage = "{0} teamkilled you at {1}. <size=36>If this was an accidental teamkill, please press ~ and then type .forgive to prevent this user from being banned.</size>";
 		[LangOption]
 		public readonly string killerMessage = "You teamkilled {0} {1}.";
+		[LangOption("killer_kdr_message")]
+		public readonly string killerKDRMessage = "You teamkilled {0} {1}. Because your K/D ratio is {2}, you will not be punished. Please watch your fire.";
 		[LangOption]
 		public readonly string killerWarning = "If you teamkill {0} more times you will be banned.";
 		[LangOption]
 		public readonly string killerRequest = "Please do not teamkill.";
 		[LangOption]
-		public readonly string nogunsOutput = "Your guns have been removed for teamkilling. You will get them back when your teamkill expires.";
+		public readonly string nogunsOutput = "Your guns have been removed for <color=red>teamkilling</color>. You will get them back when your teamkill expires.";
 		[LangOption]
-		public readonly string tospecOutput = "You have been moved to spectate for teamkilling.";
+		public readonly string tospecOutput = "You have been moved to spectate for <color=red>teamkilling</color>.";
 		[LangOption]
-		public readonly string undeadKillerOutput = "{0} has been respawned because you are teamkilling too much. If you continue, you will be banned.";
+		public readonly string undeadKillerOutput = "{0} has been respawned because you are <color=red>teamkilling</color> too much. If you continue, you will be banned.";
 		[LangOption]
 		public readonly string undeadVictimOutput = "You have been respawned after being teamkilled by {0}.";
 		[LangOption]
-		public readonly string kickerOutput = "You will be kicked for teamkilling.";
+		public readonly string kickerOutput = "You will be kicked for <color=red>teamkilling</color>.";
 		[LangOption]
-		public readonly string bannedOutput = "Player {0} has been banned for teamkilling {1} players.";
+		public readonly string bannedOutput = "Player {0} has been banned for <color=red>teamkilling</color> {1} players.";
 		[LangOption]
-		public readonly string offlineBan = "Banned {0} minutes for teamkilling {1} players";
+		public readonly string offlineBan = "Banned {0} minutes for <color=red>teamkilling</color> {1} players";
 
 		/*
 		 * Teamkiller/Teamkill
@@ -141,23 +149,23 @@ namespace FriendlyFireAutoban
 		[LangOption]
 		public readonly string roleSeparator = "on";
 		[LangOption]
-		public readonly string roleDclass = "D-CLASS";
+		public readonly string roleDclass = "<color=orange>D-CLASS</color>";
 		[LangOption]
-		public readonly string roleScientist = "SCIENTIST";
+		public readonly string roleScientist = "<color=yellow>SCIENTIST</color>";
 		[LangOption]
-		public readonly string roleGuard = "GUARD";
+		public readonly string roleGuard = "<color=silver>GUARD</color>";
 		[LangOption]
-		public readonly string roleCadet = "CADET";
+		public readonly string roleCadet = "<color=green>CADET</color>";
 		[LangOption]
-		public readonly string roleLieutenant = "LIEUTENANT";
+		public readonly string roleLieutenant = "<color=green>LIEUTENANT</color>";
 		[LangOption]
-		public readonly string roleCommander = "COMMANDER";
+		public readonly string roleCommander = "<color=green>COMMANDER</color>";
 		[LangOption("role_ntf_scientist")]
-		public readonly string roleNTFScientist = "NTF SCIENTIST";
+		public readonly string roleNTFScientist = "<color=green>NTF SCIENTIST</color>";
 		[LangOption]
-		public readonly string roleChaos = "CHAOS";
+		public readonly string roleChaos = "<color=green>CHAOS</color>";
 		[LangOption]
-		public readonly string roleTutorial = "TUTORIAL";
+		public readonly string roleTutorial = "<color=lime>TUTORIAL</color>";
 
 		/*
 		 * Commands
@@ -168,6 +176,15 @@ namespace FriendlyFireAutoban
 		public readonly string toggleDisable = "Friendly fire Autoban has been disabled.";
 		[LangOption]
 		public readonly string toggleEnable = "Friendly fire Autoban has been enabled.";
+
+		[LangOption]
+		public readonly string whitelistDescription = "Whitelist a user from being banned by FFA until the end of the round.";
+		[LangOption]
+		public readonly string whitelistError = "A single name or Steam ID must be provided.";
+		[LangOption]
+		public readonly string whitelistAdd = "Added player {0} ({1}) to ban whitelist.";
+		[LangOption]
+		public readonly string whitelistRemove = "Removed player {0} ({1}) from ban whitelist.";
 
 		/*
 		 * Client Commands
@@ -186,7 +203,7 @@ namespace FriendlyFireAutoban
 		[LangOption]
 		public readonly string tksCommand = "tks";
 		[LangOption]
-		public readonly string tksNoTeamkills = "No players by this name has any teamkills.";
+		public readonly string tksNoTeamkills = "No players by this name or Steam ID has any teamkills.";
 		[LangOption]
 		public readonly string tksTeamkillEntry = "({0}) {1} teamkilled {2} {3}.";
 		[LangOption]
@@ -203,6 +220,7 @@ namespace FriendlyFireAutoban
 		public override void OnEnable()
 		{
 			FriendlyFireAutobanPlugin.instance = this;
+			this.plugin = this;
 			if (this.outall)
 			{
 				this.PrintConfigs();
@@ -292,11 +310,14 @@ namespace FriendlyFireAutoban
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_undead", 0, true, "Respawns teamkilled players after this many teamkills."));
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_warntk", 0, true, "The number of TKs to warn for before banning, (0) for a generic warning after every TK, and (-1) for no warning."));
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_votetk", 0, true, "Number of TKs at which to trigger a vote via the callvote plugin."));
+			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_kdsafe", 0, true, "The K/D ratio that prevents a player from being punished for teamkilling."));
 
 			this.AddConfig(new Smod2.Config.ConfigSetting("friendly_fire_autoban_immune", new string[] { "owner", "admin", "moderator" }, true, "Ranks that are immune to being autobanned."));
 
 			this.AddCommand("friendly_fire_autoban_toggle", new ToggleCommand(this));
 			this.AddCommand("ffa_toggle", new ToggleCommand(this));
+			this.AddCommand("friendly_fire_autoban_whitelist", new WhitelistCommand(this));
+			this.AddCommand("ffa_whitelist", new WhitelistCommand(this));
 		}
 
 		public void PrintConfigs()
@@ -361,7 +382,16 @@ namespace FriendlyFireAutoban
 
 		public bool isImmune(Player player)
 		{
-			string[] immuneRanks = this.GetConfigList("friendly_fire_autoban_immune");
+			if (this.plugin.immune.Contains(player.GetUserGroup().Name) || this.plugin.immune.Contains(player.GetRankName()) || this.plugin.immune.Contains(player.GetRankName()))
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+
+			/*string[] immuneRanks = this.GetConfigList("friendly_fire_autoban_immune");
 			foreach (string rank in immuneRanks)
 			{
 				if (this.outall)
@@ -373,7 +403,7 @@ namespace FriendlyFireAutoban
 					return true;
 				}
 			}
-			return false;
+			return false;*/
 		}
 
 		public bool isTeamkill(Player killer, Player victim)
@@ -527,10 +557,23 @@ namespace FriendlyFireAutoban
 		{
 			if (this.undead > 0 && this.Teamkillers[killer.SteamId].Teamkills.Count >= this.undead && !this.isImmune(killer))
 			{
-				this.Info("Player " + victim.Name + " " + victim.SteamId + " " + victim.IpAddress + " has been respawned after " + killer.Name + " " + killer.SteamId + " " + killer.IpAddress + " teamkilled " + this.Teamkillers[killer.SteamId].Teamkills.Count + " times.");
+				Role oldRole = victim.TeamRole.Role;
+				//Vector oldPosition = victim.GetPosition();
+				this.Info("Player " + victim.Name + " " + victim.SteamId + " " + victim.IpAddress + " has been respawned as " + oldRole + " after " + killer.Name + " " + killer.SteamId + " " + killer.IpAddress + " teamkilled " + this.Teamkillers[killer.SteamId].Teamkills.Count + " times.");
 				killer.PersonalBroadcast(5, string.Format(this.GetTranslation("undead_killer_output"), victim.Name), false);
 				victim.PersonalBroadcast(5, string.Format(this.GetTranslation("undead_victim_output"), killer.Name), false);
-				victim.ChangeRole(victim.TeamRole.Role);
+				Timer t = new Timer
+				{
+					Interval = 3000,
+					Enabled = true
+				};
+				t.Elapsed += delegate
+				{
+					this.Info("Respawning victim " + victim.Name + " " + victim.SteamId + " " + victim.IpAddress + "as " + victim.TeamRole.Role + "...");
+					victim.ChangeRole(victim.TeamRole.Role, true, false, false, true);
+					//victim.Teleport(oldPosition);
+					t.Dispose();
+				};
 				return true;
 			}
 			else
@@ -560,6 +603,12 @@ namespace FriendlyFireAutoban
 		[PipeMethod]
 		public bool OnVoteTeamkill(Player killer)
 		{
+			if (this.outall)
+			{
+				this.Info("votetk > 0: " + this.votetk);
+				this.Info("Teamkiller count is greater than votetk? " + this.Teamkillers[killer.SteamId].Teamkills.Count);
+				this.Info("Teamkiller is immune? " + this.isImmune(killer));
+			}
 			if (this.votetk > 0 && this.Teamkillers[killer.SteamId].Teamkills.Count >= this.votetk && !this.isImmune(killer))
 			{
 				this.Info("Player " + killer.Name + " " + killer.SteamId + " " + killer.IpAddress + " is being voted on a ban for teamkilling " + this.Teamkillers[killer.SteamId].Teamkills.Count + " times.");

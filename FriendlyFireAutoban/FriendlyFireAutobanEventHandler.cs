@@ -96,6 +96,13 @@ namespace FriendlyFireAutoban.EventHandlers
 			this.plugin.noguns = this.plugin.GetConfigInt("friendly_fire_autoban_noguns");
 			this.plugin.tospec = this.plugin.GetConfigInt("friendly_fire_autoban_tospec");
 			this.plugin.kicker = this.plugin.GetConfigInt("friendly_fire_autoban_kicker");
+
+			this.plugin.immune = new HashSet<string>();
+			foreach (string rank in this.plugin.GetConfigList("friendly_fire_autoban_immune"))
+			{
+				this.plugin.immune.Add(rank);
+			}
+
 			this.plugin.bomber = this.plugin.GetConfigInt("friendly_fire_autoban_bomber");
 			this.plugin.disarm = this.plugin.GetConfigBool("friendly_fire_autoban_disarm");
 
@@ -130,6 +137,9 @@ namespace FriendlyFireAutoban.EventHandlers
 			this.plugin.undead = this.plugin.GetConfigInt("friendly_fire_autoban_undead");
 			this.plugin.warntk = this.plugin.GetConfigInt("friendly_fire_autoban_warntk");
 			this.plugin.votetk = this.plugin.GetConfigInt("friendly_fire_autoban_votetk");
+			this.plugin.kdsafe = this.plugin.GetConfigInt("friendly_fire_autoban_kdsafe");
+
+			this.plugin.banWhitelist = new HashSet<string>();
 
 			// Add back if we want to keep track of which teamkills are removed
 			//foreach (Timer timer in this.plugin.teamkillTimers.Values)
@@ -240,28 +250,48 @@ namespace FriendlyFireAutoban.EventHandlers
 			Player victim = ev.Player;
 			string victimOutput = victim.Name + " " + victim.SteamId + " " + victim.IpAddress;
 
-			if (this.plugin.isTeamkill(killer, victim))
+			if (this.plugin.enable)
 			{
-				if (this.plugin.enable)
+				if (!this.plugin.Teamkillers.ContainsKey(victim.SteamId))
 				{
+					this.plugin.Teamkillers[victim.SteamId] = new Teamkiller(victim.PlayerId, victim.Name, victim.SteamId, victim.IpAddress);
+					this.plugin.Teamkillers[victim.SteamId].Deaths++;
+				}
+
+				if (!this.plugin.Teamkillers.ContainsKey(killer.SteamId))
+				{
+					this.plugin.Teamkillers[killer.SteamId] = new Teamkiller(killer.PlayerId, killer.Name, killer.SteamId, killer.IpAddress);
+				}
+
+				if (this.plugin.isTeamkill(killer, victim))
+				{
+					this.plugin.Teamkillers[killer.SteamId].Kills--;
+
 					Teamkill teamkill = new Teamkill(killer.Name, killer.SteamId, killer.TeamRole, victim.Name, victim.SteamId, victim.TeamRole, victim.IsHandcuffed(), ev.DamageTypeVar, this.plugin.Server.Round.Duration);
 					this.plugin.TeamkillVictims[ev.Player.SteamId] = teamkill;
-					
-					if (this.plugin.Teamkillers.ContainsKey(killer.SteamId))
+					this.plugin.Teamkillers[killer.SteamId].Teamkills.Add(teamkill);
+
+					this.plugin.Info("Player " + killerOutput + " " + killer.TeamRole.Team.ToString() + " teamkilled " +
+						victimOutput + " " + victim.TeamRole.Team.ToString() + ", for a total of " + this.plugin.Teamkillers[killer.SteamId].Teamkills.Count + " teamkills.");
+
+					victim.PersonalBroadcast(10, string.Format(this.plugin.GetTranslation("victim_message"), killer.Name, DateTime.Today.ToString("yyyy-MM-dd hh:mm tt zzz")), false);
+
+					if (this.plugin.banWhitelist.Contains(killer.SteamId))
 					{
-						this.plugin.Teamkillers[killer.SteamId].Teamkills.Add(teamkill);
-						plugin.Info("Player " + killerOutput + " " + killer.TeamRole.Team.ToString() + " teamkilled " +
-							victimOutput + " " + victim.TeamRole.Team.ToString() + ", for a total of " + this.plugin.Teamkillers[killer.SteamId].Teamkills.Count + " teamkills.");
-					}
-					else
-					{
-						this.plugin.Teamkillers[killer.SteamId] = new Teamkiller(killer.PlayerId, killer.Name, killer.SteamId, killer.IpAddress);
-						this.plugin.Teamkillers[killer.SteamId].Teamkills.Add(teamkill);
-						plugin.Info("Player " + killerOutput + " " + killer.TeamRole.Team.ToString() + " teamkilled " +
-							victimOutput + " " + victim.TeamRole.Team.ToString() + ", for a total of 1 teamkill.");
+						this.plugin.Info("Player " + killerOutput + " not being punished by FFA because the player is whitelisted.");
+						return;
 					}
 
-					victim.PersonalBroadcast(10, string.Format(this.plugin.GetTranslation("victim_message"), killer.Name), false);
+					if (this.plugin.kdsafe > 0)
+					{
+						float kdr = this.plugin.Teamkillers[killer.SteamId].Deaths == 0 ? 0 : (float)this.plugin.Teamkillers[killer.SteamId].Kills / this.plugin.Teamkillers[killer.SteamId].Deaths;
+						// If kdr is greater than K/D safe amount, AND if the number of kils is greater than kdsafe to exclude low K/D values
+						if (kdr > (float) this.plugin.kdsafe && this.plugin.Teamkillers[killer.SteamId].Kills > this.plugin.kdsafe)
+						{
+							killer.PersonalBroadcast(5, string.Format(this.plugin.GetTranslation("killer_kdr_message"), victim.Name, teamkill.GetRoleDisplay(), kdr), false);
+							return;
+						}
+					}
 
 					if (this.plugin.warntk != -1)
 					{
@@ -375,17 +405,19 @@ namespace FriendlyFireAutoban.EventHandlers
 				}
 				else
 				{
-					plugin.Info("Player " + killerOutput + " " + killer.TeamRole.Team.ToString() + " teamkilled " +
-						victimOutput + " " + victim.TeamRole.Team.ToString() + ".");
+					if (this.plugin.outall)
+					{
+						this.plugin.Info("Player " + killerOutput + " " + killer.TeamRole.Team.ToString() + " killed " +
+							victimOutput + " " + victim.TeamRole.Team.ToString() + " and it was not detected as a teamkill.");
+					}
+
+					this.plugin.Teamkillers[killer.SteamId].Kills++;
 				}
 			}
 			else
 			{
-				if (this.plugin.outall)
-				{
-					this.plugin.Info("Player " + killerOutput + " " + killer.TeamRole.Team.ToString() + " killed " +
-						victimOutput + " " + victim.TeamRole.Team.ToString() + " and it was not detected as a teamkill.");
-				}
+				plugin.Info("Player " + killerOutput + " " + killer.TeamRole.Team.ToString() + " killed " +
+					victimOutput + " " + victim.TeamRole.Team.ToString() + ".");
 			}
 		}
 	}
@@ -405,7 +437,7 @@ namespace FriendlyFireAutoban.EventHandlers
 			{
 				if (this.plugin.mirror > 0f)
 				{
-					if (this.plugin.isTeamkill(ev.Attacker, ev.Player))
+					if (this.plugin.isTeamkill(ev.Attacker, ev.Player) && !this.plugin.isImmune(ev.Attacker) && !this.plugin.banWhitelist.Contains(ev.Attacker.SteamId))
 					{
 						if (this.plugin.invert > 0)
 						{

@@ -12,6 +12,8 @@ namespace FriendlyFireAutoban
 		public string Name;
 		public string SteamId;
 		public string IpAddress;
+		public int Kills;
+		public int Deaths;
 		public List<Teamkill> Teamkills = new List<Teamkill>();
 		//public Timer Timer;
 

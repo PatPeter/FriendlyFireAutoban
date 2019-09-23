@@ -23,10 +23,17 @@ namespace FriendlyFireAutoban
 			string command = ev.Command.Split(' ')[0];
 			string[] quotedArgs = Regex.Matches(ev.Command, "[^\\s\"\']+|\"([^\"]*)\"|\'([^\']*)\'")
 				.Cast<Match>()
-				.Select(m => m.Value)
+				.Select(m => {
+					return Regex.Replace(Regex.Replace(m.Value, "^\'([^\']*)\'$", "$1"), "^\"([^\"]*)\"$", "$1");
+				})
 				.ToArray()
 				.Skip(1)
 				.ToArray();
+
+			if (this.plugin.outall)
+			{
+				this.plugin.Info("Quoted Args for command: " + string.Join(" | ", quotedArgs));
+			}
 
 			if (command.Equals(this.plugin.GetTranslation("forgive_command")))
 			{
@@ -71,7 +78,6 @@ namespace FriendlyFireAutoban
 			}
 			else if (command.Equals(this.plugin.GetTranslation("tks_command")))
 			{
-
 				if (this.plugin.enable)
 				{
 					if (quotedArgs.Length == 1)
@@ -79,12 +85,24 @@ namespace FriendlyFireAutoban
 						List<Teamkill> teamkills = new List<Teamkill>();
 						try
 						{
-							// https://stackoverflow.com/questions/55436309/how-do-i-use-linq-to-select-from-a-list-inside-a-map
-							teamkills = this.plugin.Teamkillers.SelectMany(
-								x => x.Value.Teamkills.Where(
-									y => y.KillerName.Contains(quotedArgs[0])
-								)
-							).ToList();
+							if (Regex.Match(quotedArgs[0], "^[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]$").Success)
+							{
+								// https://stackoverflow.com/questions/55436309/how-do-i-use-linq-to-select-from-a-list-inside-a-map
+								teamkills = this.plugin.Teamkillers.SelectMany(
+									x => x.Value.Teamkills.Where(
+										y => y.KillerSteamId.Equals(quotedArgs[0])
+									)
+								).ToList();
+							}
+							else
+							{
+								// https://stackoverflow.com/questions/55436309/how-do-i-use-linq-to-select-from-a-list-inside-a-map
+								teamkills = this.plugin.Teamkillers.SelectMany(
+									x => x.Value.Teamkills.Where(
+										y => y.KillerName.Contains(quotedArgs[0])
+									)
+								).ToList();
+							}
 						}
 						catch (Exception e)
 						{
