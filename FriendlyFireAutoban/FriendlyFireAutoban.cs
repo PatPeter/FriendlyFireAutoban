@@ -486,6 +486,11 @@ namespace FriendlyFireAutoban
 				this.Info("Admin/Moderator " + playerName + " has avoided a ban for " + banLength + " minutes after teamkilling " + teamkills + " players during the round.");
 				return false;
 			}
+			else if (this.plugin.banWhitelist.Contains(player.SteamId))
+			{
+				this.plugin.Info("Player " + playerName + " " + player.SteamId + " " + player.IpAddress + " not being punished by FFA because the player is whitelisted.");
+				return false;
+			}
 			else
 			{
 				if (teamkills.Count > 3)

@@ -435,7 +435,7 @@ namespace FriendlyFireAutoban.EventHandlers
 		{
 			if (this.plugin.enable)
 			{
-				if (this.plugin.mirror > 0f)
+				if (this.plugin.mirror > 0f && ev.DamageType != DamageType.FRAG)
 				{
 					if (this.plugin.isTeamkill(ev.Attacker, ev.Player) && !this.plugin.isImmune(ev.Attacker) && !this.plugin.banWhitelist.Contains(ev.Attacker.SteamId))
 					{
