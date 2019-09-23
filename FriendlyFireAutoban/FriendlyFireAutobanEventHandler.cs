@@ -441,22 +441,22 @@ namespace FriendlyFireAutoban.EventHandlers
 					{
 						if (this.plugin.invert > 0)
 						{
-							if (this.plugin.Teamkillers[ev.Attacker.SteamId].Teamkills.Count >= this.plugin.invert)
+							if (this.plugin.Teamkillers.ContainsKey(ev.Attacker.SteamId) && this.plugin.Teamkillers[ev.Attacker.SteamId].Teamkills.Count >= this.plugin.invert)
 							{
-								if (this.plugin.outall)
-								{
-									this.plugin.Info("Dealing damage to " + ev.Attacker.Name + ": " + (ev.Damage * this.plugin.mirror));
-								}
+								//if (this.plugin.outall)
+								//{
+								//	this.plugin.Info("Dealing damage to " + ev.Attacker.Name + ": " + (ev.Damage * this.plugin.mirror));
+								//}
 								ev.Attacker.Damage((int)(ev.Damage * this.plugin.mirror));
 							}
 							// else do nothing
 						}
 						else
 						{
-							if (this.plugin.outall)
-							{
-								this.plugin.Info("Dealing damage to " + ev.Attacker.Name + ": " + (ev.Damage * this.plugin.mirror));
-							}
+							//if (this.plugin.outall)
+							//{
+							//	this.plugin.Info("Dealing damage to " + ev.Attacker.Name + ": " + (ev.Damage * this.plugin.mirror));
+							//}
 							ev.Attacker.Damage((int)(ev.Damage * this.plugin.mirror));
 						}
 					}
