@@ -25,6 +25,11 @@ namespace FriendlyFireAutoban
 			this.IpAddress = ipAddress;
 		}
 
+		public float GetKDR()
+		{
+			return Deaths == 0 ? 0 : (float) Kills / Deaths;
+		}
+
 		public override bool Equals(object obj)
 		{
 			var teamkiller = obj as Teamkiller;

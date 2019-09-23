@@ -138,8 +138,10 @@ namespace FriendlyFireAutoban
 		public readonly string kickerOutput = "You will be kicked for <color=red>teamkilling</color>.";
 		[LangOption]
 		public readonly string bannedOutput = "Player {0} has been banned for <color=red>teamkilling</color> {1} players.";
+
 		[LangOption]
-		public readonly string offlineBan = "Banned {0} minutes for <color=red>teamkilling</color> {1} players";
+		// OFFLINE BAN, DO NOT ADD BBCODE
+		public readonly string offlineBan = "Banned {0} minutes for teamkilling {1} players";
 
 		/*
 		 * Teamkiller/Teamkill

@@ -276,50 +276,57 @@ namespace FriendlyFireAutoban.EventHandlers
 
 					victim.PersonalBroadcast(10, string.Format(this.plugin.GetTranslation("victim_message"), killer.Name, DateTime.Today.ToString("yyyy-MM-dd hh:mm tt zzz")), false);
 
-					if (this.plugin.banWhitelist.Contains(killer.SteamId))
+					if (!this.plugin.banWhitelist.Contains(killer.SteamId))
 					{
-						this.plugin.Info("Player " + killerOutput + " not being punished by FFA because the player is whitelisted.");
-						return;
-					}
-
-					if (this.plugin.kdsafe > 0)
-					{
-						float kdr = this.plugin.Teamkillers[killer.SteamId].Deaths == 0 ? 0 : (float)this.plugin.Teamkillers[killer.SteamId].Kills / this.plugin.Teamkillers[killer.SteamId].Deaths;
+						float kdr = this.plugin.Teamkillers[killer.SteamId].GetKDR();
 						// If kdr is greater than K/D safe amount, AND if the number of kils is greater than kdsafe to exclude low K/D values
-						if (kdr > (float) this.plugin.kdsafe && this.plugin.Teamkillers[killer.SteamId].Kills > this.plugin.kdsafe)
+						if (this.plugin.outall)
+						{
+							this.plugin.Info("kdsafe set to: " + this.plugin.kdsafe);
+							this.plugin.Info("Player " + killerOutput + " KDR: " + kdr);
+							this.plugin.Info("Is KDR greater than kdsafe? " + (kdr > (float)this.plugin.kdsafe));
+							this.plugin.Info("Are kills greater than kdsafe? " + (this.plugin.Teamkillers[killer.SteamId].Kills > this.plugin.kdsafe));
+						}
+
+						if (this.plugin.kdsafe > 0 && kdr > (float) this.plugin.kdsafe && this.plugin.Teamkillers[killer.SteamId].Kills > this.plugin.kdsafe)
 						{
 							killer.PersonalBroadcast(5, string.Format(this.plugin.GetTranslation("killer_kdr_message"), victim.Name, teamkill.GetRoleDisplay(), kdr), false);
 							return;
 						}
-					}
-
-					if (this.plugin.warntk != -1)
-					{
-						string broadcast = string.Format(this.plugin.GetTranslation("killer_message"), victim.Name, teamkill.GetRoleDisplay()) + " ";
-						if (this.plugin.warntk > 0)
+						else if (this.plugin.warntk != -1)
 						{
-							int teamkillsBeforeBan = this.plugin.amount - this.plugin.Teamkillers[killer.SteamId].Teamkills.Count;
-							if (teamkillsBeforeBan <= this.plugin.warntk)
+							string broadcast = string.Format(this.plugin.GetTranslation("killer_message"), victim.Name, teamkill.GetRoleDisplay()) + " ";
+							if (this.plugin.warntk > 0)
 							{
-								broadcast += string.Format(this.plugin.GetTranslation("killer_warning"), teamkillsBeforeBan) + " ";
+								int teamkillsBeforeBan = this.plugin.amount - this.plugin.Teamkillers[killer.SteamId].Teamkills.Count;
+								if (teamkillsBeforeBan <= this.plugin.warntk)
+								{
+									broadcast += string.Format(this.plugin.GetTranslation("killer_warning"), teamkillsBeforeBan) + " ";
+								}
 							}
+							else
+							{
+								broadcast += this.plugin.GetTranslation("killer_request") + " ";
+							}
+							killer.PersonalBroadcast(5, broadcast, false);
 						}
-						else
-						{
-							broadcast += this.plugin.GetTranslation("killer_request") + " ";
-						}
-						killer.PersonalBroadcast(5, broadcast, false);
+
+						this.plugin.OnCheckRemoveGuns(ev.Killer);
+
+						this.plugin.OnCheckToSpectator(ev.Killer);
+
+						this.plugin.OnCheckUndead(ev.Killer, ev.Player);
+
+						this.plugin.OnCheckKick(ev.Killer);
+
+						this.plugin.OnVoteTeamkill(ev.Killer);
+						
 					}
-
-					this.plugin.OnCheckRemoveGuns(ev.Killer);
-
-					this.plugin.OnCheckToSpectator(ev.Killer);
-
-					this.plugin.OnCheckUndead(ev.Killer, ev.Player);
-
-					this.plugin.OnCheckKick(ev.Killer);
-
-					this.plugin.OnVoteTeamkill(ev.Killer);
+					else
+					{
+						this.plugin.Info("Player " + killerOutput + " not being punished by FFA because the player is whitelisted.");
+						return;
+					}
 
 					/*
 					 * If ban system is #1, do not create timers and perform a ban based on a static number of teamkills
