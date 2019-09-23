@@ -633,7 +633,7 @@ namespace FriendlyFireAutoban
 
 				//if (Voting.Invoke())
 				//{
-					this.plugin.InvokeEvent("patpeter.callvote.OnStartVote", "Ban " + killer.Name + "?", options, votes, counter);
+					this.plugin.InvokeEvent("OnStartVote", "Ban " + killer.Name + "?", options, votes, counter);
 					return true;
 				//}
 				//else
