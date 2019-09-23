@@ -255,8 +255,8 @@ namespace FriendlyFireAutoban.EventHandlers
 				if (!this.plugin.Teamkillers.ContainsKey(victim.SteamId))
 				{
 					this.plugin.Teamkillers[victim.SteamId] = new Teamkiller(victim.PlayerId, victim.Name, victim.SteamId, victim.IpAddress);
-					this.plugin.Teamkillers[victim.SteamId].Deaths++;
 				}
+				this.plugin.Teamkillers[victim.SteamId].Deaths++;
 
 				if (!this.plugin.Teamkillers.ContainsKey(killer.SteamId))
 				{

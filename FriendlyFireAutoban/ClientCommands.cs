@@ -111,7 +111,7 @@ namespace FriendlyFireAutoban
 
 						if (teamkillers.Count == 1)
 						{
-							string retval = "Player " + teamkillers[0] + " has a K/D ratio of " + teamkillers[0].GetKDR() + ".\n";
+							string retval = "Player " + teamkillers[0].Name + " has a K/D ratio of " + teamkillers[0].Kills + ":" + teamkillers[0].Deaths + " or " + teamkillers[0].GetKDR() + ".\n";
 							foreach (Teamkill tk in teamkillers[0].Teamkills)
 							{
 								retval +=
