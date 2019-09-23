@@ -82,25 +82,21 @@ namespace FriendlyFireAutoban
 				{
 					if (quotedArgs.Length == 1)
 					{
-						List<Teamkill> teamkills = new List<Teamkill>();
+						List<Teamkiller> teamkillers = new List<Teamkiller>();
 						try
 						{
 							if (Regex.Match(quotedArgs[0], "^[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]$").Success)
 							{
 								// https://stackoverflow.com/questions/55436309/how-do-i-use-linq-to-select-from-a-list-inside-a-map
-								teamkills = this.plugin.Teamkillers.SelectMany(
-									x => x.Value.Teamkills.Where(
-										y => y.KillerSteamId.Equals(quotedArgs[0])
-									)
+								teamkillers = this.plugin.Teamkillers.Values.Where(
+									x => x.SteamId.Equals(quotedArgs[0])
 								).ToList();
 							}
 							else
 							{
 								// https://stackoverflow.com/questions/55436309/how-do-i-use-linq-to-select-from-a-list-inside-a-map
-								teamkills = this.plugin.Teamkillers.SelectMany(
-									x => x.Value.Teamkills.Where(
-										y => y.KillerName.Contains(quotedArgs[0])
-									)
+								teamkillers = this.plugin.Teamkillers.Values.Where(
+									x => x.Name.Contains(quotedArgs[0])
 								).ToList();
 							}
 						}
@@ -113,14 +109,10 @@ namespace FriendlyFireAutoban
 							}
 						}
 
-						if (teamkills.Count == 0)
-						{
-							ev.ReturnMessage = this.plugin.GetTranslation("tks_no_teamkills");
-						}
-						else
+						if (teamkillers.Count == 1)
 						{
 							string retval = "";
-							foreach (Teamkill tk in teamkills)
+							foreach (Teamkill tk in teamkillers[0].Teamkills)
 							{
 								retval +=
 									string.Format(
@@ -132,6 +124,10 @@ namespace FriendlyFireAutoban
 									) + "\n";
 							}
 							ev.ReturnMessage = retval;
+						}
+						else
+						{
+							ev.ReturnMessage = this.plugin.GetTranslation("tks_no_teamkills");
 						}
 					}
 					else

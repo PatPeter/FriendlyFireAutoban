@@ -110,14 +110,14 @@ namespace FriendlyFireAutoban
 		[PipeLink("patpeter.callvote", "Voting")]
 		private readonly MethodPipe<bool> Voting;
 
-		[PipeLink("patpeter.callvote", "StartVote")]
-		private readonly MethodPipe<bool> StartVote;
+		//[PipeLink("patpeter.callvote", "StartVote")]
+		//private readonly MethodPipe<bool> StartVote;
 
 		/*
 		 * Ban Events
 		 */
 		[LangOption]
-		public readonly string victimMessage = "{0} teamkilled you at {1}. <size=36>If this was an accidental teamkill, please press ~ and then type .forgive to prevent this user from being banned.</size>";
+		public readonly string victimMessage = "<size=36>{0} <color=red>teamkilled</color> you at {1}. If this was an accidental teamkill, please press ~ and then type .forgive to prevent this user from being banned.</size>";
 		[LangOption]
 		public readonly string killerMessage = "You teamkilled {0} {1}.";
 		[LangOption("killer_kdr_message")]
@@ -155,13 +155,13 @@ namespace FriendlyFireAutoban
 		[LangOption]
 		public readonly string roleGuard = "<color=silver>GUARD</color>";
 		[LangOption]
-		public readonly string roleCadet = "<color=green>CADET</color>";
+		public readonly string roleCadet = "<color=cyan>CADET</color>";
 		[LangOption]
-		public readonly string roleLieutenant = "<color=green>LIEUTENANT</color>";
+		public readonly string roleLieutenant = "<color=aqua>LIEUTENANT</color>";
 		[LangOption]
-		public readonly string roleCommander = "<color=green>COMMANDER</color>";
+		public readonly string roleCommander = "<color=blue>COMMANDER</color>";
 		[LangOption("role_ntf_scientist")]
-		public readonly string roleNTFScientist = "<color=green>NTF SCIENTIST</color>";
+		public readonly string roleNTFScientist = "<color=aqua>NTF SCIENTIST</color>";
 		[LangOption]
 		public readonly string roleChaos = "<color=green>CHAOS</color>";
 		[LangOption]
@@ -611,6 +611,12 @@ namespace FriendlyFireAutoban
 			}
 			if (this.votetk > 0 && this.Teamkillers[killer.SteamId].Teamkills.Count >= this.votetk && !this.isImmune(killer))
 			{
+				if (Voting == null)
+				{
+					this.Info("patpeter.callvote Voting PipeLink is broken. Cannot start vote.");
+					return false;
+				}
+
 				this.Info("Player " + killer.Name + " " + killer.SteamId + " " + killer.IpAddress + " is being voted on a ban for teamkilling " + this.Teamkillers[killer.SteamId].Teamkills.Count + " times.");
 				Dictionary<int, string> options = new Dictionary<int, string>();
 				options[1] = "Yes";
@@ -620,7 +626,8 @@ namespace FriendlyFireAutoban
 
 				if (Voting.Invoke())
 				{
-					return StartVote.Invoke("Ban " + killer.Name + "?", options, votes, counter);
+					this.plugin.InvokeEvent("patpeter.callvote.OnStartVote", "Ban " + killer.Name + "?", options, votes, counter);
+					return true;
 				}
 				else
 				{
