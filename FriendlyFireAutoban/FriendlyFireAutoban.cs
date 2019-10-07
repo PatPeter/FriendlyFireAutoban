@@ -107,11 +107,11 @@ namespace FriendlyFireAutoban
 			{ 17, 16 }
 		};
 
-		//[PipeLink("patpeter.callvote", "Voting")]
-		//private MethodPipe<bool> Voting;
+		[PipeLink("patpeter.callvote", "Voting")]
+		private MethodPipe<bool> Voting;
 
-		//[PipeLink("patpeter.callvote", "StartVote")]
-		//private readonly MethodPipe<bool> StartVote;
+		[PipeLink("patpeter.callvote", "StartVote")]
+		private readonly MethodPipe<bool> StartVote;
 
 		/*
 		 * Ban Events
@@ -618,11 +618,11 @@ namespace FriendlyFireAutoban
 			}
 			if (this.votetk > 0 && this.Teamkillers[killer.SteamId].Teamkills.Count >= this.votetk && !this.isImmune(killer))
 			{
-				/*if (Voting == null)
+				if (Voting == null)
 				{
-					this.Info("patpeter.callvote Voting PipeLink is broken. Cannot start vote.");
+					this.Warn("patpeter.callvote Voting PipeLink is broken. Cannot start vote.");
 					return false;
-				}*/
+				}
 
 				this.Info("Player " + killer.Name + " " + killer.SteamId + " " + killer.IpAddress + " is being voted on a ban for teamkilling " + this.Teamkillers[killer.SteamId].Teamkills.Count + " times.");
 				Dictionary<int, string> options = new Dictionary<int, string>();
@@ -631,15 +631,17 @@ namespace FriendlyFireAutoban
 				HashSet<string> votes = new HashSet<string>();
 				Dictionary<int, int> counter = new Dictionary<int, int>();
 
-				//if (Voting.Invoke())
-				//{
-					this.plugin.InvokeEvent("OnStartVote", "Ban " + killer.Name + "?", options, votes, counter);
+				if (Voting != null && StartVote != null && Voting.Invoke())
+				{
+					//this.plugin.InvokeEvent("OnStartVote", "Ban " + killer.Name + "?", options, votes, counter);
+					this.Info("Running vote: " + "Ban " + killer.Name + "?");
+					this.StartVote.Invoke("Ban " + killer.Name + "?", options, votes, counter);
 					return true;
-				//}
-				//else
-				//{
-				//	return false;
-				//}
+				}
+				else
+				{
+					return false;
+				}
 			}
 			else
 			{

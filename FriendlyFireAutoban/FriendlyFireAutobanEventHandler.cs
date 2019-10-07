@@ -274,7 +274,7 @@ namespace FriendlyFireAutoban.EventHandlers
 					this.plugin.Info("Player " + killerOutput + " " + killer.TeamRole.Team.ToString() + " teamkilled " +
 						victimOutput + " " + victim.TeamRole.Team.ToString() + ", for a total of " + this.plugin.Teamkillers[killer.SteamId].Teamkills.Count + " teamkills.");
 
-					victim.PersonalBroadcast(10, string.Format(this.plugin.GetTranslation("victim_message"), killer.Name, DateTime.Today.ToString("yyyy-MM-dd hh:mm tt zzz")), false);
+					victim.PersonalBroadcast(10, string.Format(this.plugin.GetTranslation("victim_message"), killer.Name, DateTime.Today.ToString("yyyy-MM-dd hh:mm tt")), false);
 
 					if (!this.plugin.banWhitelist.Contains(killer.SteamId))
 					{
