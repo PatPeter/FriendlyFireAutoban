@@ -76,7 +76,7 @@ namespace FriendlyFireAutoban
 					{
 						// https://stackoverflow.com/questions/55436309/how-do-i-use-linq-to-select-from-a-list-inside-a-map
 						teamkillers = this.plugin.Teamkillers.Values.Where(
-							x => x.SteamId.Equals(args[0])
+							x => x.UserId.Equals(args[0])
 						).ToList();
 					}
 					else
@@ -98,15 +98,15 @@ namespace FriendlyFireAutoban
 
 				if (teamkillers.Count == 1)
 				{
-					if (!this.plugin.banWhitelist.Contains(teamkillers[0].SteamId))
+					if (!this.plugin.banWhitelist.Contains(teamkillers[0].UserId))
 					{
-						this.plugin.banWhitelist.Add(teamkillers[0].SteamId);
-						return new string[] { string.Format(this.plugin.GetTranslation("whitelist_add"), teamkillers[0].Name, teamkillers[0].SteamId) };
+						this.plugin.banWhitelist.Add(teamkillers[0].UserId);
+						return new string[] { string.Format(this.plugin.GetTranslation("whitelist_add"), teamkillers[0].Name, teamkillers[0].UserId) };
 					}
 					else
 					{
-						this.plugin.banWhitelist.Remove(teamkillers[0].SteamId);
-						return new string[] { string.Format(this.plugin.GetTranslation("whitelist_remove"), teamkillers[0].Name, teamkillers[0].SteamId) };
+						this.plugin.banWhitelist.Remove(teamkillers[0].UserId);
+						return new string[] { string.Format(this.plugin.GetTranslation("whitelist_remove"), teamkillers[0].Name, teamkillers[0].UserId) };
 					}
 				}
 				else

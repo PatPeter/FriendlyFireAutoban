@@ -39,13 +39,13 @@ namespace FriendlyFireAutoban
 			{
 				if (this.plugin.enable)
 				{
-					if (this.plugin.TeamkillVictims.ContainsKey(ev.Player.SteamId) &&
-						this.plugin.TeamkillVictims[ev.Player.SteamId] != null)
+					if (this.plugin.TeamkillVictims.ContainsKey(ev.Player.UserId) &&
+						this.plugin.TeamkillVictims[ev.Player.UserId] != null)
 					{
-						Teamkill teamkill = this.plugin.TeamkillVictims[ev.Player.SteamId];
-						if (this.plugin.Teamkillers.ContainsKey(teamkill.KillerSteamId))
+						Teamkill teamkill = this.plugin.TeamkillVictims[ev.Player.UserId];
+						if (this.plugin.Teamkillers.ContainsKey(teamkill.KillerUserId))
 						{
-							int removedBans = this.plugin.Teamkillers[teamkill.KillerSteamId].Teamkills.RemoveAll(x => x.Equals(teamkill));
+							int removedBans = this.plugin.Teamkillers[teamkill.KillerUserId].Teamkills.RemoveAll(x => x.Equals(teamkill));
 							if (removedBans > 0)
 							{
 								// No need for broadcast with return message
@@ -64,7 +64,7 @@ namespace FriendlyFireAutoban
 						}
 
 						// No matter what, remove this teamkill cached in the array
-						this.plugin.TeamkillVictims.Remove(ev.Player.SteamId);
+						this.plugin.TeamkillVictims.Remove(ev.Player.UserId);
 					}
 					else
 					{
@@ -89,7 +89,7 @@ namespace FriendlyFireAutoban
 							{
 								// https://stackoverflow.com/questions/55436309/how-do-i-use-linq-to-select-from-a-list-inside-a-map
 								teamkillers = this.plugin.Teamkillers.Values.Where(
-									x => x.SteamId.Equals(quotedArgs[0])
+									x => x.UserId.Equals(quotedArgs[0])
 								).ToList();
 							}
 							else

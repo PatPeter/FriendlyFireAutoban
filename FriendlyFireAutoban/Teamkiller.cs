@@ -10,7 +10,7 @@ namespace FriendlyFireAutoban
 	{
 		public int PlayerId;
 		public string Name;
-		public string SteamId;
+		public string UserId;
 		public string IpAddress;
 		public int Kills;
 		public int Deaths;
@@ -21,7 +21,7 @@ namespace FriendlyFireAutoban
 		{
 			this.PlayerId = playerId;
 			this.Name = name;
-			this.SteamId = steamId;
+			this.UserId = steamId;
 			this.IpAddress = ipAddress;
 		}
 
@@ -36,7 +36,7 @@ namespace FriendlyFireAutoban
 			return teamkiller != null &&
 				   PlayerId == teamkiller.PlayerId &&
 				   Name == teamkiller.Name &&
-				   SteamId == teamkiller.SteamId &&
+				   UserId == teamkiller.UserId &&
 				   IpAddress == teamkiller.IpAddress;
 		}
 
@@ -45,14 +45,14 @@ namespace FriendlyFireAutoban
 			var hashCode = -1156428363;
 			hashCode = hashCode * -1521134295 + PlayerId.GetHashCode();
 			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Name);
-			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(SteamId);
+			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(UserId);
 			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(IpAddress);
 			return hashCode;
 		}
 
 		public override string ToString()
 		{
-			return PlayerId + " " + Name + " " + SteamId + " " + IpAddress;
+			return PlayerId + " " + Name + " " + UserId + " " + IpAddress;
 		}
 	}
 }

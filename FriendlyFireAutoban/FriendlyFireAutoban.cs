@@ -415,7 +415,7 @@ namespace FriendlyFireAutoban
 			int killerRole = (int)killer.TeamRole.Role;
 			int victimRole = (int)victim.TeamRole.Role;
 
-			if (String.Equals(killer.SteamId, victim.SteamId))
+			if (String.Equals(killer.UserId, victim.UserId))
 			{
 				return false;
 			}
@@ -488,9 +488,9 @@ namespace FriendlyFireAutoban
 				this.Info("Admin/Moderator " + playerName + " has avoided a ban for " + banLength + " minutes after teamkilling " + teamkills + " players during the round.");
 				return false;
 			}
-			else if (this.plugin.banWhitelist.Contains(player.SteamId))
+			else if (this.plugin.banWhitelist.Contains(player.UserId))
 			{
-				this.plugin.Info("Player " + playerName + " " + player.SteamId + " " + player.IpAddress + " not being punished by FFA because the player is whitelisted.");
+				this.plugin.Info("Player " + playerName + " " + player.UserId + " " + player.IpAddress + " not being punished by FFA because the player is whitelisted.");
 				return false;
 			}
 			else
@@ -513,22 +513,22 @@ namespace FriendlyFireAutoban
 		[PipeMethod]
 		public bool OnCheckRemoveGuns(Player killer)
 		{
-			if (this.noguns > 0 && this.Teamkillers.ContainsKey(killer.SteamId) && this.Teamkillers[killer.SteamId].Teamkills.Count >= this.noguns && !this.isImmune(killer))
+			if (this.noguns > 0 && this.Teamkillers.ContainsKey(killer.UserId) && this.Teamkillers[killer.UserId].Teamkills.Count >= this.noguns && !this.isImmune(killer))
 			{
-				this.Info("Player " + killer.Name + " " + killer.SteamId + " " + killer.IpAddress + " has had his/her guns removed for teamkilling.");
-				List<Item> inv = killer.GetInventory();
+				this.Info("Player " + killer.Name + " " + killer.UserId + " " + killer.IpAddress + " has had his/her guns removed for teamkilling.");
+				List<Smod2.API.Item> inv = killer.GetInventory();
 				for (int i = 0; i < inv.Count; i++)
 				{
 					switch (inv[i].ItemType)
 					{
-						case ItemType.COM15:
-						case ItemType.E11_STANDARD_RIFLE:
-						case ItemType.LOGICER:
-						case ItemType.MICROHID:
-						case ItemType.MP4:
-						case ItemType.P90:
-						case ItemType.FRAG_GRENADE:
-						case ItemType.FLASHBANG:
+						case Smod2.API.ItemType.COM15:
+						case Smod2.API.ItemType.E11_STANDARD_RIFLE:
+						case Smod2.API.ItemType.LOGICER:
+						case Smod2.API.ItemType.MICROHID:
+						case Smod2.API.ItemType.MP7:
+						case Smod2.API.ItemType.P90:
+						case Smod2.API.ItemType.FRAG_GRENADE:
+						case Smod2.API.ItemType.FLASHBANG:
 							inv[i].Remove();
 							break;
 					}
@@ -546,11 +546,11 @@ namespace FriendlyFireAutoban
 		[PipeMethod]
 		public bool OnCheckToSpectator(Player killer)
 		{
-			if (this.tospec > 0 && this.Teamkillers[killer.SteamId].Teamkills.Count >= this.tospec && !this.isImmune(killer))
+			if (this.tospec > 0 && this.Teamkillers[killer.UserId].Teamkills.Count >= this.tospec && !this.isImmune(killer))
 			{
-				this.Info("Player " + killer.Name + " " + killer.SteamId + " " + killer.IpAddress + " has been moved to spectator for teamkilling " + this.Teamkillers[killer.SteamId].Teamkills.Count + " times.");
+				this.Info("Player " + killer.Name + " " + killer.UserId + " " + killer.IpAddress + " has been moved to spectator for teamkilling " + this.Teamkillers[killer.UserId].Teamkills.Count + " times.");
 				killer.PersonalBroadcast(5, this.GetTranslation("tospec_output"), false);
-				killer.ChangeRole(Role.SPECTATOR);
+				killer.ChangeRole(Smod2.API.RoleType.SPECTATOR);
 				return true;
 			}
 			else
@@ -562,11 +562,11 @@ namespace FriendlyFireAutoban
 		[PipeMethod]
 		public bool OnCheckUndead(Player killer, Player victim)
 		{
-			if (this.undead > 0 && this.Teamkillers[killer.SteamId].Teamkills.Count >= this.undead && !this.isImmune(killer))
+			if (this.undead > 0 && this.Teamkillers[killer.UserId].Teamkills.Count >= this.undead && !this.isImmune(killer))
 			{
-				Role oldRole = victim.TeamRole.Role;
+				Smod2.API.RoleType oldRole = victim.TeamRole.Role;
 				//Vector oldPosition = victim.GetPosition();
-				this.Info("Player " + victim.Name + " " + victim.SteamId + " " + victim.IpAddress + " has been respawned as " + oldRole + " after " + killer.Name + " " + killer.SteamId + " " + killer.IpAddress + " teamkilled " + this.Teamkillers[killer.SteamId].Teamkills.Count + " times.");
+				this.Info("Player " + victim.Name + " " + victim.UserId + " " + victim.IpAddress + " has been respawned as " + oldRole + " after " + killer.Name + " " + killer.UserId + " " + killer.IpAddress + " teamkilled " + this.Teamkillers[killer.UserId].Teamkills.Count + " times.");
 				killer.PersonalBroadcast(5, string.Format(this.GetTranslation("undead_killer_output"), victim.Name), false);
 				victim.PersonalBroadcast(5, string.Format(this.GetTranslation("undead_victim_output"), killer.Name), false);
 				Timer t = new Timer
@@ -576,7 +576,7 @@ namespace FriendlyFireAutoban
 				};
 				t.Elapsed += delegate
 				{
-					this.Info("Respawning victim " + victim.Name + " " + victim.SteamId + " " + victim.IpAddress + "as " + victim.TeamRole.Role + "...");
+					this.Info("Respawning victim " + victim.Name + " " + victim.UserId + " " + victim.IpAddress + "as " + victim.TeamRole.Role + "...");
 					victim.ChangeRole(victim.TeamRole.Role, true, false, false, true);
 					//victim.Teleport(oldPosition);
 					t.Dispose();
@@ -593,9 +593,9 @@ namespace FriendlyFireAutoban
 		[PipeMethod]
 		public bool OnCheckKick(Player killer)
 		{
-			if (this.kicker > 0 && this.Teamkillers[killer.SteamId].Teamkills.Count == this.kicker && !this.isImmune(killer))
+			if (this.kicker > 0 && this.Teamkillers[killer.UserId].Teamkills.Count == this.kicker && !this.isImmune(killer))
 			{
-				this.Info("Player " + killer.Name + " " + killer.SteamId + " " + killer.IpAddress + " has been kicked for teamkilling " + this.Teamkillers[killer.SteamId].Teamkills.Count + " times.");
+				this.Info("Player " + killer.Name + " " + killer.UserId + " " + killer.IpAddress + " has been kicked for teamkilling " + this.Teamkillers[killer.UserId].Teamkills.Count + " times.");
 				killer.PersonalBroadcast(1, this.GetTranslation("kicker_output"), false);
 				killer.Ban(0);
 				return true;
@@ -613,25 +613,19 @@ namespace FriendlyFireAutoban
 			if (this.outall)
 			{
 				this.Info("votetk > 0: " + this.votetk);
-				this.Info("Teamkiller count is greater than votetk? " + this.Teamkillers[killer.SteamId].Teamkills.Count);
+				this.Info("Teamkiller count is greater than votetk? " + this.Teamkillers[killer.UserId].Teamkills.Count);
 				this.Info("Teamkiller is immune? " + this.isImmune(killer));
 			}
-			if (this.votetk > 0 && this.Teamkillers[killer.SteamId].Teamkills.Count >= this.votetk && !this.isImmune(killer))
+			if (this.votetk > 0 && this.Teamkillers[killer.UserId].Teamkills.Count >= this.votetk && !this.isImmune(killer))
 			{
-				if (Voting == null)
-				{
-					this.Warn("patpeter.callvote Voting PipeLink is broken. Cannot start vote.");
-					return false;
-				}
-
-				this.Info("Player " + killer.Name + " " + killer.SteamId + " " + killer.IpAddress + " is being voted on a ban for teamkilling " + this.Teamkillers[killer.SteamId].Teamkills.Count + " times.");
+				this.Info("Player " + killer.Name + " " + killer.UserId + " " + killer.IpAddress + " is being voted on a ban for teamkilling " + this.Teamkillers[killer.UserId].Teamkills.Count + " times.");
 				Dictionary<int, string> options = new Dictionary<int, string>();
 				options[1] = "Yes";
 				options[2] = "No";
 				HashSet<string> votes = new HashSet<string>();
 				Dictionary<int, int> counter = new Dictionary<int, int>();
 
-				if (Voting != null && StartVote != null && Voting.Invoke())
+				if (Voting != null && StartVote != null && !Voting.Invoke())
 				{
 					//this.plugin.InvokeEvent("OnStartVote", "Ban " + killer.Name + "?", options, votes, counter);
 					this.Info("Running vote: " + "Ban " + killer.Name + "?");
@@ -640,6 +634,7 @@ namespace FriendlyFireAutoban
 				}
 				else
 				{
+					this.Warn("patpeter.callvote Voting PipeLink is broken. Cannot start vote.");
 					return false;
 				}
 			}
