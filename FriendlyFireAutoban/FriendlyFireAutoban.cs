@@ -23,7 +23,7 @@ namespace FriendlyFireAutoban
 		langFile = AssemblyInfo.LangFile,
 		version = AssemblyInfo.Version,
 		SmodMajor = 3,
-		SmodMinor = 4,
+		SmodMinor = 7,
 		SmodRevision = 0
 		)]
 	class FriendlyFireAutobanPlugin : Plugin
