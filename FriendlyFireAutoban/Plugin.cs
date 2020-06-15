@@ -253,7 +253,18 @@ namespace FriendlyFireAutoban
 		{
 			Events.RoundStartEvent -= EventHandlers.OnRoundStart;
 			Events.RoundEndEvent -= EventHandlers.OnRoundEnd;
+
 			Events.PlayerJoinEvent -= EventHandlers.OnPlayerJoin;
+			Events.PlayerLeaveEvent -= EventHandlers.OnPlayerLeave;
+
+			Events.PlayerDeathEvent -= EventHandlers.OnPlayerDeath;
+			Events.PlayerHurtEvent -= EventHandlers.OnPlayerHurt;
+
+			Events.PlayerSpawnEvent -= EventHandlers.OnPlayerSpawn;
+			Events.SetClassEvent -= EventHandlers.OnSetClass;
+			Events.PickupItemEvent -= EventHandlers.OnPickupItem;
+
+			Events.ConsoleCommandEvent -= EventHandlers.OnConsoleCommand;
 
 			EventHandlers = null;
 		}

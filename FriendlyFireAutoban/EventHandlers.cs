@@ -29,10 +29,10 @@ namespace FriendlyFireAutoban
 
 		public void OnRoundEnd()
 		{
-			if (EventPlugin.GetRoundDuration() >= 3)
-			{
-				this.plugin.DuringRound = false;
-			}
+			//if (EventPlugin.GetRoundDuration() >= 3)
+			//{
+			this.plugin.DuringRound = false;
+			//}
 
 			foreach (Timer timer in this.plugin.TeamkillTimers.Values)
 			{
@@ -94,7 +94,12 @@ namespace FriendlyFireAutoban
 
 		public void OnPlayerJoin(PlayerJoinEvent ev)
 		{
-			ev.Player.Broadcast(5, "Welcome to the server!");
+			ReferenceHub player = ev.Player;
+			if (!this.plugin.Teamkillers.ContainsKey(Player.GetUserId(player)))
+			{
+				Log.Info("Adding Teamkiller entry for player #" + Player.GetPlayerId(player) + " " + Player.GetNickname(player) + " [" + Player.GetUserId(player) + "] [" + Player.GetIpAddress(player) + "]");
+				this.plugin.Teamkillers[Player.GetUserId(player)] = new Teamkiller(Player.GetPlayerId(player), Player.GetNickname(player), Player.GetUserId(player), Player.GetIpAddress(player));
+			}
 		}
 
 		public void OnPlayerLeave(PlayerLeaveEvent ev)
@@ -168,16 +173,17 @@ namespace FriendlyFireAutoban
 
 		public void OnPlayerDeath(ref PlayerDeathEvent ev)
 		{
-			if (!this.plugin.DuringRound)
-			{
-				Log.Info("Skipping OnPlayerDie for being outside of a round.");
-				return;
-			}
 
 			ReferenceHub killer = ev.Killer;
 			string killerOutput = Player.GetNickname(killer) + " " + Player.GetUserId(killer) + " " + Player.GetIpAddress(killer);
 			ReferenceHub victim = ev.Player;
 			string victimOutput = Player.GetNickname(victim) + " " + Player.GetUserId(victim) + " " + Player.GetIpAddress(victim);
+
+			if (!this.plugin.DuringRound)
+			{
+				Log.Info("Skipping OnPlayerDie " + killerOutput + " killed " + victimOutput + " for being outside of a round.");
+				return;
+			}
 
 			if (this.plugin.enable)
 			{
