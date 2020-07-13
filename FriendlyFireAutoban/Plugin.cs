@@ -487,12 +487,15 @@ namespace FriendlyFireAutoban
 
 		public bool isTeamkill(ReferenceHub killer, ReferenceHub victim)
 		{
+			string killerUserId = killerUserId;
 			int killerTeam = (int)Player.GetTeam(killer);
-			int victimTeam = (int)Player.GetTeam(victim);
 			int killerRole = (int)Player.GetRole(killer);
+
+			string victimUserId = Player.GetUserId(victim);
+			int victimTeam = (int)Player.GetTeam(victim);
 			int victimRole = (int)Player.GetRole(victim);
 
-			if (String.Equals(Player.GetUserId(killer), Player.GetUserId(victim)))
+			if (String.Equals(killerUserId, victimUserId))
 			{
 				return false;
 			}
@@ -595,9 +598,9 @@ namespace FriendlyFireAutoban
 		//[PipeMethod]
 		public bool OnCheckRemoveGuns(ReferenceHub killer)
 		{
-			if (this.noguns > 0 && this.Teamkillers.ContainsKey(Player.GetUserId(killer)) && this.Teamkillers[Player.GetUserId(killer)].Teamkills.Count >= this.noguns && !this.isImmune(killer))
+			if (this.noguns > 0 && this.Teamkillers.ContainsKey(killerUserId) && this.Teamkillers[killerUserId].Teamkills.Count >= this.noguns && !this.isImmune(killer))
 			{
-				Log.Info("Player " + Player.GetNickname(killer) + " " + Player.GetUserId(killer) + " " + Player.GetIpAddress(killer) + " has had his/her guns removed for teamkilling.");
+				Log.Info("Player " + Player.GetNickname(killer) + " " + killerUserId + " " + Player.GetIpAddress(killer) + " has had his/her guns removed for teamkilling.");
 				Item[] inv = killer.inventory.availableItems;
 				for (int i = 0; i < inv.Length; i++)
 				{
@@ -628,9 +631,9 @@ namespace FriendlyFireAutoban
 		//[PipeMethod]
 		public bool OnCheckToSpectator(ReferenceHub killer)
 		{
-			if (this.tospec > 0 && this.Teamkillers[Player.GetUserId(killer)].Teamkills.Count >= this.tospec && !this.isImmune(killer))
+			if (this.tospec > 0 && this.Teamkillers[killerUserId].Teamkills.Count >= this.tospec && !this.isImmune(killer))
 			{
-				Log.Info("Player " + Player.GetNickname(killer) + " " + Player.GetUserId(killer) + " " + Player.GetIpAddress(killer) + " has been moved to spectator for teamkilling " + this.Teamkillers[Player.GetUserId(killer)].Teamkills.Count + " times.");
+				Log.Info("Player " + Player.GetNickname(killer) + " " + killerUserId + " " + Player.GetIpAddress(killer) + " has been moved to spectator for teamkilling " + this.Teamkillers[killerUserId].Teamkills.Count + " times.");
 				Player.Broadcast(killer, 5, this.GetTranslation("tospec_output"), false);
 				Player.SetRole(killer, RoleType.Spectator);
 				return true;
@@ -644,11 +647,11 @@ namespace FriendlyFireAutoban
 		//[PipeMethod]
 		public bool OnCheckUndead(ReferenceHub killer, ReferenceHub victim)
 		{
-			if (this.undead > 0 && this.Teamkillers[Player.GetUserId(killer)].Teamkills.Count >= this.undead && !this.isImmune(killer))
+			if (this.undead > 0 && this.Teamkillers[killerUserId].Teamkills.Count >= this.undead && !this.isImmune(killer))
 			{
 				RoleType oldRole = Player.GetRole(victim);
 				//Vector oldPosition = victim.GetPosition();
-				Log.Info("Player " + Player.GetNickname(victim) + " " + Player.GetUserId(victim) + " " + Player.GetIpAddress(victim) + " has been respawned as " + oldRole + " after " + Player.GetNickname(killer) + " " + Player.GetUserId(killer) + " " + Player.GetIpAddress(killer) + " teamkilled " + this.Teamkillers[Player.GetUserId(killer)].Teamkills.Count + " times.");
+				Log.Info("Player " + Player.GetNickname(victim) + " " + victimUserId + " " + Player.GetIpAddress(victim) + " has been respawned as " + oldRole + " after " + Player.GetNickname(killer) + " " + killerUserId + " " + Player.GetIpAddress(killer) + " teamkilled " + this.Teamkillers[killerUserId].Teamkills.Count + " times.");
 				Player.Broadcast(killer, 5, string.Format(this.GetTranslation("undead_killer_output"), Player.GetNickname(victim)), false);
 				Player.Broadcast(victim, 5, string.Format(this.GetTranslation("undead_victim_output"), Player.GetNickname(killer)), false);
 				Timer t = new Timer
@@ -658,7 +661,7 @@ namespace FriendlyFireAutoban
 				};
 				t.Elapsed += delegate
 				{
-					Log.Info("Respawning victim " + Player.GetNickname(victim) + " " + Player.GetUserId(victim) + " " + Player.GetIpAddress(victim) + "as " + Player.GetRole(victim) + "...");
+					Log.Info("Respawning victim " + Player.GetNickname(victim) + " " + victimUserId + " " + Player.GetIpAddress(victim) + "as " + Player.GetRole(victim) + "...");
 					Player.SetRole(victim, oldRole);
 					//victim.Teleport(oldPosition);
 					t.Dispose();
@@ -675,9 +678,9 @@ namespace FriendlyFireAutoban
 		//[PipeMethod]
 		public bool OnCheckKick(ReferenceHub killer)
 		{
-			if (this.kicker > 0 && this.Teamkillers[Player.GetUserId(killer)].Teamkills.Count == this.kicker && !this.isImmune(killer))
+			if (this.kicker > 0 && this.Teamkillers[killerUserId].Teamkills.Count == this.kicker && !this.isImmune(killer))
 			{
-				Log.Info("Player " + Player.GetNickname(killer) + " " + Player.GetUserId(killer) + " " + Player.GetIpAddress(killer) + " has been kicked for teamkilling " + this.Teamkillers[Player.GetUserId(killer)].Teamkills.Count + " times.");
+				Log.Info("Player " + Player.GetNickname(killer) + " " + killerUserId + " " + Player.GetIpAddress(killer) + " has been kicked for teamkilling " + this.Teamkillers[killerUserId].Teamkills.Count + " times.");
 				Player.Broadcast(killer, 1, this.GetTranslation("kicker_output"), false);
 				Player.KickPlayer(killer, this.GetTranslation("kicker_output"));
 				return true;
@@ -695,12 +698,12 @@ namespace FriendlyFireAutoban
 			if (this.outall)
 			{
 				Log.Info("votetk > 0: " + this.votetk);
-				Log.Info("Teamkiller count is greater than votetk? " + this.Teamkillers[Player.GetUserId(killer)].Teamkills.Count);
+				Log.Info("Teamkiller count is greater than votetk? " + this.Teamkillers[killerUserId].Teamkills.Count);
 				Log.Info("Teamkiller is immune? " + this.isImmune(killer));
 			}
-			if (this.votetk > 0 && this.Teamkillers[Player.GetUserId(killer)].Teamkills.Count >= this.votetk && !this.isImmune(killer))
+			if (this.votetk > 0 && this.Teamkillers[killerUserId].Teamkills.Count >= this.votetk && !this.isImmune(killer))
 			{
-				Log.Info("Player " + Player.GetNickname(killer) + " " + Player.GetUserId(killer) + " " + Player.GetIpAddress(killer) + " is being voted on a ban for teamkilling " + this.Teamkillers[Player.GetUserId(killer)].Teamkills.Count + " times.");
+				Log.Info("Player " + Player.GetNickname(killer) + " " + killerUserId + " " + Player.GetIpAddress(killer) + " is being voted on a ban for teamkilling " + this.Teamkillers[killerUserId].Teamkills.Count + " times.");
 				Dictionary<int, string> options = new Dictionary<int, string>();
 				options[1] = "Yes";
 				options[2] = "No";
