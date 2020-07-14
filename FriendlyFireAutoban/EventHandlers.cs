@@ -101,6 +101,7 @@ namespace FriendlyFireAutoban
 			string playerNickname = Player.GetNickname(player);
 			string playerUserId = Player.GetUserId(player);
 			string playerIpAddress = Player.GetIpAddress(player);
+
 			if (!this.plugin.Teamkillers.ContainsKey(playerUserId))
 			{
 				Log.Info("Adding Teamkiller entry for player #" + playerId + " " + playerNickname + " [" + playerUserId + "] [" + playerIpAddress + "]");
@@ -180,14 +181,21 @@ namespace FriendlyFireAutoban
 		{
 
 			ReferenceHub killer = ev.Killer;
+			int killerPlayerId = Player.GetPlayerId(killer);
 			string killerNickname = Player.GetNickname(killer);
 			string killerUserId = Player.GetUserId(killer);
 			string killerIpAddress = Player.GetIpAddress(killer);
+			Team killerTeam = Player.GetTeam(killer);
+			RoleType killerRole = Player.GetRole(killer);
 			string killerOutput = killerNickname + " " + killerUserId + " " + killerIpAddress;
 			ReferenceHub victim = ev.Player;
+			int victimPlayerId = Player.GetPlayerId(victim);
 			string victimNickname = Player.GetNickname(victim);
 			string victimUserId = Player.GetUserId(victim);
 			string victimIpAddress = Player.GetIpAddress(victim);
+			Team victimTeam = Player.GetTeam(victim);
+			RoleType victimRole = Player.GetRole(victim);
+			bool victimIsHandcuffed = Player.IsHandCuffed(victim);
 			string victimOutput = victimNickname + " " + victimUserId + " " + victimIpAddress;
 
 			if (!this.plugin.DuringRound)
@@ -200,27 +208,27 @@ namespace FriendlyFireAutoban
 			{
 				if (!this.plugin.Teamkillers.ContainsKey(victimUserId))
 				{
-					this.plugin.Teamkillers[victimUserId] = new Teamkiller(Player.GetPlayerId(victim), Player.GetNickname(victim), victimUserId, Player.GetIpAddress(victim));
+					this.plugin.Teamkillers[victimUserId] = new Teamkiller(victimPlayerId, victimNickname, victimUserId, victimIpAddress);
 				}
 				this.plugin.Teamkillers[victimUserId].Deaths++;
 
 				if (!this.plugin.Teamkillers.ContainsKey(killerUserId))
 				{
-					this.plugin.Teamkillers[killerUserId] = new Teamkiller(Player.GetPlayerId(killer), Player.GetNickname(killer), killerUserId, Player.GetIpAddress(killer));
+					this.plugin.Teamkillers[killerUserId] = new Teamkiller(killerPlayerId, killerNickname, killerUserId, killerIpAddress);
 				}
 
 				if (this.plugin.isTeamkill(killer, victim))
 				{
 					this.plugin.Teamkillers[killerUserId].Kills--;
 
-					Teamkill teamkill = new Teamkill(Player.GetNickname(killer), killerUserId, Player.GetRole(killer), Player.GetNickname(victim), victimUserId, Player.GetRole(victim), Player.IsHandCuffed(victim), ev.Info.GetDamageType(), (int) EventPlugin.GetRoundDuration());
-					this.plugin.TeamkillVictims[Player.GetUserId(ev.Player)] = teamkill;
+					Teamkill teamkill = new Teamkill(killerNickname, killerUserId, killerRole, victimNickname, victimUserId, victimRole, victimIsHandcuffed, ev.Info.GetDamageType(), (int) EventPlugin.GetRoundDuration());
+					this.plugin.TeamkillVictims[victimUserId] = teamkill;
 					this.plugin.Teamkillers[killerUserId].Teamkills.Add(teamkill);
 
-					Log.Info("Player " + killerOutput + " " + Player.GetTeam(killer).ToString() + " teamkilled " +
-						victimOutput + " " + Player.GetTeam(victim).ToString() + ", for a total of " + this.plugin.Teamkillers[killerUserId].Teamkills.Count + " teamkills.");
+					Log.Info("Player " + killerOutput + " " + killerTeam.ToString() + " teamkilled " +
+						victimOutput + " " + victimTeam.ToString() + ", for a total of " + this.plugin.Teamkillers[killerUserId].Teamkills.Count + " teamkills.");
 
-					Player.Broadcast(victim, 10, string.Format(this.plugin.GetTranslation("victim_message"), Player.GetNickname(killer), DateTime.Today.ToString("yyyy-MM-dd hh:mm tt")), false);
+					Player.Broadcast(victim, 10, string.Format(this.plugin.GetTranslation("victim_message"), killerNickname, DateTime.Today.ToString("yyyy-MM-dd hh:mm tt")), false);
 
 					if (!this.plugin.banWhitelist.Contains(killerUserId))
 					{
@@ -236,12 +244,12 @@ namespace FriendlyFireAutoban
 
 						if (this.plugin.kdsafe > 0 && kdr > (float)this.plugin.kdsafe && this.plugin.Teamkillers[killerUserId].Kills > this.plugin.kdsafe)
 						{
-							Player.Broadcast(killer, 5, string.Format(this.plugin.GetTranslation("killer_kdr_message"), Player.GetNickname(victim), teamkill.GetRoleDisplay(), kdr), false);
+							Player.Broadcast(killer, 5, string.Format(this.plugin.GetTranslation("killer_kdr_message"), victimNickname, teamkill.GetRoleDisplay(), kdr), false);
 							return;
 						}
 						else if (this.plugin.warntk != -1)
 						{
-							string broadcast = string.Format(this.plugin.GetTranslation("killer_message"), Player.GetNickname(victim), teamkill.GetRoleDisplay()) + " ";
+							string broadcast = string.Format(this.plugin.GetTranslation("killer_message"), victimNickname, teamkill.GetRoleDisplay()) + " ";
 							if (this.plugin.warntk > 0)
 							{
 								int teamkillsBeforeBan = this.plugin.amount - this.plugin.Teamkillers[killerUserId].Teamkills.Count;
@@ -279,7 +287,7 @@ namespace FriendlyFireAutoban
 					 */
 					if (this.plugin.system == 1 && this.plugin.Teamkillers[killerUserId].Teamkills.Count >= this.plugin.amount)
 					{
-						this.plugin.OnBan(killer, Player.GetNickname(killer), this.plugin.length, this.plugin.Teamkillers[killerUserId].Teamkills);
+						this.plugin.OnBan(killer, killerNickname, this.plugin.length, this.plugin.Teamkillers[killerUserId].Teamkills);
 					}
 					else
 					{
@@ -316,7 +324,7 @@ namespace FriendlyFireAutoban
 										int banLength = this.plugin.GetScaledBanAmount(killerUserId);
 										if (banLength > 0)
 										{
-											this.plugin.OnBan(killer, Player.GetNickname(killer), banLength, this.plugin.Teamkillers[killerUserId].Teamkills);
+											this.plugin.OnBan(killer, killerNickname, banLength, this.plugin.Teamkillers[killerUserId].Teamkills);
 										}
 										else
 										{
@@ -331,7 +339,7 @@ namespace FriendlyFireAutoban
 									{
 										Teamkill firstTeamkill = this.plugin.Teamkillers[killerUserId].Teamkills[0];
 										this.plugin.Teamkillers[killerUserId].Teamkills.RemoveAt(0);
-										Log.Info("Player " + killerOutput + " " + Player.GetTeam(killer).ToString() + " teamkill expired, counter now at " + this.plugin.Teamkillers[killerUserId].Teamkills.Count + ".");
+										Log.Info("Player " + killerOutput + " " + killerTeam.ToString() + " teamkill expired, counter now at " + this.plugin.Teamkillers[killerUserId].Teamkills.Count + ".");
 									}
 									else
 									{
@@ -352,7 +360,7 @@ namespace FriendlyFireAutoban
 						if (this.plugin.system == 2 && this.plugin.Teamkillers[killerUserId].Teamkills.Count >= this.plugin.amount)
 						{
 							t.Stop();
-							this.plugin.OnBan(killer, Player.GetNickname(killer), this.plugin.length, this.plugin.Teamkillers[killerUserId].Teamkills);
+							this.plugin.OnBan(killer, killerNickname, this.plugin.length, this.plugin.Teamkillers[killerUserId].Teamkills);
 						}
 					}
 				}
@@ -360,8 +368,8 @@ namespace FriendlyFireAutoban
 				{
 					if (this.plugin.outall)
 					{
-						Log.Info("Player " + killerOutput + " " + Player.GetTeam(killer).ToString() + " killed " +
-							victimOutput + " " + Player.GetTeam(victim).ToString() + " and it was not detected as a teamkill.");
+						Log.Info("Player " + killerOutput + " " + killerTeam.ToString() + " killed " +
+							victimOutput + " " + victimTeam.ToString() + " and it was not detected as a teamkill.");
 					}
 
 					this.plugin.Teamkillers[killerUserId].Kills++;
@@ -369,8 +377,8 @@ namespace FriendlyFireAutoban
 			}
 			else
 			{
-				Log.Info("Player " + killerOutput + " " + Player.GetTeam(killer).ToString() + " killed " +
-					victimOutput + " " + Player.GetTeam(victim).ToString() + ".");
+				Log.Info("Player " + killerOutput + " " + killerTeam.ToString() + " killed " +
+					victimOutput + " " + victimTeam.ToString() + ".");
 			}
 		}
 
@@ -379,35 +387,45 @@ namespace FriendlyFireAutoban
 			if (this.plugin.enable)
 			{
 				ReferenceHub attacker = ev.Attacker;
-				ReferenceHub player = ev.Player;
+				int attackerPlayerId = Player.GetPlayerId(ev.Attacker);
+				String attackerUserId = Player.GetUserId(ev.Attacker);
+				String attackerNickname = Player.GetNickname(attacker);
+
+				ReferenceHub victim = ev.Player;
+				int victimPlayerId = Player.GetPlayerId(victim);
+
 				if (this.plugin.mirror > 0f && ev.DamageType != DamageTypes.Grenade && ev.DamageType != DamageTypes.Falldown)
 				{
-					if (this.plugin.isTeamkill(ev.Attacker, ev.Player) && !this.plugin.isImmune(ev.Attacker) && !this.plugin.banWhitelist.Contains(Player.GetUserId(attacker)))
+					if (this.plugin.isTeamkill(attacker, victim) && !this.plugin.isImmune(attacker) && !this.plugin.banWhitelist.Contains(attackerUserId))
 					{
 						if (this.plugin.invert > 0)
 						{
-							if (this.plugin.Teamkillers.ContainsKey(Player.GetUserId(ev.Attacker)) && this.plugin.Teamkillers[Player.GetUserId(ev.Attacker)].Teamkills.Count >= this.plugin.invert)
+							if (this.plugin.Teamkillers.ContainsKey(attackerUserId) && this.plugin.Teamkillers[attackerUserId].Teamkills.Count >= this.plugin.invert)
 							{
-								//if (this.plugin.outall)
-								//{
-								//	Log.Info("Dealing damage to " + ev.Attacker.Name + ": " + (ev.Damage * this.plugin.mirror));
-								//}
-								attacker.playerStats.HurtPlayer(new PlayerStats.HitInfo(ev.Amount * this.plugin.mirror, Player.GetNickname(attacker), DamageTypes.Falldown, Player.GetPlayerId(attacker)), attacker.gameObject);
+								if (this.plugin.outall)
+								{
+									Log.Info("Dealing damage to " + attackerNickname + ": " + (ev.Amount * this.plugin.mirror));
+								}
+								attacker.playerStats.HurtPlayer(new PlayerStats.HitInfo(ev.Amount * this.plugin.mirror, attackerNickname, DamageTypes.Falldown, attackerPlayerId), attacker.gameObject);
 							}
 							// else do nothing
 						}
 						else
 						{
-							//if (this.plugin.outall)
-							//{
-							//	Log.Info("Dealing damage to " + ev.Attacker.Name + ": " + (ev.Damage * this.plugin.mirror));
-							//}
-							attacker.playerStats.HurtPlayer(new PlayerStats.HitInfo(ev.Amount * this.plugin.mirror, Player.GetNickname(attacker), DamageTypes.Falldown, Player.GetPlayerId(attacker)), attacker.gameObject);
+							if (this.plugin.outall)
+							{
+								Log.Info("Dealing damage to " + attackerNickname + ": " + (ev.Amount * this.plugin.mirror));
+							}
+							attacker.playerStats.HurtPlayer(new PlayerStats.HitInfo(ev.Amount * this.plugin.mirror, attackerNickname, DamageTypes.Falldown, attackerPlayerId), attacker.gameObject);
 						}
 					}
 				}
-				else if (Player.GetPlayerId(ev.Player) == Player.GetPlayerId(ev.Attacker) && ev.DamageType == DamageTypes.Grenade)
+				else if (victimPlayerId == attackerPlayerId && ev.DamageType == DamageTypes.Grenade)
 				{
+					if (this.plugin.outall)
+					{
+						Log.Info("[BOMBER] Player " + victimPlayerId + " damaged by his/her own grenade, bomber triggered.");
+					}
 					if (this.plugin.bomber == 2)
 					{
 						int damage = (int)ev.Amount;
@@ -419,8 +437,12 @@ namespace FriendlyFireAutoban
 						};
 						t.Elapsed += delegate
 						{
+							if (this.plugin.outall)
+							{
+								Log.Info("[BOMBER] Player " + attackerPlayerId + " taking " + damage + " delayed damage after throwing a grenade.");
+							}
 							//Player.AddHealth(attacker, damage * -1, DamageTypes.Falldown);
-							attacker.playerStats.HurtPlayer(new PlayerStats.HitInfo(damage, Player.GetNickname(attacker), DamageTypes.Falldown, Player.GetPlayerId(attacker)), attacker.gameObject);
+							attacker.playerStats.HurtPlayer(new PlayerStats.HitInfo(damage, attackerNickname, DamageTypes.Falldown, attackerPlayerId), attacker.gameObject);
 							t.Dispose();
 						};
 					}
