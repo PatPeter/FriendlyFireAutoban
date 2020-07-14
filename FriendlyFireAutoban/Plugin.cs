@@ -28,7 +28,7 @@ namespace FriendlyFireAutoban
 		 * 
 		 */
 		public bool enable = true;
-		public bool outall = true;
+		public bool outall = false;
 		public int system = 1;
 		public List<TeamTuple> matrix = new List<TeamTuple>();
 		public int amount = 5;

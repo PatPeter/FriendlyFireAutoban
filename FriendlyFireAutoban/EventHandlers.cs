@@ -225,7 +225,7 @@ namespace FriendlyFireAutoban
 			bool victimIsHandcuffed = Player.IsHandCuffed(victim);
 			string victimOutput = victimNickname + " " + victimUserId + " " + victimIpAddress;
 
-			Log.Info(killerOutput + " killed " + victimOutput);
+			Log.Info(killerOutput + " killed " + victimOutput + " while plugin is enabled? " + this.plugin.enable + " and during round? " + this.plugin.DuringRound);
 
 			if (!this.plugin.DuringRound)
 			{
@@ -248,6 +248,7 @@ namespace FriendlyFireAutoban
 					this.plugin.Teamkillers[killerUserId] = new Teamkiller(killerPlayerId, killerNickname, killerUserId, killerIpAddress);
 				}
 
+				Log.Info("Was this a teamkill? " + this.plugin.isTeamkill(killer, victim));
 				if (this.plugin.isTeamkill(killer, victim))
 				{
 					this.plugin.Teamkillers[killerUserId].Kills--;
@@ -409,7 +410,7 @@ namespace FriendlyFireAutoban
 			else
 			{
 				Log.Info("Player " + killerOutput + " " + killerTeam.ToString() + " killed " +
-					victimOutput + " " + victimTeam.ToString() + ".");
+					victimOutput + " " + victimTeam.ToString() + ", but FriendlyFireAutoban is not enabled.");
 			}
 		}
 
@@ -488,7 +489,6 @@ namespace FriendlyFireAutoban
 
 		public void OnPlayerSpawn(PlayerSpawnEvent ev)
 		{
-			Log.Info("Player " + ev.Player.name + " has spawned, check for gun removal.");
 			if (this.plugin.enable)
 			{
 				this.plugin.OnCheckRemoveGuns(ev.Player);
@@ -497,7 +497,6 @@ namespace FriendlyFireAutoban
 
 		public void OnSetClass(SetClassEvent ev)
 		{
-			Log.Info("Player " + ev.Player.name + " has set class, check for gun removal.");
 			if (this.plugin.enable)
 			{
 				this.plugin.OnCheckRemoveGuns(ev.Player);
@@ -506,7 +505,6 @@ namespace FriendlyFireAutoban
 
 		public void OnPickupItem(ref PickupItemEvent ev)
 		{
-			Log.Info("Player " + ev.Player.name + " has picked up an item, check for gun removal.");
 			if (this.plugin.enable)
 			{
 				this.plugin.OnCheckRemoveGuns(ev.Player);
