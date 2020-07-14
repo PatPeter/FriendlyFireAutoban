@@ -207,7 +207,7 @@ namespace FriendlyFireAutoban
 			}
 		}
 
-		public override string getName { get; } = "Sample Plugin";
+		public override string getName { get; } = "Friendly Fire Autoban";
 
 		public override void OnEnable()
 		{
@@ -238,6 +238,7 @@ namespace FriendlyFireAutoban
 				Events.SetClassEvent += EventHandlers.OnSetClass;
 				Events.PickupItemEvent += EventHandlers.OnPickupItem;
 
+				Events.RemoteAdminCommandEvent += EventHandlers.OnRACommand;
 				Events.ConsoleCommandEvent += EventHandlers.OnConsoleCommand;
 
 				Log.Info($"Friendly Fire Autoban has been loaded!");
@@ -264,6 +265,7 @@ namespace FriendlyFireAutoban
 			Events.SetClassEvent -= EventHandlers.OnSetClass;
 			Events.PickupItemEvent -= EventHandlers.OnPickupItem;
 
+			Events.RemoteAdminCommandEvent -= EventHandlers.OnRACommand;
 			Events.ConsoleCommandEvent -= EventHandlers.OnConsoleCommand;
 
 			EventHandlers = null;
@@ -820,10 +822,10 @@ namespace FriendlyFireAutoban
 	public class Teamkill
 	{
 		public string KillerName;
-		public string KillerSteamId;
+		public string KillerUserId;
 		public RoleType KillerTeamRole;
 		public string VictimName;
-		public string VictimSteamId;
+		public string VictimUserId;
 		public RoleType VictimTeamRole;
 		public bool VictimDisarmed;
 		public DamageType DamageType;
@@ -832,10 +834,10 @@ namespace FriendlyFireAutoban
 		public Teamkill(string killerName, string killerSteamId, RoleType killerTeamRole, string victimName, string victimSteamId, RoleType victimTeamRole, bool victimDisarmed, DamageType damageType, int duration)
 		{
 			this.KillerName = killerName;
-			this.KillerSteamId = killerSteamId;
+			this.KillerUserId = killerSteamId;
 			this.KillerTeamRole = killerTeamRole;
 			this.VictimName = victimName;
-			this.VictimSteamId = victimSteamId;
+			this.VictimUserId = victimSteamId;
 			this.VictimTeamRole = victimTeamRole;
 			this.VictimDisarmed = victimDisarmed;
 			this.DamageType = damageType;
@@ -935,10 +937,10 @@ namespace FriendlyFireAutoban
 			var teamkill = obj as Teamkill;
 			return teamkill != null &&
 				   KillerName == teamkill.KillerName &&
-				   KillerSteamId == teamkill.KillerSteamId &&
+				   KillerUserId == teamkill.KillerUserId &&
 				   EqualityComparer<RoleType>.Default.Equals(KillerTeamRole, teamkill.KillerTeamRole) &&
 				   VictimName == teamkill.VictimName &&
-				   VictimSteamId == teamkill.VictimSteamId &&
+				   VictimUserId == teamkill.VictimUserId &&
 				   EqualityComparer<RoleType>.Default.Equals(VictimTeamRole, teamkill.VictimTeamRole) &&
 				   VictimDisarmed == teamkill.VictimDisarmed &&
 				   DamageType == teamkill.DamageType &&
@@ -949,10 +951,10 @@ namespace FriendlyFireAutoban
 		{
 			var hashCode = -153347006;
 			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(KillerName);
-			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(KillerSteamId);
+			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(KillerUserId);
 			hashCode = hashCode * -1521134295 + EqualityComparer<RoleType>.Default.GetHashCode(KillerTeamRole);
 			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(VictimName);
-			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(VictimSteamId);
+			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(VictimUserId);
 			hashCode = hashCode * -1521134295 + EqualityComparer<RoleType>.Default.GetHashCode(VictimTeamRole);
 			hashCode = hashCode * -1521134295 + VictimDisarmed.GetHashCode();
 			hashCode = hashCode * -1521134295 + DamageType.GetHashCode();
