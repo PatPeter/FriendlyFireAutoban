@@ -310,38 +310,40 @@ namespace FriendlyFireAutoban
 			this.outall = Config.GetBool("friendly_fire_autoban_outall", false);
 			this.system = Config.GetInt("friendly_fire_autoban_system", 1);
 
-			this.matrix = new List<TeamTuple>();
 			List<string> teamkillMatrix = Config.GetStringList("friendly_fire_autoban_matrix");
-			foreach (string pair in teamkillMatrix)
+			if (teamkillMatrix.Count != 0)
 			{
-				string[] tuple = pair.Split(':');
-				if (tuple.Length != 2)
+				Log.Info("Matrix: " + string.Join("|", Config.GetStringList("friendly_fire_autoban_matrix").ToArray()));
+				this.matrix = new List<TeamTuple>();
+				foreach (string pair in teamkillMatrix)
 				{
-					if (this.outall)
+					string[] tuple = pair.Split(':');
+					if (tuple.Length != 2)
 					{
-						Log.Info("Tuple " + pair + " does not have a single : in it.");
+						Log.Warn("Tuple " + pair + " does not have a single : in it.");
+						continue;
 					}
-					continue;
-				}
-				int tuple0 = -1, tuple1 = -1;
-				if (!int.TryParse(tuple[0], out tuple0) || !int.TryParse(tuple[1], out tuple1))
-				{
-					if (this.outall)
+					int tuple0 = -1, tuple1 = -1;
+					if (!int.TryParse(tuple[0], out tuple0) || !int.TryParse(tuple[1], out tuple1))
 					{
-						Log.Info("Either " + tuple[0] + " or " + tuple[1] + " could not be parsed as an int.");
+						Log.Warn("Either " + tuple[0] + " or " + tuple[1] + " could not be parsed as an int.");
+						continue;
 					}
-					continue;
-				}
 
-				this.matrix.Add(new TeamTuple(tuple0, tuple1));
+					this.matrix.Add(new TeamTuple(tuple0, tuple1));
+				}
+			}
+			else
+			{
+				Log.Warn("friendly_fire_autoban_matrix retrieved from config was empty, skipping.");
 			}
 
 			this.amount = Config.GetInt("friendly_fire_autoban_amount");
 			this.length = Config.GetInt("friendly_fire_autoban_length");
 			this.expire = Config.GetInt("friendly_fire_autoban_expire");
 
-			this.scaled = new Dictionary<int, int>();
 			List<string> teamkillScaled = Config.GetStringList("friendly_fire_autoban_scaled");
+			this.scaled = new Dictionary<int, int>();
 			foreach (string pair in teamkillScaled)
 			{
 				string[] tuple = pair.Split(':');
