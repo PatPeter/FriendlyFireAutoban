@@ -30,15 +30,43 @@ namespace FriendlyFireAutoban
 		public bool enable = true;
 		public bool outall = false;
 		public int system = 1;
-		public List<TeamTuple> matrix = new List<TeamTuple>();
+		public List<TeamTuple> matrix = new List<TeamTuple>()
+		{
+			new TeamTuple(0, 0),
+			new TeamTuple(1, 1),
+			new TeamTuple(2, 2),
+			new TeamTuple(3, 3),
+			new TeamTuple(4, 4),
+			new TeamTuple(1, 3),
+			new TeamTuple(2, 4),
+			new TeamTuple(3, 1),
+			new TeamTuple(4, 2),
+		};
 		public int amount = 5;
 		public int length = 1440;
 		public int expire = 60;
-		public Dictionary<int, int> scaled = new Dictionary<int, int>();
+		public Dictionary<int, int> scaled = new Dictionary<int, int>()
+		{
+			{ 4, 1440 },
+			{ 5, 4320 },
+			{ 6, 4320 },
+			{ 7, 10080 },
+			{ 8, 10080 },
+			{ 9, 43800 },
+			{ 10, 43800 },
+			{ 11, 129600 },
+			{ 12, 129600 },
+			{ 13, 525600 }
+		};
 		public int noguns = 0;
 		public int tospec = 0;
 		public int kicker = 0;
-		public HashSet<string> immune = new HashSet<string>();
+		public HashSet<string> immune = new HashSet<string>()
+		{
+			"owner",
+			"admin",
+			"moderator"
+		};
 		public int bomber = 0;
 		public bool disarm = false;
 		public List<RoleTuple> rolewl = new List<RoleTuple>();
@@ -499,6 +527,7 @@ namespace FriendlyFireAutoban
 
 			if (String.Equals(killerUserId, victimUserId))
 			{
+				Log.Info(killerUserId + " equals " + victimUserId + ", this is a suicide and not a teamkill.");
 				return false;
 			}
 
@@ -506,12 +535,14 @@ namespace FriendlyFireAutoban
 			{
 				victimTeam = this.InverseTeams[victimTeam];
 				victimRole = this.InverseRoles[victimRole];
+				Log.Info(victimUserId + " is handcuffed, team inverted to " + victimTeam + " and role " + victimRole);
 			}
 
 			foreach (RoleTuple roleTuple in this.rolewl)
 			{
 				if (killerRole == roleTuple.KillerRole && victimRole == roleTuple.VictimRole)
 				{
+					Log.Info("Killer role " + killerRole + " and victim role " + victimRole + " is whitelisted, not a teamkill.");
 					return false;
 				}
 			}
@@ -520,10 +551,12 @@ namespace FriendlyFireAutoban
 			{
 				if (killerTeam == teamTuple.KillerTeam && victimTeam == teamTuple.VictimTeam)
 				{
+					Log.Info("Team " + killerTeam + " killing " + victimTeam + " WAS detected as a teamkill.");
 					return true;
 				}
 			}
 
+			Log.Info("Team " + killerTeam + " killing " + victimTeam + " was not detected as a teamkill.");
 			return false;
 		}
 
