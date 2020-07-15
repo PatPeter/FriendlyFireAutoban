@@ -223,11 +223,11 @@ namespace FriendlyFireAutoban
 
 		public string GetTranslation(string name)
 		{
-			Type t = this.GetType();
-			PropertyInfo property = t.GetProperty(name);
-			if (property != null)
+			Type t = typeof(Plugin);
+			PropertyInfo p = t.GetProperty(name);
+			if (p != null)
 			{
-				return (string) property.GetValue(this);
+				return (string) p.GetValue(null, null);
 			}
 			else
 			{
@@ -302,6 +302,7 @@ namespace FriendlyFireAutoban
 		public override void OnReload()
 		{
 			//This is only fired when you use the EXILED reload command, the reload command will call OnDisable, OnReload, reload the plugin, then OnEnable in that order. There is no GAC bypass, so if you are updating a plugin, it must have a unique assembly name, and you need to remove the old version from the plugins folder
+			ReloadConfig();
 		}
 
 		public void ReloadConfig()
@@ -519,6 +520,8 @@ namespace FriendlyFireAutoban
 
 		public bool isTeamkill(ReferenceHub killer, ReferenceHub victim)
 		{
+			Teamkiller teamkiller = this.plugin.AddAndGetTeamkiller(killer);
+
 			string killerUserId = Player.GetUserId(killer);
 			int killerTeam = (int)Player.GetTeam(killer);
 			int killerRole = (int)Player.GetRole(killer);
@@ -565,9 +568,9 @@ namespace FriendlyFireAutoban
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="steamId"></param>
+		/// <param name="userId"></param>
 		/// <returns>scaled ban amount in minutes</returns>
-		public int GetScaledBanAmount(string steamId)
+		public int GetScaledBanAmount(string userId)
 		{
 			int banLength = 0;
 			foreach (int banAmount in this.scaled.Keys.OrderBy(k => k))
@@ -576,13 +579,13 @@ namespace FriendlyFireAutoban
 				// If ban kills is less than player's kills, set the banLength
 				// This will ensure that players who teamkill more than the maximum
 				// will still serve the maximum ban length
-				if (banAmount < this.Teamkillers[steamId].Teamkills.Count)
+				if (banAmount < this.Teamkillers[userId].Teamkills.Count)
 				{
 					if (this.outall) Log.Info("Ban amount is less than player teamkills.");
 					banLength = this.scaled[banAmount];
 				}
 				// Exact ban amount match is found, set
-				else if (banAmount == this.Teamkillers[steamId].Teamkills.Count)
+				else if (banAmount == this.Teamkillers[userId].Teamkills.Count)
 				{
 					if (this.outall) Log.Info("Ban amount is equal to player teamkills.");
 					banLength = this.scaled[banAmount];
@@ -591,7 +594,7 @@ namespace FriendlyFireAutoban
 				// If the smallest ban amount is larger than the player's bans,
 				// then the player will not be banned.
 				// If banAmount has not been found, it will still be set to 0
-				else if (banAmount > this.Teamkillers[steamId].Teamkills.Count)
+				else if (banAmount > this.Teamkillers[userId].Teamkills.Count)
 				{
 					if (this.outall) Log.Info("Ban amount is greater than player teamkills.");
 					break;
@@ -746,6 +749,25 @@ namespace FriendlyFireAutoban
 			}
 		}
 
+		public Teamkiller AddAndGetTeamkiller(ReferenceHub player)
+		{
+			int playerId = Player.GetPlayerId(player);
+			string playerNickname = Player.GetNickname(player);
+			string playerUserId = Player.GetUserId(player);
+			string playerIpAddress = Player.GetIpAddress(player);
+
+			if (!this.plugin.Teamkillers.ContainsKey(playerUserId))
+			{
+				Log.Info("Adding Teamkiller entry for player #" + playerId + " " + playerNickname + " [" + playerUserId + "] [" + playerIpAddress + "]");
+				this.plugin.Teamkillers[playerUserId] = new Teamkiller(playerId, playerNickname, playerUserId, playerIpAddress);
+			}
+			else
+			{
+				Log.Info("Fetching Teamkiller entry for player #" + playerId + " " + playerNickname + " [" + playerUserId + "] [" + playerIpAddress + "]");
+			}
+			return this.plugin.Teamkillers[playerUserId];
+		}
+
 		//[PipeEvent("patpeter.friendly.fire.autoban.OnCheckVote")]
 		//[PipeMethod]
 		/*public bool OnVoteTeamkill(ReferenceHub killer)
@@ -813,6 +835,10 @@ namespace FriendlyFireAutoban
 		public string Name;
 		public string UserId;
 		public string IpAddress;
+		// Must keep track of team and role for when the player is sent to spectator and events are still running
+		public Team Team;
+		public RoleType Role;
+		// For kdsafe
 		public int Kills;
 		public int Deaths;
 		public List<Teamkill> Teamkills = new List<Teamkill>();

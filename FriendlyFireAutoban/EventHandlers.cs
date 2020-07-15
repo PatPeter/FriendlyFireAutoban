@@ -104,21 +104,7 @@ namespace FriendlyFireAutoban
 
 		public void OnPlayerJoin(PlayerJoinEvent ev)
 		{
-			ReferenceHub player = ev.Player;
-			int playerId = Player.GetPlayerId(player);
-			string playerNickname = Player.GetNickname(player);
-			string playerUserId = Player.GetUserId(player);
-			string playerIpAddress = Player.GetIpAddress(player);
-
-			if (!this.plugin.Teamkillers.ContainsKey(playerUserId))
-			{
-				Log.Info("Adding Teamkiller entry for player #" + playerId + " " + playerNickname + " [" + playerUserId + "] [" + playerIpAddress + "]");
-				this.plugin.Teamkillers[playerUserId] = new Teamkiller(playerId, playerNickname, playerUserId, playerIpAddress);
-			}
-			else
-			{
-				Log.Info("Player has rejoined the server #" + playerId + " " + playerNickname + " [" + playerUserId + "] [" + playerIpAddress + "]");
-			}
+			this.plugin.AddAndGetTeamkiller(ev.Player);
 		}
 
 		public void OnPlayerLeave(PlayerLeaveEvent ev)
@@ -426,7 +412,7 @@ namespace FriendlyFireAutoban
 				ReferenceHub victim = ev.Player;
 				int victimPlayerId = Player.GetPlayerId(victim);
 
-				if (this.plugin.mirror > 0f && ev.DamageType != DamageTypes.Grenade && ev.DamageType != DamageTypes.Falldown)
+				if (this.plugin.mirror > 0f && ev.DamageType != DamageTypes.Falldown) // && ev.DamageType != DamageTypes.Grenade
 				{
 					Log.Info("Mirroring " + ev.Amount + " of " + ev.DamageType.ToString() + " damage.");
 					if (this.plugin.isTeamkill(attacker, victim) && !this.plugin.isImmune(attacker) && !this.plugin.banWhitelist.Contains(attackerUserId))
@@ -453,7 +439,7 @@ namespace FriendlyFireAutoban
 						}
 					}
 				}
-				else if (victimPlayerId == attackerPlayerId && ev.DamageType == DamageTypes.Grenade)
+				/*else if (victimPlayerId == attackerPlayerId && ev.DamageType == DamageTypes.Grenade)
 				{
 					if (this.plugin.outall)
 					{
@@ -483,7 +469,7 @@ namespace FriendlyFireAutoban
 					{
 						ev.Amount = 0;
 					}
-				}
+				}*/
 			}
 		}
 
@@ -491,6 +477,19 @@ namespace FriendlyFireAutoban
 		{
 			if (this.plugin.enable)
 			{
+				// Every time a player respawns, if that player is not spectator, update team/role
+				// Therefore when mirror/bomber are triggered, we can use the cached team/role
+				ReferenceHub player = ev.Player;
+				Team playerTeam = Player.GetTeam(player);
+				RoleType playerRole = Player.GetRole(player);
+
+				Teamkiller teamkiller = this.plugin.AddAndGetTeamkiller(ev.Player);
+				if (playerTeam != Team.RIP)
+				{
+					teamkiller.Team = playerTeam;
+					teamkiller.Role = playerRole;
+				}
+
 				this.plugin.OnCheckRemoveGuns(ev.Player);
 			}
 		}
@@ -499,6 +498,19 @@ namespace FriendlyFireAutoban
 		{
 			if (this.plugin.enable)
 			{
+				// Every time a player respawns, if that player is not spectator, update team/role
+				// Therefore when mirror/bomber are triggered, we can use the cached team/role
+				ReferenceHub player = ev.Player;
+				Team playerTeam = Player.GetTeam(player);
+				RoleType playerRole = Player.GetRole(player);
+
+				Teamkiller teamkiller = this.plugin.AddAndGetTeamkiller(ev.Player);
+				if (playerTeam != Team.RIP)
+				{
+					teamkiller.Team = playerTeam;
+					teamkiller.Role = playerRole;
+				}
+
 				this.plugin.OnCheckRemoveGuns(ev.Player);
 			}
 		}
