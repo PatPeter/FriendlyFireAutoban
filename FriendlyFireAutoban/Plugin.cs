@@ -336,7 +336,7 @@ namespace FriendlyFireAutoban
 			}
 			else
 			{
-				Log.Warn("friendly_fire_autoban_matrix retrieved from config was empty, skipping.");
+				Log.Warn("friendly_fire_autoban_matrix retrieved from config was empty or could not be parsed: " + Config.GetString("friendly_fire_autoban_matrix"));
 			}
 
 			this.amount = Config.GetInt("friendly_fire_autoban_amount");
@@ -344,42 +344,56 @@ namespace FriendlyFireAutoban
 			this.expire = Config.GetInt("friendly_fire_autoban_expire");
 
 			List<string> teamkillScaled = Config.GetStringList("friendly_fire_autoban_scaled");
-			this.scaled = new Dictionary<int, int>();
-			foreach (string pair in teamkillScaled)
+			if (system == 3 && teamkillScaled.Count != 0)
 			{
-				string[] tuple = pair.Split(':');
-				if (tuple.Length != 2)
+				this.scaled = new Dictionary<int, int>();
+				foreach (string pair in teamkillScaled)
 				{
-					if (this.outall)
+					string[] tuple = pair.Split(':');
+					if (tuple.Length != 2)
 					{
-						Log.Info("Tuple " + pair + " does not have a single : in it.");
+						if (this.outall)
+						{
+							Log.Info("Tuple " + pair + " does not have a single : in it.");
+						}
+						continue;
 					}
-					continue;
-				}
-				int tuple0 = -1, tuple1 = -1;
-				if (!int.TryParse(tuple[0], out tuple0) || !int.TryParse(tuple[1], out tuple1))
-				{
-					if (this.outall)
+					int tuple0 = -1, tuple1 = -1;
+					if (!int.TryParse(tuple[0], out tuple0) || !int.TryParse(tuple[1], out tuple1))
 					{
-						Log.Info("Either " + tuple[0] + " or " + tuple[1] + " could not be parsed as an int.");
+						if (this.outall)
+						{
+							Log.Info("Either " + tuple[0] + " or " + tuple[1] + " could not be parsed as an int.");
+						}
+						continue;
 					}
-					continue;
-				}
 
-				if (!this.scaled.ContainsKey(tuple0))
-				{
-					this.scaled[tuple0] = tuple1;
+					if (!this.scaled.ContainsKey(tuple0))
+					{
+						this.scaled[tuple0] = tuple1;
+					}
 				}
+			}
+			else
+			{
+				Log.Warn("friendly_fire_autoban_scaled retrieved from config was empty or could not be parsed: " + Config.GetString("friendly_fire_autoban_scaled"));
 			}
 
 			this.noguns = Config.GetInt("friendly_fire_autoban_noguns");
 			this.tospec = Config.GetInt("friendly_fire_autoban_tospec");
 			this.kicker = Config.GetInt("friendly_fire_autoban_kicker");
 
-			this.immune = new HashSet<string>();
-			foreach (string rank in Config.GetStringList("friendly_fire_autoban_immune"))
+			List<string> immuneRanks = Config.GetStringList("friendly_fire_autoban_immune");
+			if (immuneRanks.Count != 0) {
+				this.immune = new HashSet<string>();
+				foreach (string rank in immuneRanks)
+				{
+					this.immune.Add(rank);
+				}
+			}
+			else
 			{
-				this.immune.Add(rank);
+				Log.Warn("friendly_fire_autoban_immune retrieved from config was empty or could not be parsed: " + Config.GetString("friendly_fire_autoban_immune"));
 			}
 
 			this.bomber = Config.GetInt("friendly_fire_autoban_bomber");
