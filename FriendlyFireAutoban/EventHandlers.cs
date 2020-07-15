@@ -428,7 +428,7 @@ namespace FriendlyFireAutoban
 
 				if (this.plugin.mirror > 0f && ev.DamageType != DamageTypes.Grenade && ev.DamageType != DamageTypes.Falldown)
 				{
-					Log.Info("Mirroring " + ev.Amount + " damage.");
+					Log.Info("Mirroring " + ev.Amount + " of " + ev.DamageType.ToString() + " damage.");
 					if (this.plugin.isTeamkill(attacker, victim) && !this.plugin.isImmune(attacker) && !this.plugin.banWhitelist.Contains(attackerUserId))
 					{
 						if (this.plugin.invert > 0)

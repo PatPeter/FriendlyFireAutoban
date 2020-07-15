@@ -124,102 +124,102 @@ namespace FriendlyFireAutoban
 		 * Ban Events
 		 */
 		
-		public readonly string victimMessage = "<size=36>{0} <color=red>teamkilled</color> you at {1}. If this was an accidental teamkill, please press ~ and then type .forgive to prevent this user from being banned.</size>";
+		public readonly string victim_message = "<size=36>{0} <color=red>teamkilled</color> you at {1}. If this was an accidental teamkill, please press ~ and then type .forgive to prevent this user from being banned.</size>";
 		
-		public readonly string killerMessage = "You teamkilled {0} {1}.";
+		public readonly string killer_message = "You teamkilled {0} {1}.";
 		
-		public readonly string killerKDRMessage = "You teamkilled {0} {1}. Because your K/D ratio is {2}, you will not be punished. Please watch your fire.";
+		public readonly string killer_kdr_message = "You teamkilled {0} {1}. Because your K/D ratio is {2}, you will not be punished. Please watch your fire.";
 		
-		public readonly string killerWarning = "If you teamkill {0} more times you will be banned.";
+		public readonly string killer_warning = "If you teamkill {0} more times you will be banned.";
 		
-		public readonly string killerRequest = "Please do not teamkill.";
+		public readonly string killer_request = "Please do not teamkill.";
 		
-		public readonly string nogunsOutput = "Your guns have been removed for <color=red>teamkilling</color>. You will get them back when your teamkill expires.";
+		public readonly string noguns_output = "Your guns have been removed for <color=red>teamkilling</color>. You will get them back when your teamkill expires.";
 		
-		public readonly string tospecOutput = "You have been moved to spectate for <color=red>teamkilling</color>.";
+		public readonly string tospec_output = "You have been moved to spectate for <color=red>teamkilling</color>.";
 		
-		public readonly string undeadKillerOutput = "{0} has been respawned because you are <color=red>teamkilling</color> too much. If you continue, you will be banned.";
+		public readonly string undead_killer_output = "{0} has been respawned because you are <color=red>teamkilling</color> too much. If you continue, you will be banned.";
 		
-		public readonly string undeadVictimOutput = "You have been respawned after being teamkilled by {0}.";
+		public readonly string undead_victim_output = "You have been respawned after being teamkilled by {0}.";
 		
-		public readonly string kickerOutput = "You will be kicked for <color=red>teamkilling</color>.";
+		public readonly string kicker_output = "You will be kicked for <color=red>teamkilling</color>.";
 		
-		public readonly string bannedOutput = "Player {0} has been banned for <color=red>teamkilling</color> {1} players.";
+		public readonly string banned_output = "Player {0} has been banned for <color=red>teamkilling</color> {1} players.";
 
 		
 		// OFFLINE BAN, DO NOT ADD BBCODE
-		public readonly string offlineBan = "Banned {0} minutes for teamkilling {1} players";
+		public readonly string offline_ban = "Banned {0} minutes for teamkilling {1} players";
 
 		/*
 		 * Teamkiller/Teamkill
 		 */
 		
-		public readonly string roleDisarmed = "DISARMED ";
+		public readonly string role_disarmed = "DISARMED ";
 		
-		public readonly string roleSeparator = "on";
+		public readonly string role_separator = "on";
 		
-		public readonly string roleDclass = "<color=orange>D-CLASS</color>";
+		public readonly string role_dclass = "<color=orange>D-CLASS</color>";
 		
-		public readonly string roleScientist = "<color=yellow>SCIENTIST</color>";
+		public readonly string role_scientist = "<color=yellow>SCIENTIST</color>";
 		
-		public readonly string roleGuard = "<color=silver>GUARD</color>";
+		public readonly string role_guard = "<color=silver>GUARD</color>";
 		
-		public readonly string roleCadet = "<color=cyan>CADET</color>";
+		public readonly string role_cadet = "<color=cyan>CADET</color>";
 		
-		public readonly string roleLieutenant = "<color=aqua>LIEUTENANT</color>";
+		public readonly string role_lieutenant = "<color=aqua>LIEUTENANT</color>";
 		
-		public readonly string roleCommander = "<color=blue>COMMANDER</color>";
+		public readonly string role_commander = "<color=blue>COMMANDER</color>";
 		
-		public readonly string roleNTFScientist = "<color=aqua>NTF SCIENTIST</color>";
+		public readonly string role_ntf_scientist = "<color=aqua>NTF SCIENTIST</color>";
 		
-		public readonly string roleChaos = "<color=green>CHAOS</color>";
+		public readonly string role_chaos = "<color=green>CHAOS</color>";
 		
-		public readonly string roleTutorial = "<color=lime>TUTORIAL</color>";
+		public readonly string role_tutorial = "<color=lime>TUTORIAL</color>";
 
 		/*
 		 * Commands
 		 */
 		
-		public readonly string toggleDescription = "Toggle Friendly Fire Autoban on and off.";
+		public readonly string toggle_description = "Toggle Friendly Fire Autoban on and off.";
 		
-		public readonly string toggleDisable = "Friendly fire Autoban has been disabled.";
+		public readonly string toggle_disable = "Friendly fire Autoban has been disabled.";
 		
-		public readonly string toggleEnable = "Friendly fire Autoban has been enabled.";
+		public readonly string toggle_enable = "Friendly fire Autoban has been enabled.";
 
 		
-		public readonly string whitelistDescription = "Whitelist a user from being banned by FFA until the end of the round.";
+		public readonly string whitelist_description = "Whitelist a user from being banned by FFA until the end of the round.";
 		
-		public readonly string whitelistError = "A single name or Steam ID must be provided.";
+		public readonly string whitelist_error = "A single name or Steam ID must be provided.";
 		
-		public readonly string whitelistAdd = "Added player {0} ({1}) to ban whitelist.";
+		public readonly string whitelist_add = "Added player {0} ({1}) to ban whitelist.";
 		
-		public readonly string whitelistRemove = "Removed player {0} ({1}) from ban whitelist.";
+		public readonly string whitelist_remove = "Removed player {0} ({1}) from ban whitelist.";
 
 		/*
 		 * Client Commands
 		 */
 		
-		public readonly string forgiveCommand = "forgive";
+		public readonly string forgive_command = "forgive";
 		
-		public readonly string forgiveSuccess = "You have forgiven {0} {1}!";
+		public readonly string forgive_success = "You have forgiven {0} {1}!";
 		
-		public readonly string forgiveDuplicate = "You already forgave {0} {1}.";
+		public readonly string forgive_duplicate = "You already forgave {0} {1}.";
 		
-		public readonly string forgiveDisconnect = "The player has disconnected.";
+		public readonly string forgive_disconnect = "The player has disconnected.";
 		
-		public readonly string forgiveInvalid = "You have not been teamkilled yet.";
+		public readonly string forgive_invalid = "You have not been teamkilled yet.";
 
 		
-		public readonly string tksCommand = "tks";
+		public readonly string tks_command = "tks";
 		
-		public readonly string tksNoTeamkills = "No players by this name or Steam ID has any teamkills.";
+		public readonly string tks_no_teamkills = "No players by this name or Steam ID has any teamkills.";
 		
-		public readonly string tksTeamkillEntry = "({0}) {1} teamkilled {2} {3}.";
+		public readonly string tks_teamkill_entry = "({0}) {1} teamkilled {2} {3}.";
 		
-		public readonly string tksNotFound = "Player name not provided or not quoted.";
+		public readonly string tks_not_found = "Player name not provided or not quoted.";
 
 		
-		public readonly string ffaDisabled = "Friendly Fire Autoban is currently disabled.";
+		public readonly string ffa_disabled = "Friendly Fire Autoban is currently disabled.";
 
 		public string GetTranslation(string name)
 		{
