@@ -223,11 +223,11 @@ namespace FriendlyFireAutoban
 
 		public string GetTranslation(string name)
 		{
-			Type t = typeof(Plugin);
-			PropertyInfo p = t.GetProperty(name);
+			Type t = typeof(FriendlyFireAutoban.Plugin);
+			FieldInfo p = t.GetField(name);
 			if (p != null)
 			{
-				return (string) p.GetValue(null, null);
+				return (string) p.GetValue(this);
 			}
 			else
 			{
