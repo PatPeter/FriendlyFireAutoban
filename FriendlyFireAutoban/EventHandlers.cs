@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Timers;
+
 using EXILED;
 using EXILED.Extensions;
 using Grenades;
 using MEC;
 using static BanHandler;
+
 
 namespace FriendlyFireAutoban
 {
@@ -239,7 +241,7 @@ namespace FriendlyFireAutoban
 				{
 					this.plugin.Teamkillers[killerUserId].Kills--;
 
-					Teamkill teamkill = new Teamkill(killerNickname, killerUserId, killerRole, victimNickname, victimUserId, victimRole, victimIsHandcuffed, ev.Info.GetDamageType(), (int) EventPlugin.GetRoundDuration());
+					Teamkill teamkill = new Teamkill(killerNickname, killerUserId, (short)killerRole, victimNickname, victimUserId, (short)victimRole, victimIsHandcuffed, (short)ev.Info.GetDamageType().weaponId, (int) EventPlugin.GetRoundDuration());
 					this.plugin.TeamkillVictims[victimUserId] = teamkill;
 					this.plugin.Teamkillers[killerUserId].Teamkills.Add(teamkill);
 
@@ -486,8 +488,8 @@ namespace FriendlyFireAutoban
 				Teamkiller teamkiller = this.plugin.AddAndGetTeamkiller(ev.Player);
 				if (playerTeam != Team.RIP)
 				{
-					teamkiller.Team = playerTeam;
-					teamkiller.Role = playerRole;
+					teamkiller.Team = (short)playerTeam;
+					teamkiller.Role = (short)playerRole;
 				}
 
 				this.plugin.OnCheckRemoveGuns(ev.Player);
@@ -507,8 +509,8 @@ namespace FriendlyFireAutoban
 				Teamkiller teamkiller = this.plugin.AddAndGetTeamkiller(ev.Player);
 				if (playerTeam != Team.RIP)
 				{
-					teamkiller.Team = playerTeam;
-					teamkiller.Role = playerRole;
+					teamkiller.Team = (short)playerTeam;
+					teamkiller.Role = (short)playerRole;
 				}
 
 				this.plugin.OnCheckRemoveGuns(ev.Player);

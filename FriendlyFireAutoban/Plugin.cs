@@ -9,6 +9,7 @@ using MEC;
 using static DamageTypes;
 using static Inventory;
 
+
 namespace FriendlyFireAutoban
 {
 	public class Plugin : EXILED.Plugin
@@ -252,7 +253,7 @@ namespace FriendlyFireAutoban
 				Log.Debug("Initializing event handlers..");
 				//Set instance varible to a new instance, this should be nulled again in OnDisable
 				EventHandlers = new EventHandlers(this);
-				//Hook the events you will be using in the plugin. You should hook all events you will be using here, all events should be unhooked in OnDisabled 
+				//Hook the events you will be using in the plugin. You should hook all events you will be using here, all events should be unhooked in OnDisabled
 				Events.RoundStartEvent += EventHandlers.OnRoundStart;
 				Events.RoundEndEvent += EventHandlers.OnRoundEnd;
 
@@ -850,8 +851,8 @@ namespace FriendlyFireAutoban
 		public string UserId;
 		public string IpAddress;
 		// Must keep track of team and role for when the player is sent to spectator and events are still running
-		public Team Team;
-		public RoleType Role;
+		public short Team;
+		public short Role;
 		// For kdsafe
 		public int Kills;
 		public int Deaths;
@@ -898,15 +899,15 @@ namespace FriendlyFireAutoban
 	{
 		public string KillerName;
 		public string KillerUserId;
-		public RoleType KillerTeamRole;
+		public short KillerTeamRole;
 		public string VictimName;
 		public string VictimUserId;
-		public RoleType VictimTeamRole;
+		public short VictimTeamRole;
 		public bool VictimDisarmed;
-		public DamageType DamageType;
+		public short DamageType;
 		public int Duration;
 
-		public Teamkill(string killerName, string killerSteamId, RoleType killerTeamRole, string victimName, string victimSteamId, RoleType victimTeamRole, bool victimDisarmed, DamageType damageType, int duration)
+		public Teamkill(string killerName, string killerSteamId, short killerTeamRole, string victimName, string victimSteamId, short victimTeamRole, bool victimDisarmed, short damageType, int duration)
 		{
 			this.KillerName = killerName;
 			this.KillerUserId = killerSteamId;
@@ -924,39 +925,39 @@ namespace FriendlyFireAutoban
 			string retval = "(";
 			switch (KillerTeamRole)
 			{
-				case RoleType.ClassD:
+				case (short)RoleType.ClassD:
 					retval += Plugin.GetInstance().GetTranslation("role_dclass");
 					break;
 
-				case RoleType.Scientist:
+				case (short)RoleType.Scientist:
 					retval += Plugin.GetInstance().GetTranslation("role_scientist");
 					break;
 
-				case RoleType.FacilityGuard:
+				case (short)RoleType.FacilityGuard:
 					retval += Plugin.GetInstance().GetTranslation("role_guard");
 					break;
 
-				case RoleType.NtfCadet:
+				case (short)RoleType.NtfCadet:
 					retval += Plugin.GetInstance().GetTranslation("role_cadet");
 					break;
 
-				case RoleType.NtfLieutenant:
+				case (short)RoleType.NtfLieutenant:
 					retval += Plugin.GetInstance().GetTranslation("role_lieutenant");
 					break;
 
-				case RoleType.NtfCommander:
+				case (short)RoleType.NtfCommander:
 					retval += Plugin.GetInstance().GetTranslation("role_commander");
 					break;
 
-				case RoleType.NtfScientist:
+				case (short)RoleType.NtfScientist:
 					retval += Plugin.GetInstance().GetTranslation("role_ntf_scientist");
 					break;
 
-				case RoleType.ChaosInsurgency:
+				case (short)RoleType.ChaosInsurgency:
 					retval += Plugin.GetInstance().GetTranslation("role_chaos");
 					break;
 
-				case RoleType.Tutorial:
+				case (short)RoleType.Tutorial:
 					retval += Plugin.GetInstance().GetTranslation("role_tutorial");
 					break;
 			}
@@ -967,39 +968,39 @@ namespace FriendlyFireAutoban
 			}
 			switch (VictimTeamRole)
 			{
-				case RoleType.ClassD:
+				case (short)RoleType.ClassD:
 					retval += Plugin.GetInstance().GetTranslation("role_dclass");
 					break;
 
-				case RoleType.Scientist:
+				case (short)RoleType.Scientist:
 					retval += Plugin.GetInstance().GetTranslation("role_scientist");
 					break;
 
-				case RoleType.FacilityGuard:
+				case (short)RoleType.FacilityGuard:
 					retval += Plugin.GetInstance().GetTranslation("role_guard");
 					break;
 
-				case RoleType.NtfCadet:
+				case (short)RoleType.NtfCadet:
 					retval += Plugin.GetInstance().GetTranslation("role_cadet");
 					break;
 
-				case RoleType.NtfLieutenant:
+				case (short)RoleType.NtfLieutenant:
 					retval += Plugin.GetInstance().GetTranslation("role_lieutenant");
 					break;
 
-				case RoleType.NtfCommander:
+				case (short)RoleType.NtfCommander:
 					retval += Plugin.GetInstance().GetTranslation("role_commander");
 					break;
 
-				case RoleType.NtfScientist:
+				case (short)RoleType.NtfScientist:
 					retval += Plugin.GetInstance().GetTranslation("role_ntf_scientist");
 					break;
 
-				case RoleType.ChaosInsurgency:
+				case (short)RoleType.ChaosInsurgency:
 					retval += Plugin.GetInstance().GetTranslation("role_chaos");
 					break;
 
-				case RoleType.Tutorial:
+				case (short)RoleType.Tutorial:
 					retval += Plugin.GetInstance().GetTranslation("role_tutorial");
 					break;
 			}
@@ -1013,10 +1014,10 @@ namespace FriendlyFireAutoban
 			return teamkill != null &&
 				   KillerName == teamkill.KillerName &&
 				   KillerUserId == teamkill.KillerUserId &&
-				   EqualityComparer<RoleType>.Default.Equals(KillerTeamRole, teamkill.KillerTeamRole) &&
+				   EqualityComparer<short>.Default.Equals(KillerTeamRole, teamkill.KillerTeamRole) &&
 				   VictimName == teamkill.VictimName &&
 				   VictimUserId == teamkill.VictimUserId &&
-				   EqualityComparer<RoleType>.Default.Equals(VictimTeamRole, teamkill.VictimTeamRole) &&
+				   EqualityComparer<short>.Default.Equals(VictimTeamRole, teamkill.VictimTeamRole) &&
 				   VictimDisarmed == teamkill.VictimDisarmed &&
 				   DamageType == teamkill.DamageType &&
 				   Duration == teamkill.Duration;
@@ -1027,10 +1028,10 @@ namespace FriendlyFireAutoban
 			var hashCode = -153347006;
 			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(KillerName);
 			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(KillerUserId);
-			hashCode = hashCode * -1521134295 + EqualityComparer<RoleType>.Default.GetHashCode(KillerTeamRole);
+			hashCode = hashCode * -1521134295 + EqualityComparer<short>.Default.GetHashCode(KillerTeamRole);
 			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(VictimName);
 			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(VictimUserId);
-			hashCode = hashCode * -1521134295 + EqualityComparer<RoleType>.Default.GetHashCode(VictimTeamRole);
+			hashCode = hashCode * -1521134295 + EqualityComparer<short>.Default.GetHashCode(VictimTeamRole);
 			hashCode = hashCode * -1521134295 + VictimDisarmed.GetHashCode();
 			hashCode = hashCode * -1521134295 + DamageType.GetHashCode();
 			hashCode = hashCode * -1521134295 + Duration.GetHashCode();
