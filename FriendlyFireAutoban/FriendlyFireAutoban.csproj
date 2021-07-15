@@ -31,8 +31,8 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Assembly-CSharp" Condition="'$(Configuration)'=='Smod2'">
-      <HintPath>..\..\References\Assembly-CSharp.dll</HintPath>
+    <Reference Include="0Harmony">
+      <HintPath>..\..\References\dependencies\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp_publicized" Condition="'$(Configuration)'=='EXILED'">
       <HintPath>..\..\References\Assembly-CSharp_publicized.dll</HintPath>
@@ -40,18 +40,23 @@
     <Reference Include="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\..\References\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
-    <Reference Include="EXILED, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Condition="'$(Configuration)'=='EXILED'">
-      <HintPath>..\..\References\EXILED.dll</HintPath>
-      <Aliases>global</Aliases>
+    <Reference Include="Exiled.API">
+      <HintPath>..\..\References\dependencies\Exiled.API.dll</HintPath>
     </Reference>
-    <Reference Include="EXILED_Events, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" Condition="'$(Configuration)'=='EXILED'">
-      <HintPath>..\..\References\EXILED_Events.dll</HintPath>
+    <Reference Include="Exiled.Events">
+      <HintPath>..\..\References\Exiled.Events.dll</HintPath>
+    </Reference>
+    <Reference Include="Exiled.Loader">
+      <HintPath>..\..\References\Exiled.Loader.dll</HintPath>
+    </Reference>
+    <Reference Include="Exiled.Permissions">
+      <HintPath>..\..\References\Exiled.Permissions.dll</HintPath>
+    </Reference>
+    <Reference Include="Exiled.Updater">
+      <HintPath>..\..\References\Exiled.Updater.dll</HintPath>
     </Reference>
     <Reference Include="Mirror, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\..\References\Mirror.dll</HintPath>
-    </Reference>
-    <Reference Include="Smod2" Condition="'$(Configuration)'=='Smod2'">
-      <HintPath>..\..\References\Smod2.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -63,8 +68,12 @@
     <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>..\..\References\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
+    <Reference Include="YamlDotNet">
+      <HintPath>..\..\References\dependencies\YamlDotNet.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Config.cs" />
     <Compile Include="EventHandlers.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Plugin.cs" />

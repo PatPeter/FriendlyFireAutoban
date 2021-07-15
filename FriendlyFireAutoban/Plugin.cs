@@ -1,37 +1,41 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Timers;
-using EXILED;
-using EXILED.Extensions;
-using MEC;
-using static DamageTypes;
-using static Inventory;
-
-
 namespace FriendlyFireAutoban
 {
-	public class Plugin : EXILED.Plugin
-	{
-		private static Plugin instance = null;
-		private Plugin plugin = null;
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+	using System.Reflection;
+	using System.Timers;
+	using Exiled.API.Enums;
+	using Exiled.API.Features;
+	using Exiled.Events.Extensions;
 
-		public static Plugin GetInstance()
+	public class Plugin : Plugin<Config>
+	{
+		private static readonly Lazy<Plugin> LazyInstance = new Lazy<Plugin>(() => new Plugin());
+
+		private Handlers.Server server;
+		private Handlers.Player player;
+		private Handlers.Warhead warhead;
+
+		private Plugin()
 		{
-			return instance;
 		}
 
-		internal bool DuringRound = false;
-		internal bool ProcessingDisconnect = false;
+		/// <summary>
+		/// Gets the lazy instance.
+		/// </summary>
+		public static Plugin Instance => LazyInstance.Value;
+
 
 		/*
 		 * 
+		 * FFA config values
+		 * 
 		 */
-		public bool enable = true;
-		public bool outall = false;
-		public int system = 1;
-		public List<TeamTuple> matrix = new List<TeamTuple>()
+		private bool enable = true;
+		private bool outall = false;
+		private int system = 1;
+		private List<TeamTuple> matrix = new List<TeamTuple>()
 		{
 			new TeamTuple(0, 0),
 			new TeamTuple(1, 1),
@@ -43,10 +47,10 @@ namespace FriendlyFireAutoban
 			new TeamTuple(3, 1),
 			new TeamTuple(4, 2),
 		};
-		public int amount = 5;
-		public int length = 1440;
-		public int expire = 60;
-		public Dictionary<int, int> scaled = new Dictionary<int, int>()
+		private int amount = 5;
+		private int length = 1440;
+		private int expire = 60;
+		private Dictionary<int, int> scaled = new Dictionary<int, int>()
 		{
 			{ 4, 1440 },
 			{ 5, 4320 },
@@ -59,32 +63,37 @@ namespace FriendlyFireAutoban
 			{ 12, 129600 },
 			{ 13, 525600 }
 		};
-		public int noguns = 0;
-		public int tospec = 0;
-		public int kicker = 0;
-		public HashSet<string> immune = new HashSet<string>()
+		private int noguns = 0;
+		private int tospec = 0;
+		private int kicker = 0;
+		private HashSet<string> immune = new HashSet<string>()
 		{
 			"owner",
 			"admin",
 			"moderator"
 		};
-		public int bomber = 0;
-		public bool disarm = false;
-		public List<RoleTuple> rolewl = new List<RoleTuple>();
-		public int invert = 0;
-		public float mirror = 0;
-		public int undead = 0;
-		public int warntk = 0;
-		public int votetk = 0;
-		public int kdsafe = 0;
+		private int bomber = 0;
+		private bool disarm = false;
+		private List<RoleTuple> rolewl = new List<RoleTuple>();
+		private int invert = 0;
+		private float mirror = 0;
+		private int undead = 0;
+		private int warntk = 0;
+		private int votetk = 0;
+		private int kdsafe = 0;
 
+		/*
+		 * FFA internal values
+		 */
+		internal bool DuringRound = false;
+		internal bool ProcessingDisconnect = false;
 		internal Dictionary<string, Teamkiller> Teamkillers = new Dictionary<string, Teamkiller>();
 		internal Dictionary<string, Timer> TeamkillTimers = new Dictionary<string, Timer>();
 		internal Dictionary<string, Teamkill> TeamkillVictims = new Dictionary<string, Teamkill>();
 
 		internal HashSet<string> banWhitelist = new HashSet<string>();
 
-		internal Dictionary<int, int> InverseTeams = new Dictionary<int, int>()
+		readonly internal Dictionary<int, int> InverseTeams = new Dictionary<int, int>()
 		{
 			{ -1, -1 },
 			{ 0, 0 },
@@ -95,7 +104,7 @@ namespace FriendlyFireAutoban
 			{ 5, 5 },
 			{ 6, 6 }
 		};
-		internal Dictionary<int, int> InverseRoles = new Dictionary<int, int>()
+		readonly internal Dictionary<int, int> InverseRoles = new Dictionary<int, int>()
 		{
 			{ -1, -1 },
 			{ 0, 0 },
