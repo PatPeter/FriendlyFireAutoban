@@ -4,27 +4,27 @@ This is a plugin for [Smod2](https://github.com/Grover-c13/Smod2) that automatic
 ## Configuration Settings
 Key | Value Type | Default Value | Description
 --- | --- | --- | ---
-friendly_fire_autoban_enable | boolean | true | `Enable` or `Disable` the plugin on each server
-friendly_fire_autoban_outall | boolean | false | Print debugging statements to see if your configuration is working correctly
-friendly_fire_autoban_system | integer | 1 | Change system for processing teamkills:<br>(1) basic counter that will ban the player instantly upon reaching a threshold,<br>(2) timer-based counter that will ban a player after reaching the threshold but will forgive 1 teamkill every `friendly_fire_autoban_expire` seconds, or<br>(3) allow users to teamkill as much as possible and ban them after they have gone `friendly_fire_autoban_expire` seconds without teamkilling (will ban on round end and player disconnect).
-friendly_fire_autoban_matrix | list | 1:1,2:2,3:3,4:4,1:3,2:4,3:1,4:2 | Matrix of `killer:victim` team tuples that the plugins considers teamkills
-friendly_fire_autoban_amount | integer | 5 | Amount of teamkills before a ban will be issued.
-friendly_fire_autoban_length | integer | 3600 | Length of ban in minutes.
-friendly_fire_autoban_expire | integer | 60 | For ban system #2, Time it takes in seconds for teamkill to degrade and not count towards ban.
-friendly_fire_autoban_scaled | dictionary |  | For ban system #3, dictionary of amount of teamkills:length of ban that will be processed at the end of the round.
-friendly_fire_autoban_noguns | integer | 0 | Number of kills to remove the player's guns as a warning for teamkilling, and will remove guns every time the player picks them up or spawns with them. In ban system #1, this will remove the player's guns for the rest of the round.
-friendly_fire_autoban_tospec | integer | 0 | Number of kills at which to put a player into spectator as a warning for teamkilling.
-friendly_fire_autoban_kicker | integer | 0 | Number of kills at which to kick the player as a warning for teamkilling.
-friendly_fire_autoban_immune | string | owner,admin,moderator | Groups that are immune to being autobanned.
-friendly_fire_autoban_bomber | integer | 0 | Whether to delay grenade damage of thrower by one second [experimental] (2), make player immune to grenade damage (1), or keep disabled (0).
-friendly_fire_autoban_disarm | boolean | false | Whether disarmed players should be considered members of the opposite team and role.
-friendly_fire_autoban_rolewl | list |  | Matrix of `killer:victim` role tuples that the plugin will NOT consider teamkills.<br><br>If you want NTF to be able to teamkill based on the chain of command, use this value (on one line): <br>12:11,12:4,12:13,12:15,<br>4:11,4:13,4:15,<br>11:13,11:15,13:15
-friendly_fire_autoban_invert | integer | 0 | Reverse Friendly Fire. If greater than 0, value of mirror will only apply after this many teamkills.
-friendly_fire_autoban_mirror | float | 0 | Whether damage should be mirrored back to a teamkiller, with values greater than (1) being considered a multiplier.
-friendly_fire_autoban_undead | integer | 0 | Respawns teamkilled players after this many teamkills.
-friendly_fire_autoban_warntk | integer | -1 | How many teamkills before a ban should a teamkiller be warned (>=1), give a generic warning (0), or give no warning (-1).
-friendly_fire_autoban_votetk | integer | 0 | [not implemented yet] The number of teamkills at which to call a vote via the callvote plugin to ban a user by the ban amount.
-friendly_fire_autoban_kdsafe | integer | 0 | The K/D ratio at which players will be immune from pre-ban and ban punishments. Takes effect when kills are greater than kdsafe, i.e. set to 2 requires a minimum of 4:2 (not 2:1), set to 3 requires a minimum of 6:2 (not 3:1), etc.
+friendly_fire_autoban_enable |    boolean |                            true | `Enable` or `Disable` the plugin on each server
+friendly_fire_autoban_outall |    boolean |                           false | Print debugging statements to see if your configuration is working correctly
+friendly_fire_autoban_system |    integer |                               1 | Change system for processing teamkills:<br>(1) basic counter that will ban the player instantly upon reaching a threshold,<br>(2) timer-based counter that will ban a player after reaching the threshold but will forgive 1 teamkill every `friendly_fire_autoban_expire` seconds, or<br>(3) allow users to teamkill as much as possible and ban them after they have gone `friendly_fire_autoban_expire` seconds without teamkilling (will ban on round end and player disconnect).
+friendly_fire_autoban_matrix |       list | 1:1,2:2,3:3,4:4,1:3,2:4,3:1,4:2 | Matrix of `killer:victim` team tuples that the plugin considers teamkills
+friendly_fire_autoban_amount |    integer |                               5 | Amount of teamkills before a ban will be issued.
+friendly_fire_autoban_length |    integer |                            3600 | Length of ban in minutes.
+friendly_fire_autoban_expire |    integer |                              60 | For ban system #2, Time it takes in seconds for teamkill to degrade and not count towards ban.
+friendly_fire_autoban_scaled | dictionary |                                 | For ban system #3, dictionary of amount of teamkills:length of ban that will be processed at the end of the round.
+friendly_fire_autoban_noguns |    integer |                               0 | Number of kills to remove the player's guns as a warning for teamkilling, and will remove guns every time the player picks them up or spawns with them. In ban system #1, this will remove the player's guns for the rest of the round.
+friendly_fire_autoban_tospec |    integer |                               0 | Number of kills at which to put a player into spectator as a warning for teamkilling.
+friendly_fire_autoban_kicker |    integer |                               0 | Number of kills at which to kick the player as a warning for teamkilling.
+friendly_fire_autoban_immune |     string |           owner,admin,moderator | Groups that are immune to being autobanned.
+friendly_fire_autoban_bomber |    integer |                               0 | Whether to delay grenade damage of thrower by one second [experimental] (2), make player immune to grenade damage (1), or keep disabled (0).
+friendly_fire_autoban_disarm |    boolean |                           false | Whether disarmed players should be considered members of the opposite team and role.
+friendly_fire_autoban_rolewl |       list |                                 | Matrix of `killer:victim` role tuples that the plugin will NOT consider teamkills.<br><br>If you want NTF to be able to teamkill based on the chain of command, use this value (on one line): <br>12:11,12:4,12:13,12:15,<br>4:11,4:13,4:15,<br>11:13,11:15,13:15
+friendly_fire_autoban_invert |    integer |                               0 | Reverse Friendly Fire. If greater than 0, value of mirror will only apply after this many teamkills.
+friendly_fire_autoban_mirror |      float |                               0 | Whether damage should be mirrored back to a teamkiller, with values greater than (1) being considered a multiplier.
+friendly_fire_autoban_undead |    integer |                               0 | Respawns teamkilled players after this many teamkills.
+friendly_fire_autoban_warntk |    integer |                              -1 | How many teamkills before a ban should a teamkiller be warned (>=1), give a generic warning (0), or give no warning (-1).
+friendly_fire_autoban_votetk |    integer |                               0 | [not implemented yet] The number of teamkills at which to call a vote via the callvote plugin to ban a user by the ban amount.
+friendly_fire_autoban_kdsafe |    integer |                               0 | The K/D ratio at which players will be immune from pre-ban and ban punishments. Takes effect when kills are greater than kdsafe, i.e. set to 2 requires a minimum of 4:2 (not 2:1), set to 3 requires a minimum of 6:2 (not 3:1), etc.
 
 ## Example Configuration
 Here is the default configuration for Friendly Fire Autoban that you can copy directly into your config_gameplay.txt:

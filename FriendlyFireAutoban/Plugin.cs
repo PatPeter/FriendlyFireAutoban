@@ -1,21 +1,22 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Timers;
+using Exiled.API.Enums;
+using Exiled.API.Features;
+using Exiled.Events.Extensions;
+using Exiled.API.Features;
+using Exiled.API.Extensions;
+using Exiled.API.Features.Items;
+
 namespace FriendlyFireAutoban
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Reflection;
-	using System.Timers;
-	using Exiled.API.Enums;
-	using Exiled.API.Features;
-	using Exiled.Events.Extensions;
-
 	public class Plugin : Plugin<Config>
 	{
 		private static readonly Lazy<Plugin> LazyInstance = new Lazy<Plugin>(() => new Plugin());
 
-		private Handlers.Server server;
-		private Handlers.Player player;
-		private Handlers.Warhead warhead;
+		private EventHandlers eh;
 
 		private Plugin()
 		{
@@ -26,107 +27,57 @@ namespace FriendlyFireAutoban
 		/// </summary>
 		public static Plugin Instance => LazyInstance.Value;
 
-
-		/*
-		 * 
-		 * FFA config values
-		 * 
-		 */
-		private bool enable = true;
-		private bool outall = false;
-		private int system = 1;
-		private List<TeamTuple> matrix = new List<TeamTuple>()
-		{
-			new TeamTuple(0, 0),
-			new TeamTuple(1, 1),
-			new TeamTuple(2, 2),
-			new TeamTuple(3, 3),
-			new TeamTuple(4, 4),
-			new TeamTuple(1, 3),
-			new TeamTuple(2, 4),
-			new TeamTuple(3, 1),
-			new TeamTuple(4, 2),
-		};
-		private int amount = 5;
-		private int length = 1440;
-		private int expire = 60;
-		private Dictionary<int, int> scaled = new Dictionary<int, int>()
-		{
-			{ 4, 1440 },
-			{ 5, 4320 },
-			{ 6, 4320 },
-			{ 7, 10080 },
-			{ 8, 10080 },
-			{ 9, 43800 },
-			{ 10, 43800 },
-			{ 11, 129600 },
-			{ 12, 129600 },
-			{ 13, 525600 }
-		};
-		private int noguns = 0;
-		private int tospec = 0;
-		private int kicker = 0;
-		private HashSet<string> immune = new HashSet<string>()
-		{
-			"owner",
-			"admin",
-			"moderator"
-		};
-		private int bomber = 0;
-		private bool disarm = false;
-		private List<RoleTuple> rolewl = new List<RoleTuple>();
-		private int invert = 0;
-		private float mirror = 0;
-		private int undead = 0;
-		private int warntk = 0;
-		private int votetk = 0;
-		private int kdsafe = 0;
-
 		/*
 		 * FFA internal values
 		 */
 		internal bool DuringRound = false;
 		internal bool ProcessingDisconnect = false;
 		internal Dictionary<string, Teamkiller> Teamkillers = new Dictionary<string, Teamkiller>();
-		internal Dictionary<string, Timer> TeamkillTimers = new Dictionary<string, Timer>();
 		internal Dictionary<string, Teamkill> TeamkillVictims = new Dictionary<string, Teamkill>();
+		//internal Dictionary<string, Timer> TeamkillTimers = new Dictionary<string, Timer>();
 
-		internal HashSet<string> banWhitelist = new HashSet<string>();
+		internal HashSet<string> BanWhitelist = new HashSet<string>();
 
-		readonly internal Dictionary<int, int> InverseTeams = new Dictionary<int, int>()
+		readonly internal Dictionary<Team, Team> InverseTeams = new Dictionary<Team, Team>()
 		{
-			{ -1, -1 },
-			{ 0, 0 },
-			{ 1, 2 },
-			{ 2, 1 },
-			{ 3, 4 },
-			{ 4, 3 },
-			{ 5, 5 },
-			{ 6, 6 }
+			{ Team.SCP, Team.SCP },
+			{ Team.MTF, Team.CHI },
+			{ Team.CHI, Team.MTF },
+			{ Team.RSC, Team.CDP },
+			{ Team.CDP, Team.RSC },
+			{ Team.RIP, Team.RIP },
+			{ Team.TUT, Team.TUT },
 		};
-		readonly internal Dictionary<int, int> InverseRoles = new Dictionary<int, int>()
+		readonly internal Dictionary<RoleType, RoleType> InverseRoles = new Dictionary<RoleType, RoleType>()
 		{
-			{ -1, -1 },
-			{ 0, 0 },
-			{ 1, 6 },
-			{ 2, 2 },
-			{ 3, 3 },
-			{ 4, 8 },
-			{ 5, 5 },
-			{ 6, 1 },
-			{ 7, 7 },
-			{ 8, 12 },
-			{ 9, 9 },
-			{ 10, 10 },
-			{ 11, 8 },
-			{ 12, 8 },
-			{ 13, 8 },
-			{ 14, 14 },
-			{ 15, 8 },
-			{ 16, 17 },
-			{ 17, 16 }
+			{ RoleType.None, RoleType.None },
+			{ RoleType.Spectator, RoleType.Spectator },
+			{ RoleType.Tutorial, RoleType.Tutorial },
+			// ClassD/Scientist
+			{ RoleType.ClassD, RoleType.Scientist },
+			{ RoleType.Scientist, RoleType.ClassD },
+			// NTF to Chaos
+			{ RoleType.FacilityGuard, RoleType.ChaosConscript },
+			{ RoleType.NtfPrivate, RoleType.ChaosConscript },
+			{ RoleType.NtfSpecialist, RoleType.ChaosRifleman },
+			{ RoleType.NtfSergeant, RoleType.ChaosRepressor },
+			{ RoleType.NtfCaptain, RoleType.ChaosMarauder },
+			// Chaos to NTF
+			{ RoleType.ChaosConscript, RoleType.NtfPrivate },
+			{ RoleType.ChaosRifleman, RoleType.NtfSpecialist },
+			{ RoleType.ChaosRepressor, RoleType.NtfSergeant },
+			{ RoleType.ChaosMarauder, RoleType.NtfCaptain },
+			// SCPs
+			{ RoleType.Scp049, RoleType.Scp049 },
+			{ RoleType.Scp0492, RoleType.Scp0492 },
+			{ RoleType.Scp079, RoleType.Scp079 },
+			{ RoleType.Scp096, RoleType.Scp096 },
+			{ RoleType.Scp106, RoleType.Scp106 },
+			{ RoleType.Scp173, RoleType.Scp173 },
+			{ RoleType.Scp93953, RoleType.Scp93989 },
+			{ RoleType.Scp93989, RoleType.Scp93953 },
 		};
-
+		
 		//Instance variable for eventhandlers
 		public EventHandlers EventHandlers;
 
@@ -245,39 +196,31 @@ namespace FriendlyFireAutoban
 			}
 		}
 
-		public override string getName { get; } = "Friendly Fire Autoban";
+		public override string Name { get; } = "Friendly Fire Autoban";
 
-		public override void OnEnable()
+		public override void OnEnabled()
 		{
-			ReloadConfig();
-
-			if (!enable)
-				return;
-
-			Plugin.instance = this;
-			this.plugin = this;
-
 			try
 			{
 				Log.Debug("Initializing event handlers..");
 				//Set instance varible to a new instance, this should be nulled again in OnDisable
 				EventHandlers = new EventHandlers(this);
 				//Hook the events you will be using in the plugin. You should hook all events you will be using here, all events should be unhooked in OnDisabled
-				Events.RoundStartEvent += EventHandlers.OnRoundStart;
-				Events.RoundEndEvent += EventHandlers.OnRoundEnd;
+				Exiled.Events.Handlers.Server.RoundStarted += EventHandlers.OnRoundStart;
+				Exiled.Events.Handlers.Server.RoundEnded += EventHandlers.OnRoundEnd;
 
-				Events.PlayerJoinEvent += EventHandlers.OnPlayerJoin;
-				Events.PlayerLeaveEvent += EventHandlers.OnPlayerLeave;
+				Exiled.Events.Handlers.Player.Verified += EventHandlers.OnPlayerVerified;
+				Exiled.Events.Handlers.Player.Destroying += EventHandlers.OnPlayerDestroying;
 
-				Events.PlayerDeathEvent += EventHandlers.OnPlayerDeath;
-				Events.PlayerHurtEvent += EventHandlers.OnPlayerHurt;
+				Exiled.Events.Handlers.Player.Died += EventHandlers.OnPlayerDeath;
+				Exiled.Events.Handlers.Player.Hurting += EventHandlers.OnPlayerHurt;
 
-				Events.PlayerSpawnEvent += EventHandlers.OnPlayerSpawn;
-				Events.SetClassEvent += EventHandlers.OnSetClass;
-				Events.PickupItemEvent += EventHandlers.OnPickupItem;
+				Exiled.Events.Handlers.Player.Spawning += EventHandlers.OnPlayerSpawn;
+				Exiled.Events.Handlers.Player.ChangingRole += EventHandlers.OnSetClass;
+				Exiled.Events.Handlers.Player.PickingUpItem += EventHandlers.OnPickupItem;
 
-				Events.RemoteAdminCommandEvent += EventHandlers.OnRACommand;
-				Events.ConsoleCommandEvent += EventHandlers.OnConsoleCommand;
+				//Exiled.Events.Handlers.Server.SendingRemoteAdminCommand += EventHandlers.OnRACommand;
+				//Exiled.Events.Handlers.Server.SendingConsoleCommand += EventHandlers.OnConsoleCommand;
 
 				Log.Info($"Friendly Fire Autoban has been loaded!");
 			}
@@ -288,237 +231,30 @@ namespace FriendlyFireAutoban
 			}
 		}
 
-		public override void OnDisable()
+		public override void OnDisabled()
 		{
-			Events.RoundStartEvent -= EventHandlers.OnRoundStart;
-			Events.RoundEndEvent -= EventHandlers.OnRoundEnd;
+			Exiled.Events.Handlers.Server.RoundStarted -= EventHandlers.OnRoundStart;
+			Exiled.Events.Handlers.Server.RoundEnded -= EventHandlers.OnRoundEnd;
 
-			Events.PlayerJoinEvent -= EventHandlers.OnPlayerJoin;
-			Events.PlayerLeaveEvent -= EventHandlers.OnPlayerLeave;
+			Exiled.Events.Handlers.Player.Verified -= EventHandlers.OnPlayerVerified;
+			Exiled.Events.Handlers.Player.Destroying -= EventHandlers.OnPlayerDestroying;
 
-			Events.PlayerDeathEvent -= EventHandlers.OnPlayerDeath;
-			Events.PlayerHurtEvent -= EventHandlers.OnPlayerHurt;
+			Exiled.Events.Handlers.Player.Died -= EventHandlers.OnPlayerDeath;
+			Exiled.Events.Handlers.Player.Hurting -= EventHandlers.OnPlayerHurt;
 
-			Events.PlayerSpawnEvent -= EventHandlers.OnPlayerSpawn;
-			Events.SetClassEvent -= EventHandlers.OnSetClass;
-			Events.PickupItemEvent -= EventHandlers.OnPickupItem;
+			Exiled.Events.Handlers.Player.Spawning -= EventHandlers.OnPlayerSpawn;
+			Exiled.Events.Handlers.Player.ChangingRole -= EventHandlers.OnSetClass;
+			Exiled.Events.Handlers.Player.PickingUpItem -= EventHandlers.OnPickupItem;
 
-			Events.RemoteAdminCommandEvent -= EventHandlers.OnRACommand;
-			Events.ConsoleCommandEvent -= EventHandlers.OnConsoleCommand;
+			//Exiled.Events.Handlers.Server.SendingRemoteAdminCommand -= EventHandlers.OnRACommand;
+			//Exiled.Events.Handlers.Server.SendingConsoleCommand -= EventHandlers.OnConsoleCommand;
 
 			EventHandlers = null;
 		}
 
-		public override void OnReload()
+		public bool isImmune(Player player)
 		{
-			//This is only fired when you use the EXILED reload command, the reload command will call OnDisable, OnReload, reload the plugin, then OnEnable in that order. There is no GAC bypass, so if you are updating a plugin, it must have a unique assembly name, and you need to remove the old version from the plugins folder
-			ReloadConfig();
-		}
-
-		public void ReloadConfig()
-		{
-			this.enable = Config.GetBool("friendly_fire_autoban_enable", true);
-			this.outall = Config.GetBool("friendly_fire_autoban_outall", false);
-			this.system = Config.GetInt("friendly_fire_autoban_system", 1);
-
-			List<string> teamkillMatrix = Config.GetStringList("friendly_fire_autoban_matrix");
-			if (teamkillMatrix.Count != 0)
-			{
-				Log.Info("Matrix: " + string.Join("|", Config.GetStringList("friendly_fire_autoban_matrix").ToArray()));
-				this.matrix = new List<TeamTuple>();
-				foreach (string pair in teamkillMatrix)
-				{
-					string[] tuple = pair.Split(':');
-					if (tuple.Length != 2)
-					{
-						Log.Warn("Tuple " + pair + " does not have a single : in it.");
-						continue;
-					}
-					int tuple0 = -1, tuple1 = -1;
-					if (!int.TryParse(tuple[0], out tuple0) || !int.TryParse(tuple[1], out tuple1))
-					{
-						Log.Warn("Either " + tuple[0] + " or " + tuple[1] + " could not be parsed as an int.");
-						continue;
-					}
-
-					this.matrix.Add(new TeamTuple(tuple0, tuple1));
-				}
-			}
-			else
-			{
-				Log.Warn("friendly_fire_autoban_matrix retrieved from config was empty or could not be parsed: " + Config.GetString("friendly_fire_autoban_matrix"));
-			}
-
-			this.amount = Config.GetInt("friendly_fire_autoban_amount");
-			this.length = Config.GetInt("friendly_fire_autoban_length");
-			this.expire = Config.GetInt("friendly_fire_autoban_expire");
-
-			List<string> teamkillScaled = Config.GetStringList("friendly_fire_autoban_scaled");
-			if (system == 3 && teamkillScaled.Count != 0)
-			{
-				this.scaled = new Dictionary<int, int>();
-				foreach (string pair in teamkillScaled)
-				{
-					string[] tuple = pair.Split(':');
-					if (tuple.Length != 2)
-					{
-						if (this.outall)
-						{
-							Log.Info("Tuple " + pair + " does not have a single : in it.");
-						}
-						continue;
-					}
-					int tuple0 = -1, tuple1 = -1;
-					if (!int.TryParse(tuple[0], out tuple0) || !int.TryParse(tuple[1], out tuple1))
-					{
-						if (this.outall)
-						{
-							Log.Info("Either " + tuple[0] + " or " + tuple[1] + " could not be parsed as an int.");
-						}
-						continue;
-					}
-
-					if (!this.scaled.ContainsKey(tuple0))
-					{
-						this.scaled[tuple0] = tuple1;
-					}
-				}
-			}
-			else
-			{
-				Log.Warn("friendly_fire_autoban_scaled retrieved from config was empty or could not be parsed: " + Config.GetString("friendly_fire_autoban_scaled"));
-			}
-
-			this.noguns = Config.GetInt("friendly_fire_autoban_noguns");
-			this.tospec = Config.GetInt("friendly_fire_autoban_tospec");
-			this.kicker = Config.GetInt("friendly_fire_autoban_kicker");
-
-			List<string> immuneRanks = Config.GetStringList("friendly_fire_autoban_immune");
-			if (immuneRanks.Count != 0) {
-				this.immune = new HashSet<string>();
-				foreach (string rank in immuneRanks)
-				{
-					this.immune.Add(rank);
-				}
-			}
-			else
-			{
-				Log.Warn("friendly_fire_autoban_immune retrieved from config was empty or could not be parsed: " + Config.GetString("friendly_fire_autoban_immune"));
-			}
-
-			this.bomber = Config.GetInt("friendly_fire_autoban_bomber");
-			this.disarm = Config.GetBool("friendly_fire_autoban_disarm");
-
-			this.rolewl = new List<RoleTuple>();
-			List<String> roleWhitelist = Config.GetStringList("friendly_fire_autoban_rolewl");
-			foreach (string pair in roleWhitelist)
-			{
-				string[] tuple = pair.Split(':');
-				if (tuple.Length != 2)
-				{
-					if (this.outall)
-					{
-						Log.Info("Tuple " + pair + " does not have a single : in it.");
-					}
-					continue;
-				}
-				int tuple0 = -1, tuple1 = -1;
-				if (!int.TryParse(tuple[0], out tuple0) || !int.TryParse(tuple[1], out tuple1))
-				{
-					if (this.outall)
-					{
-						Log.Info("Either " + tuple[0] + " or " + tuple[1] + " could not be parsed as an int.");
-					}
-					continue;
-				}
-
-				this.rolewl.Add(new RoleTuple(tuple0, tuple1));
-			}
-
-			this.invert = Config.GetInt("friendly_fire_autoban_invert");
-			this.mirror = Config.GetFloat("friendly_fire_autoban_mirror");
-			this.undead = Config.GetInt("friendly_fire_autoban_undead");
-			this.warntk = Config.GetInt("friendly_fire_autoban_warntk");
-			this.votetk = Config.GetInt("friendly_fire_autoban_votetk");
-			this.kdsafe = Config.GetInt("friendly_fire_autoban_kdsafe");
-
-			this.banWhitelist = new HashSet<string>();
-
-			// Add back if we want to keep track of which teamkills are removed
-			//foreach (Timer timer in this.teamkillTimers.Values)
-			//{
-			//	timer.Enabled = true;
-			//}
-
-			if (this.outall)
-			{
-				this.PrintConfigs();
-			}
-		}
-
-		public void PrintConfigs()
-		{
-			Log.Info("friendly_fire_autoban_enable default value: " + Config.GetBool("friendly_fire_autoban_enable"));
-			Log.Info("friendly_fire_autoban_system default value: " + Config.GetInt("friendly_fire_autoban_system"));
-			string matrix = "";
-			foreach (string s in Config.GetStringList("friendly_fire_autoban_matrix"))
-			{
-				if (matrix.Length == 0)
-				{
-					matrix += s;
-				}
-				else
-				{
-					matrix += ',' + s;
-				}
-			}
-			Log.Info("friendly_fire_autoban_matrix default value: " + matrix);
-			Log.Info("friendly_fire_autoban_amount default value: " + Config.GetInt("friendly_fire_autoban_amount"));
-			Log.Info("friendly_fire_autoban_length default value: " + Config.GetInt("friendly_fire_autoban_length"));
-			Log.Info("friendly_fire_autoban_expire default value: " + Config.GetInt("friendly_fire_autoban_expire"));
-			string scaled = "";
-			foreach (string s in Config.GetStringList("friendly_fire_autoban_scaled"))
-			{
-				if (scaled.Length == 0)
-				{
-					scaled += s;
-				}
-				else
-				{
-					scaled += ',' + s;
-				}
-			}
-			Log.Info("friendly_fire_autoban_scaled default value: " + scaled);
-			Log.Info("friendly_fire_autoban_noguns default value: " + Config.GetInt("friendly_fire_autoban_noguns"));
-			Log.Info("friendly_fire_autoban_tospec default value: " + Config.GetInt("friendly_fire_autoban_tospec"));
-			Log.Info("friendly_fire_autoban_kicker default value: " + Config.GetInt("friendly_fire_autoban_kicker"));
-			Log.Info("friendly_fire_autoban_bomber default value: " + Config.GetInt("friendly_fire_autoban_bomber"));
-			Log.Info("friendly_fire_autoban_disarm default value: " + Config.GetBool("friendly_fire_autoban_disarm"));
-			Log.Info("friendly_fire_autoban_rolewl default value: " + Config.GetStringList("friendly_fire_autoban_rolewl"));
-			Log.Info("friendly_fire_autoban_invert default value: " + Config.GetFloat("friendly_fire_autoban_invert"));
-			Log.Info("friendly_fire_autoban_mirror default value: " + Config.GetFloat("friendly_fire_autoban_mirror"));
-			Log.Info("friendly_fire_autoban_undead default value: " + Config.GetFloat("friendly_fire_autoban_undead"));
-			Log.Info("friendly_fire_autoban_warntk default value: " + Config.GetInt("friendly_fire_autoban_warntk"));
-			Log.Info("friendly_fire_autoban_votetk default value: " + Config.GetInt("friendly_fire_autoban_votetk"));
-
-			string immune = "";
-			foreach (string s in Config.GetStringList("friendly_fire_autoban_immune"))
-			{
-				if (immune.Length == 0)
-				{
-					immune += s;
-				}
-				else
-				{
-					immune += ',' + s;
-				}
-			}
-			Log.Info("friendly_fire_autoban_immune default value: " + immune);
-		}
-
-		public bool isImmune(ReferenceHub player)
-		{
-			if (this.plugin.immune.Contains(Player.GetGroupName(player)) || this.plugin.immune.Contains(Player.GetRank(player).BadgeText))
+			if (Plugin.Instance.Config.Immune.Contains(player.GroupName) || (player.GlobalBadge.HasValue ? Plugin.Instance.Config.Immune.Contains(player.GlobalBadge.Value.Text) : false))
 			{
 				return true;
 			}
@@ -530,7 +266,7 @@ namespace FriendlyFireAutoban
 			/*string[] immuneRanks = Config.GetStringList("friendly_fire_autoban_immune");
 			foreach (string rank in immuneRanks)
 			{
-				if (this.outall)
+				if (Plugin.Instance.Config.OutAll)
 				{
 					Log.Info("Does immune rank " + rank + " equal " + player.GetUserGroup().Name + " or " + player.GetRankName() + "?");
 				}
@@ -542,32 +278,32 @@ namespace FriendlyFireAutoban
 			return false;*/
 		}
 
-		public bool isTeamkill(ReferenceHub killer, ReferenceHub victim)
+		public bool isTeamkill(Player killer, Player victim)
 		{
-			Teamkiller teamkiller = this.plugin.AddAndGetTeamkiller(killer);
+			Teamkiller teamkiller = Plugin.Instance.AddAndGetTeamkiller(killer);
 
-			string killerUserId = Player.GetUserId(killer);
-			int killerTeam = (int)Player.GetTeam(killer);
-			int killerRole = (int)Player.GetRole(killer);
+			string killerUserId = killer.UserId;
+			Team killerTeam = killer.Team;
+			RoleType killerRole = killer.Role;
 
-			string victimUserId = Player.GetUserId(victim);
-			int victimTeam = (int)Player.GetTeam(victim);
-			int victimRole = (int)Player.GetRole(victim);
+			string victimUserId = victim.UserId;
+			Team victimTeam = victim.Team;
+			RoleType victimRole = victim.Role;
 
-			if (String.Equals(killerUserId, victimUserId))
+			if (string.Equals(killerUserId, victimUserId))
 			{
 				Log.Info(killerUserId + " equals " + victimUserId + ", this is a suicide and not a teamkill.");
 				return false;
 			}
 
-			if (this.disarm && Player.IsHandCuffed(victim))
+			if (Plugin.Instance.Config.Disarm && victim.IsCuffed)
 			{
 				victimTeam = this.InverseTeams[victimTeam];
 				victimRole = this.InverseRoles[victimRole];
 				Log.Info(victimUserId + " is handcuffed, team inverted to " + victimTeam + " and role " + victimRole);
 			}
 
-			foreach (RoleTuple roleTuple in this.rolewl)
+			foreach (RoleTuple roleTuple in Plugin.Instance.Config.RoleWL)
 			{
 				if (killerRole == roleTuple.KillerRole && victimRole == roleTuple.VictimRole)
 				{
@@ -576,7 +312,7 @@ namespace FriendlyFireAutoban
 				}
 			}
 
-			foreach (TeamTuple teamTuple in this.matrix)
+			foreach (TeamTuple teamTuple in Plugin.Instance.Config.Matrix)
 			{
 				if (killerTeam == teamTuple.KillerTeam && victimTeam == teamTuple.VictimTeam)
 				{
@@ -597,22 +333,22 @@ namespace FriendlyFireAutoban
 		public int GetScaledBanAmount(string userId)
 		{
 			int banLength = 0;
-			foreach (int banAmount in this.scaled.Keys.OrderBy(k => k))
+			foreach (int banAmount in Plugin.Instance.Config.Scaled.Keys.OrderBy(k => k))
 			{
-				if (this.outall) Log.Info("Ban length set to " + banLength + ". Checking ban amount for key " + banAmount);
+				if (Plugin.Instance.Config.OutAll) Log.Info("Ban length set to " + banLength + ". Checking ban amount for key " + banAmount);
 				// If ban kills is less than player's kills, set the banLength
 				// This will ensure that players who teamkill more than the maximum
 				// will still serve the maximum ban length
 				if (banAmount < this.Teamkillers[userId].Teamkills.Count)
 				{
-					if (this.outall) Log.Info("Ban amount is less than player teamkills.");
-					banLength = this.scaled[banAmount];
+					if (Plugin.Instance.Config.OutAll) Log.Info("Ban amount is less than player teamkills.");
+					banLength = Plugin.Instance.Config.Scaled[banAmount];
 				}
 				// Exact ban amount match is found, set
 				else if (banAmount == this.Teamkillers[userId].Teamkills.Count)
 				{
-					if (this.outall) Log.Info("Ban amount is equal to player teamkills.");
-					banLength = this.scaled[banAmount];
+					if (Plugin.Instance.Config.OutAll) Log.Info("Ban amount is equal to player teamkills.");
+					banLength = Plugin.Instance.Config.Scaled[banAmount];
 					break;
 				}
 				// If the smallest ban amount is larger than the player's bans,
@@ -620,7 +356,7 @@ namespace FriendlyFireAutoban
 				// If banAmount has not been found, it will still be set to 0
 				else if (banAmount > this.Teamkillers[userId].Teamkills.Count)
 				{
-					if (this.outall) Log.Info("Ban amount is greater than player teamkills.");
+					if (Plugin.Instance.Config.OutAll) Log.Info("Ban amount is greater than player teamkills.");
 					break;
 				}
 			}
@@ -629,17 +365,17 @@ namespace FriendlyFireAutoban
 
 		//[PipeEvent("patpeter.friendly.fire.autoban.OnBan")]
 		//[PipeMethod]
-		public bool OnBan(ReferenceHub player, string playerName, int banLength, List<Teamkill> teamkills)
+		public bool OnBan(Player player, string playerName, int banLength, List<Teamkill> teamkills)
 		{
-			String playerUserId = Player.GetUserId(player);
-			String playerIpAddress = Player.GetIpAddress(player);
+			string playerUserId = player.UserId;
+			string playerIpAddress = player.IPAddress;
 			bool immune = isImmune(player);
 			if (immune)
 			{
 				Log.Info("Admin/Moderator " + playerName + " has avoided a ban for " + banLength + " minutes after teamkilling " + teamkills + " players during the round.");
 				return false;
 			}
-			else if (this.plugin.banWhitelist.Contains(playerUserId))
+			else if (Plugin.Instance.BanWhitelist.Contains(playerUserId))
 			{
 				Log.Info("Player " + playerName + " " + playerUserId + " " + playerIpAddress + " not being punished by FFA because the player is whitelisted.");
 				return false;
@@ -648,46 +384,57 @@ namespace FriendlyFireAutoban
 			{
 				if (teamkills.Count > 3)
 				{
-					Player.BanPlayer(player, banLength, "Banned " + banLength + " minutes for teamkilling " + teamkills.Count + " players", "FriendlyFireAutoban");
+					player.Ban(banLength, "Banned " + banLength + " minutes for teamkilling " + teamkills.Count + " players", "FriendlyFireAutoban");
 				}
 				else
 				{
-					Player.BanPlayer(player, banLength, "Banned " + banLength + " minutes for teamkilling player(s) " + string.Join(", ", teamkills.Select(teamkill => teamkill.VictimName).ToArray()), "FriendlyFireAutoban");
+					player.Ban(banLength, "Banned " + banLength + " minutes for teamkilling player(s) " + string.Join(", ", teamkills.Select(teamkill => teamkill.VictimName).ToArray()), "FriendlyFireAutoban");
 				}
 				Log.Info("Player " + playerName + " has been banned for " + banLength + " minutes after teamkilling " + teamkills + " players during the round.");
-				Map.Broadcast(string.Format(this.GetTranslation("banned_output"), playerName, teamkills.Count), 3, false);
+				Map.Broadcast(new Exiled.API.Features.Broadcast(string.Format(this.GetTranslation("banned_output"), playerName, teamkills.Count), 3), false);
 				return true;
 			}
 		}
 
 		//[PipeEvent("patpeter.friendly.fire.autoban.OnCheckRemoveGuns")]
 		//[PipeMethod]
-		public bool OnCheckRemoveGuns(ReferenceHub killer)
+		public bool OnCheckRemoveGuns(Player killer)
 		{
-			String killerUserId = Player.GetUserId(killer);
-			String killerNickname = Player.GetNickname(killer);
-			String killerIpAddress = Player.GetIpAddress(killer);
-			if (this.noguns > 0 && this.Teamkillers.ContainsKey(killerUserId) && this.Teamkillers[killerUserId].Teamkills.Count >= this.noguns && !this.isImmune(killer))
+			string killerUserId = killer.UserId;
+			string killerNickname = killer.Nickname;
+			string killerIpAddress = killer.IPAddress;
+			if (Plugin.Instance.Config.NoGuns > 0 && this.Teamkillers.ContainsKey(killerUserId) && this.Teamkillers[killerUserId].Teamkills.Count >= Plugin.Instance.Config.NoGuns && !this.isImmune(killer))
 			{
 				Log.Info("Player " + killerNickname + " " + killerUserId + " " + killerIpAddress + " has had his/her guns removed for teamkilling.");
-				Item[] inv = killer.inventory.availableItems;
-				for (int i = 0; i < inv.Length; i++)
+
+
+				List<Item> itemsToRemove = new List<Item>();
+				foreach (Item i in killer.Items)
 				{
-					switch (inv[i].id)
+					switch (i.Type)
 					{
+						case ItemType.GunAK:
 						case ItemType.GunCOM15:
+						case ItemType.GunCOM18:
 						case ItemType.GunE11SR:
 						case ItemType.GunLogicer:
 						case ItemType.MicroHID:
-						case ItemType.GunMP7:
-						case ItemType.GunProject90:
-						case ItemType.GrenadeFrag:
+						case ItemType.GunCrossvec:
+						case ItemType.GunFSP9:
+						case ItemType.GunRevolver:
+						case ItemType.GunShotgun:
+						case ItemType.GrenadeHE:
 						case ItemType.GrenadeFlash:
-							inv[i].id = ItemType.None;
+							itemsToRemove.Add(i);
 							break;
 					}
 				}
-				Player.Broadcast(killer, 2, this.GetTranslation("noguns_output"), false);
+				foreach (Item i in itemsToRemove)
+				{
+					killer.RemoveItem(i);
+				}
+
+				killer.Broadcast(new Exiled.API.Features.Broadcast(this.GetTranslation("noguns_output"), 2), false);
 				return true;
 			}
 			else
@@ -698,16 +445,16 @@ namespace FriendlyFireAutoban
 
 		//[PipeEvent("patpeter.friendly.fire.autoban.OnCheckToSpectator")]
 		//[PipeMethod]
-		public bool OnCheckToSpectator(ReferenceHub killer)
+		public bool OnCheckToSpectator(Player killer)
 		{
-			String killerUserId = Player.GetUserId(killer);
-			String killerNickname = Player.GetNickname(killer);
-			String killerIpAddress = Player.GetIpAddress(killer);
-			if (this.tospec > 0 && this.Teamkillers[killerUserId].Teamkills.Count >= this.tospec && !this.isImmune(killer))
+			string killerUserId = killer.UserId;
+			string killerNickname = killer.Nickname;
+			string killerIpAddress = killer.IPAddress;
+			if (Plugin.Instance.Config.ToSpec > 0 && this.Teamkillers[killerUserId].Teamkills.Count >= Plugin.Instance.Config.ToSpec && !this.isImmune(killer))
 			{
 				Log.Info("Player " + killerNickname + " " + killerUserId + " " + killerIpAddress + " has been moved to spectator for teamkilling " + this.Teamkillers[killerUserId].Teamkills.Count + " times.");
-				Player.Broadcast(killer, 5, this.GetTranslation("tospec_output"), false);
-				Player.SetRole(killer, RoleType.Spectator);
+				killer.Broadcast(new Exiled.API.Features.Broadcast(this.GetTranslation("tospec_output"), 5), false);
+				killer.SetRole(RoleType.Spectator);
 				return true;
 			}
 			else
@@ -717,22 +464,22 @@ namespace FriendlyFireAutoban
 		}
 
 		//[PipeMethod]
-		public bool OnCheckUndead(ReferenceHub killer, ReferenceHub victim)
+		public bool OnCheckUndead(Player killer, Player victim)
 		{
-			String killerUserId = Player.GetUserId(killer);
-			String killerNickname = Player.GetNickname(killer);
-			String killerIpAddress = Player.GetIpAddress(killer);
-			String victimUserId = Player.GetUserId(victim);
-			String victimNickname = Player.GetNickname(victim);
-			String victimIpAddress = Player.GetIpAddress(victim);
-			RoleType victimRole = Player.GetRole(victim);
-			if (this.undead > 0 && this.Teamkillers[killerUserId].Teamkills.Count >= this.undead && !this.isImmune(killer))
+			string killerUserId = killer.UserId;
+			string killerNickname = killer.Nickname;
+			string killerIpAddress = killer.IPAddress;
+			string victimUserId = victim.UserId;
+			string victimNickname = victim.Nickname;
+			string victimIpAddress = victim.IPAddress;
+			RoleType victimRole = victim.Role;
+			if (Plugin.Instance.Config.Undead > 0 && this.Teamkillers[killerUserId].Teamkills.Count >= Plugin.Instance.Config.Undead && !this.isImmune(killer))
 			{
 				RoleType oldRole = victimRole;
 				//Vector oldPosition = victim.GetPosition();
 				Log.Info("Player " + victimNickname + " " + victimUserId + " " + victimIpAddress + " has been respawned as " + oldRole + " after " + killerNickname + " " + killerUserId + " " + killerIpAddress + " teamkilled " + this.Teamkillers[killerUserId].Teamkills.Count + " times.");
-				Player.Broadcast(killer, 5, string.Format(this.GetTranslation("undead_killer_output"), victimNickname), false);
-				Player.Broadcast(victim, 5, string.Format(this.GetTranslation("undead_victim_output"), killerNickname), false);
+				killer.Broadcast(new Exiled.API.Features.Broadcast(string.Format(this.GetTranslation("undead_killer_output"), victimNickname), 5), false);
+				victim.Broadcast(new Exiled.API.Features.Broadcast(string.Format(this.GetTranslation("undead_victim_output"), killerNickname), 5), false);
 				Timer t = new Timer
 				{
 					Interval = 3000,
@@ -741,7 +488,7 @@ namespace FriendlyFireAutoban
 				t.Elapsed += delegate
 				{
 					Log.Info("Respawning victim " + victimNickname + " " + victimUserId + " " + victimIpAddress + "as " + victimRole + "...");
-					Player.SetRole(victim, oldRole);
+					victim.SetRole(oldRole);
 					//victim.Teleport(oldPosition);
 					t.Dispose();
 				};
@@ -755,16 +502,16 @@ namespace FriendlyFireAutoban
 
 		//[PipeEvent("patpeter.friendly.fire.autoban.OnCheckKick")]
 		//[PipeMethod]
-		public bool OnCheckKick(ReferenceHub killer)
+		public bool OnCheckKick(Player killer)
 		{
-			String killerUserId = Player.GetUserId(killer);
-			String killerNickname = Player.GetNickname(killer);
-			String killerIpAddress = Player.GetIpAddress(killer);
-			if (this.kicker > 0 && this.Teamkillers[killerUserId].Teamkills.Count == this.kicker && !this.isImmune(killer))
+			string killerUserId = killer.UserId;
+			string killerNickname = killer.Nickname;
+			string killerIpAddress = killer.IPAddress;
+			if (Plugin.Instance.Config.Kicker > 0 && this.Teamkillers[killerUserId].Teamkills.Count == Plugin.Instance.Config.Kicker && !this.isImmune(killer))
 			{
 				Log.Info("Player " + killerNickname + " " + killerUserId + " " + killerIpAddress + " has been kicked for teamkilling " + this.Teamkillers[killerUserId].Teamkills.Count + " times.");
-				Player.Broadcast(killer, 1, this.GetTranslation("kicker_output"), false);
-				Player.KickPlayer(killer, this.GetTranslation("kicker_output"));
+				killer.Broadcast(new Exiled.API.Features.Broadcast(this.GetTranslation("kicker_output"), 5), true);
+				killer.Kick(this.GetTranslation("kicker_output"), "FriendlyFireAutoban");
 				return true;
 			}
 			else
@@ -773,30 +520,30 @@ namespace FriendlyFireAutoban
 			}
 		}
 
-		public Teamkiller AddAndGetTeamkiller(ReferenceHub player)
+		public Teamkiller AddAndGetTeamkiller(Player player)
 		{
-			int playerId = Player.GetPlayerId(player);
-			string playerNickname = Player.GetNickname(player);
-			string playerUserId = Player.GetUserId(player);
-			string playerIpAddress = Player.GetIpAddress(player);
+			int playerId = player.Id;
+			string playerNickname = player.Nickname;
+			string playerUserId = player.UserId;
+			string playerIpAddress = player.IPAddress;
 
-			if (!this.plugin.Teamkillers.ContainsKey(playerUserId))
+			if (!Plugin.Instance.Teamkillers.ContainsKey(playerUserId))
 			{
 				Log.Info("Adding Teamkiller entry for player #" + playerId + " " + playerNickname + " [" + playerUserId + "] [" + playerIpAddress + "]");
-				this.plugin.Teamkillers[playerUserId] = new Teamkiller(playerId, playerNickname, playerUserId, playerIpAddress);
+				Plugin.Instance.Teamkillers[playerUserId] = new Teamkiller(playerId, playerNickname, playerUserId, playerIpAddress);
 			}
 			else
 			{
 				Log.Info("Fetching Teamkiller entry for player #" + playerId + " " + playerNickname + " [" + playerUserId + "] [" + playerIpAddress + "]");
 			}
-			return this.plugin.Teamkillers[playerUserId];
+			return Plugin.Instance.Teamkillers[playerUserId];
 		}
 
 		//[PipeEvent("patpeter.friendly.fire.autoban.OnCheckVote")]
 		//[PipeMethod]
-		/*public bool OnVoteTeamkill(ReferenceHub killer)
+		/*public bool OnVoteTeamkill(Player killer)
 		{
-			if (this.outall)
+			if (Plugin.Instance.Config.OutAll)
 			{
 				Log.Info("votetk > 0: " + this.votetk);
 				Log.Info("Teamkiller count is greater than votetk? " + this.Teamkillers[killerUserId].Teamkills.Count);
@@ -813,7 +560,7 @@ namespace FriendlyFireAutoban
 
 				if (Voting != null && StartVote != null && !Voting.Invoke())
 				{
-					//this.plugin.InvokeEvent("OnStartVote", "Ban " + killerNickname + "?", options, votes, counter);
+					//Plugin.Instance.InvokeEvent("OnStartVote", "Ban " + killerNickname + "?", options, votes, counter);
 					Log.Info("Running vote: " + "Ban " + killerNickname + "?");
 					this.StartVote.Invoke("Ban " + killerNickname + "?", options, votes, counter);
 					return true;
@@ -833,9 +580,9 @@ namespace FriendlyFireAutoban
 
 	public struct TeamTuple
 	{
-		public int KillerTeam, VictimTeam;
+		public Team KillerTeam, VictimTeam;
 
-		public TeamTuple(int killerTeam, int victimRole)
+		public TeamTuple(Team killerTeam, Team victimRole)
 		{
 			this.KillerTeam = killerTeam;
 			this.VictimTeam = victimRole;
@@ -844,9 +591,9 @@ namespace FriendlyFireAutoban
 
 	public struct RoleTuple
 	{
-		public int KillerRole, VictimRole;
+		public RoleType KillerRole, VictimRole;
 
-		public RoleTuple(int killerRole, int victimRole)
+		public RoleTuple(RoleType killerRole, RoleType victimRole)
 		{
 			this.KillerRole = killerRole;
 			this.VictimRole = victimRole;
@@ -935,82 +682,106 @@ namespace FriendlyFireAutoban
 			switch (KillerTeamRole)
 			{
 				case (short)RoleType.ClassD:
-					retval += Plugin.GetInstance().GetTranslation("role_dclass");
+					retval += Plugin.Instance.GetTranslation("role_dclass");
 					break;
 
 				case (short)RoleType.Scientist:
-					retval += Plugin.GetInstance().GetTranslation("role_scientist");
+					retval += Plugin.Instance.GetTranslation("role_scientist");
 					break;
 
 				case (short)RoleType.FacilityGuard:
-					retval += Plugin.GetInstance().GetTranslation("role_guard");
+					retval += Plugin.Instance.GetTranslation("role_guard");
 					break;
 
-				case (short)RoleType.NtfCadet:
-					retval += Plugin.GetInstance().GetTranslation("role_cadet");
+				case (short)RoleType.NtfPrivate:
+					retval += Plugin.Instance.GetTranslation("role_cadet");
 					break;
 
-				case (short)RoleType.NtfLieutenant:
-					retval += Plugin.GetInstance().GetTranslation("role_lieutenant");
+				case (short)RoleType.NtfSergeant:
+					retval += Plugin.Instance.GetTranslation("role_lieutenant");
 					break;
 
-				case (short)RoleType.NtfCommander:
-					retval += Plugin.GetInstance().GetTranslation("role_commander");
+				case (short)RoleType.NtfCaptain:
+					retval += Plugin.Instance.GetTranslation("role_commander");
 					break;
 
-				case (short)RoleType.NtfScientist:
-					retval += Plugin.GetInstance().GetTranslation("role_ntf_scientist");
+				case (short)RoleType.NtfSpecialist:
+					retval += Plugin.Instance.GetTranslation("role_ntf_scientist");
 					break;
 
-				case (short)RoleType.ChaosInsurgency:
-					retval += Plugin.GetInstance().GetTranslation("role_chaos");
+				case (short)RoleType.ChaosConscript:
+					retval += Plugin.Instance.GetTranslation("role_chaos");
+					break;
+
+				case (short)RoleType.ChaosRifleman:
+					retval += Plugin.Instance.GetTranslation("role_chaos");
+					break;
+
+				case (short)RoleType.ChaosRepressor:
+					retval += Plugin.Instance.GetTranslation("role_chaos");
+					break;
+
+				case (short)RoleType.ChaosMarauder:
+					retval += Plugin.Instance.GetTranslation("role_chaos");
 					break;
 
 				case (short)RoleType.Tutorial:
-					retval += Plugin.GetInstance().GetTranslation("role_tutorial");
+					retval += Plugin.Instance.GetTranslation("role_tutorial");
 					break;
 			}
-			retval += " " + Plugin.GetInstance().GetTranslation("role_separator") + " ";
+			retval += " " + Plugin.Instance.GetTranslation("role_separator") + " ";
 			if (VictimDisarmed)
 			{
-				retval += Plugin.GetInstance().GetTranslation("role_disarmed");
+				retval += Plugin.Instance.GetTranslation("role_disarmed");
 			}
 			switch (VictimTeamRole)
 			{
 				case (short)RoleType.ClassD:
-					retval += Plugin.GetInstance().GetTranslation("role_dclass");
+					retval += Plugin.Instance.GetTranslation("role_dclass");
 					break;
 
 				case (short)RoleType.Scientist:
-					retval += Plugin.GetInstance().GetTranslation("role_scientist");
+					retval += Plugin.Instance.GetTranslation("role_scientist");
 					break;
 
 				case (short)RoleType.FacilityGuard:
-					retval += Plugin.GetInstance().GetTranslation("role_guard");
+					retval += Plugin.Instance.GetTranslation("role_guard");
 					break;
 
-				case (short)RoleType.NtfCadet:
-					retval += Plugin.GetInstance().GetTranslation("role_cadet");
+				case (short)RoleType.NtfPrivate:
+					retval += Plugin.Instance.GetTranslation("role_cadet");
 					break;
 
-				case (short)RoleType.NtfLieutenant:
-					retval += Plugin.GetInstance().GetTranslation("role_lieutenant");
+				case (short)RoleType.NtfSergeant:
+					retval += Plugin.Instance.GetTranslation("role_lieutenant");
 					break;
 
-				case (short)RoleType.NtfCommander:
-					retval += Plugin.GetInstance().GetTranslation("role_commander");
+				case (short)RoleType.NtfCaptain:
+					retval += Plugin.Instance.GetTranslation("role_commander");
 					break;
 
-				case (short)RoleType.NtfScientist:
-					retval += Plugin.GetInstance().GetTranslation("role_ntf_scientist");
+				case (short)RoleType.NtfSpecialist:
+					retval += Plugin.Instance.GetTranslation("role_ntf_scientist");
 					break;
 
-				case (short)RoleType.ChaosInsurgency:
-					retval += Plugin.GetInstance().GetTranslation("role_chaos");
+				case (short)RoleType.ChaosConscript:
+					retval += Plugin.Instance.GetTranslation("role_chaos");
+					break;
+
+				case (short)RoleType.ChaosRifleman:
+					retval += Plugin.Instance.GetTranslation("role_chaos");
+					break;
+
+				case (short)RoleType.ChaosRepressor:
+					retval += Plugin.Instance.GetTranslation("role_chaos");
+					break;
+
+				case (short)RoleType.ChaosMarauder:
+					retval += Plugin.Instance.GetTranslation("role_chaos");
 					break;
 
 				case (short)RoleType.Tutorial:
-					retval += Plugin.GetInstance().GetTranslation("role_tutorial");
+					retval += Plugin.Instance.GetTranslation("role_tutorial");
 					break;
 			}
 			retval += ")";
