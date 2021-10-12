@@ -3,20 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Timers;
-using Exiled.API.Enums;
 using Exiled.API.Features;
-using Exiled.Events.Extensions;
-using Exiled.API.Features;
-using Exiled.API.Extensions;
 using Exiled.API.Features.Items;
+using MEC;
 
 namespace FriendlyFireAutoban
 {
 	public class Plugin : Plugin<Config>
 	{
 		private static readonly Lazy<Plugin> LazyInstance = new Lazy<Plugin>(() => new Plugin());
-
-		private EventHandlers eh;
 
 		private Plugin()
 		{
@@ -26,15 +21,17 @@ namespace FriendlyFireAutoban
 		/// Gets the lazy instance.
 		/// </summary>
 		public static Plugin Instance => LazyInstance.Value;
+		public EventHandlers EventHandlers;
 
 		/*
 		 * FFA internal values
 		 */
 		internal bool DuringRound = false;
 		internal bool ProcessingDisconnect = false;
+		internal CoroutineHandle FFAHandle = new CoroutineHandle();
+
 		internal Dictionary<string, Teamkiller> Teamkillers = new Dictionary<string, Teamkiller>();
 		internal Dictionary<string, Teamkill> TeamkillVictims = new Dictionary<string, Teamkill>();
-		//internal Dictionary<string, Timer> TeamkillTimers = new Dictionary<string, Timer>();
 
 		internal HashSet<string> BanWhitelist = new HashSet<string>();
 
@@ -77,9 +74,6 @@ namespace FriendlyFireAutoban
 			{ RoleType.Scp93953, RoleType.Scp93989 },
 			{ RoleType.Scp93989, RoleType.Scp93953 },
 		};
-		
-		//Instance variable for eventhandlers
-		public EventHandlers EventHandlers;
 
 		/*
 		 * Ban Events
@@ -250,6 +244,63 @@ namespace FriendlyFireAutoban
 			//Exiled.Events.Handlers.Server.SendingConsoleCommand -= EventHandlers.OnConsoleCommand;
 
 			EventHandlers = null;
+		}
+
+		public IEnumerator<float> FFACoRoutine()
+		{
+			for (; ; )
+			{
+				List<Player> players = Player.List.Where(p => Plugin.Instance.Teamkillers.ContainsKey(p.UserId) && Plugin.Instance.Teamkillers[p.UserId].Teamkills.Count > 0).ToList();
+
+				foreach (Player killer in players)
+				{
+					string killerUserId = killer.UserId;
+					string killerIpAddress = killer.IPAddress;
+					string killerNickname = killer.Nickname;
+					Team killerTeam = killer.Team;
+					string killerOutput = killerNickname + " " + killerUserId + " " + killerIpAddress;
+					Teamkiller killerTeamkiller = Plugin.Instance.Teamkillers[killer.UserId];
+					
+					if (killerTeamkiller.TimerCountdown > 0)
+					{
+						// Decrease teamkiller timer by 1 second
+						killerTeamkiller.TimerCountdown--;
+					}
+					else
+					{
+						/*
+						 * If ban system is #3, every player teamkill cancels and restarts the timer
+						 * Wait until the timer expires after the teamkilling has ended to find out 
+						 * how much teamkilling the player has done.
+						 */
+						if (Plugin.Instance.Config.System == 3)
+						{
+							int banLength = Plugin.Instance.GetScaledBanAmount(killerUserId);
+							if (banLength > 0)
+							{
+								Plugin.Instance.OnBan(killer, killerNickname, banLength, killerTeamkiller.Teamkills);
+							}
+							else
+							{
+								if (Plugin.Instance.Config.OutAll)
+								{
+									Log.Info("Player " + killerUserId + " " + killerTeamkiller.Teamkills.Count + " teamkills is not bannable.");
+								}
+							}
+						}
+						
+						// Forgive teamkills in ban system #2
+						if (Plugin.Instance.Config.System == 2)
+						{
+							Teamkill firstTeamkill = killerTeamkiller.Teamkills[0];
+							killerTeamkiller.Teamkills.RemoveAt(0);
+							Log.Info("Player " + killerOutput + " " + killerTeam.ToString() + " teamkill " + firstTeamkill + " expired, counter now at " + killerTeamkiller.Teamkills.Count + ".");
+						}
+					}
+				}
+				
+				yield return Timing.WaitForSeconds(1f);
+			}
 		}
 
 		public bool isImmune(Player player)
@@ -587,6 +638,11 @@ namespace FriendlyFireAutoban
 			this.KillerTeam = killerTeam;
 			this.VictimTeam = victimRole;
 		}
+
+		public override string ToString()
+		{
+			return KillerTeam + ":" + VictimTeam;
+		}
 	}
 
 	public struct RoleTuple
@@ -597,6 +653,11 @@ namespace FriendlyFireAutoban
 		{
 			this.KillerRole = killerRole;
 			this.VictimRole = victimRole;
+		}
+
+		public override string ToString()
+		{
+			return KillerRole + ":" + VictimRole;
 		}
 	}
 
@@ -614,6 +675,7 @@ namespace FriendlyFireAutoban
 		public int Deaths;
 		public List<Teamkill> Teamkills = new List<Teamkill>();
 		//public Timer Timer;
+		public int TimerCountdown = 0;
 
 		public Teamkiller(int playerId, string name, string userId, string ipAddress)
 		{

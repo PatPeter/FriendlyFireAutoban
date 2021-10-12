@@ -22,6 +22,7 @@ namespace FriendlyFireAutoban
 			Log.Info("Round has started.");
 			Plugin.Instance.ProcessingDisconnect = false;
 			Plugin.Instance.DuringRound = true;
+			Plugin.Instance.FFAHandle = Timing.RunCoroutine(Plugin.Instance.FFACoRoutine());
 			// Remove if teamkills can be removed for memory cleanup
 			/**
 			 * MEMORY CLEANUP
@@ -36,6 +37,7 @@ namespace FriendlyFireAutoban
 			//{
 			Log.Info("Set round end to false and check if ban system is #3 " + Plugin.Instance.Config.System);
 			Plugin.Instance.DuringRound = false;
+			Timing.KillCoroutines(Plugin.Instance.FFAHandle);
 			//}
 
 			//Log.Info("Disposing of teamkill timers at round end.");
@@ -228,7 +230,9 @@ namespace FriendlyFireAutoban
 				{
 					Plugin.Instance.Teamkillers[victimUserId] = new Teamkiller(victimPlayerId, victimNickname, victimUserId, victimIpAddress);
 				}
-				Plugin.Instance.Teamkillers[victimUserId].Deaths++;
+
+				Teamkiller victimTeamkiller = Plugin.Instance.Teamkillers[victimUserId];
+				victimTeamkiller.Deaths++;
 
 				// Should be completely impossible, but does not hurt
 				if (!Plugin.Instance.Teamkillers.ContainsKey(killerUserId))
@@ -236,33 +240,35 @@ namespace FriendlyFireAutoban
 					Plugin.Instance.Teamkillers[killerUserId] = new Teamkiller(killerPlayerId, killerNickname, killerUserId, killerIpAddress);
 				}
 
+				Teamkiller killerTeamkiller = Plugin.Instance.Teamkillers[killerUserId];
+
 				Log.Info("Was this a teamkill? " + Plugin.Instance.isTeamkill(killer, victim));
 				if (Plugin.Instance.isTeamkill(killer, victim))
 				{
-					Plugin.Instance.Teamkillers[killerUserId].Kills--;
+					killerTeamkiller.Kills--;
 
 					Teamkill teamkill = new Teamkill(killerNickname, killerUserId, (short)killerRole, victimNickname, victimUserId, (short)victimRole, victimIsHandcuffed, (short) ev.HitInformations.Tool.Weapon, ev.HitInformations.Time); // TODO: ev.HitInformations.Time is probably wrong
 					Plugin.Instance.TeamkillVictims[victimUserId] = teamkill;
-					Plugin.Instance.Teamkillers[killerUserId].Teamkills.Add(teamkill);
+					killerTeamkiller.Teamkills.Add(teamkill);
 
 					Log.Info("Player " + killerOutput + " " + killerTeam.ToString() + " teamkilled " +
-						victimOutput + " " + victimTeam.ToString() + ", for a total of " + Plugin.Instance.Teamkillers[killerUserId].Teamkills.Count + " teamkills.");
+						victimOutput + " " + victimTeam.ToString() + ", for a total of " + killerTeamkiller.Teamkills.Count + " teamkills.");
 
 					victim.Broadcast(new Exiled.API.Features.Broadcast(string.Format(Plugin.Instance.GetTranslation("victim_message"), killerNickname, DateTime.Today.ToString("yyyy-MM-dd hh:mm tt")), 10), true);
 
 					if (!Plugin.Instance.BanWhitelist.Contains(killerUserId))
 					{
-						float kdr = Plugin.Instance.Teamkillers[killerUserId].GetKDR();
+						float kdr = killerTeamkiller.GetKDR();
 						// If kdr is greater than K/D safe amount, AND if the number of kils is greater than kdsafe to exclude low K/D values
 						if (Plugin.Instance.Config.OutAll)
 						{
 							Log.Info("kdsafe set to: " + Plugin.Instance.Config.KDSafe);
 							Log.Info("Player " + killerOutput + " KDR: " + kdr);
 							Log.Info("Is KDR greater than kdsafe? " + (kdr > (float)Plugin.Instance.Config.KDSafe));
-							Log.Info("Are kills greater than kdsafe? " + (Plugin.Instance.Teamkillers[killerUserId].Kills > Plugin.Instance.Config.KDSafe));
+							Log.Info("Are kills greater than kdsafe? " + (killerTeamkiller.Kills > Plugin.Instance.Config.KDSafe));
 						}
 
-						if (Plugin.Instance.Config.KDSafe > 0 && kdr > (float)Plugin.Instance.Config.KDSafe && Plugin.Instance.Teamkillers[killerUserId].Kills > Plugin.Instance.Config.KDSafe)
+						if (Plugin.Instance.Config.KDSafe > 0 && kdr > (float)Plugin.Instance.Config.KDSafe && killerTeamkiller.Kills > Plugin.Instance.Config.KDSafe)
 						{
 							killer.Broadcast(new Exiled.API.Features.Broadcast(string.Format(Plugin.Instance.GetTranslation("killer_kdr_message"), victimNickname, teamkill.GetRoleDisplay(), kdr), 5), true);
 							return;
@@ -272,7 +278,7 @@ namespace FriendlyFireAutoban
 							string broadcast = string.Format(Plugin.Instance.GetTranslation("killer_message"), victimNickname, teamkill.GetRoleDisplay()) + " ";
 							if (Plugin.Instance.Config.WarnTK > 0)
 							{
-								int teamkillsBeforeBan = Plugin.Instance.Config.Amount - Plugin.Instance.Teamkillers[killerUserId].Teamkills.Count;
+								int teamkillsBeforeBan = Plugin.Instance.Config.Amount - killerTeamkiller.Teamkills.Count;
 								if (teamkillsBeforeBan <= Plugin.Instance.Config.WarnTK)
 								{
 									broadcast += string.Format(Plugin.Instance.GetTranslation("killer_warning"), teamkillsBeforeBan) + " ";
@@ -305,82 +311,24 @@ namespace FriendlyFireAutoban
 					/*
 					 * If ban system is #1, do not create timers and perform a ban based on a static number of teamkills
 					 */
-					if (Plugin.Instance.Config.System == 1 && Plugin.Instance.Teamkillers[killerUserId].Teamkills.Count >= Plugin.Instance.Config.Amount)
+					if (Plugin.Instance.Config.System == 1 && killerTeamkiller.Teamkills.Count >= Plugin.Instance.Config.Amount)
 					{
-						Plugin.Instance.OnBan(killer, killerNickname, Plugin.Instance.Config.Length, Plugin.Instance.Teamkillers[killerUserId].Teamkills);
+						Plugin.Instance.OnBan(killer, killerNickname, Plugin.Instance.Config.Length, killerTeamkiller.Teamkills);
 					}
 					else
 					{
-						Timer t;
-						if (Plugin.Instance.TeamkillTimers.ContainsKey(killerUserId))
-						{
-							/*
-							 * If ban system is #3, allow the player to continue teamkilling
-							 */
-							t = Plugin.Instance.TeamkillTimers[killerUserId];
-							t.Stop();
-							t.Interval = Plugin.Instance.Config.Expire * 1000;
-							t.Start();
-						}
-						else
-						{
-							t = new Timer
-							{
-								Interval = Plugin.Instance.Config.Expire * 1000,
-								AutoReset = true,
-								Enabled = true
-							};
-							t.Elapsed += delegate
-							{
-								if (Plugin.Instance.Config.IsEnabled)
-								{
-									/*
-									 * If ban system is #3, every player teamkill cancels and restarts the timer
-									 * Wait until the timer expires after the teamkilling has ended to find out 
-									 * how much teamkilling the player has done.
-									 */
-									if (Plugin.Instance.Config.System == 3)
-									{
-										int banLength = Plugin.Instance.GetScaledBanAmount(killerUserId);
-										if (banLength > 0)
-										{
-											Plugin.Instance.OnBan(killer, killerNickname, banLength, Plugin.Instance.Teamkillers[killerUserId].Teamkills);
-										}
-										else
-										{
-											if (Plugin.Instance.Config.OutAll)
-											{
-												Log.Info("Player " + killerUserId + " " + Plugin.Instance.Teamkillers[killerUserId].Teamkills.Count + " teamkills is not bannable.");
-											}
-										}
-									}
-
-									if (Plugin.Instance.Teamkillers[killerUserId].Teamkills.Count > 0)
-									{
-										Teamkill firstTeamkill = Plugin.Instance.Teamkillers[killerUserId].Teamkills[0];
-										Plugin.Instance.Teamkillers[killerUserId].Teamkills.RemoveAt(0);
-										Log.Info("Player " + killerOutput + " " + killerTeam.ToString() + " teamkill expired, counter now at " + Plugin.Instance.Teamkillers[killerUserId].Teamkills.Count + ".");
-									}
-									else
-									{
-										t.Enabled = false;
-									}
-								}
-								else
-								{
-									t.Enabled = false;
-								}
-							};
-							Plugin.Instance.TeamkillTimers[killerUserId] = t;
-						}
+						// If the player has teamkilled again, reset the timer to the default
+						// for both ban systems #2 and #3
+						killerTeamkiller.TimerCountdown = Plugin.Instance.Config.Expire;
 
 						/*
-						 * If ban system is #2, allow the teamkills to expire
+						 * If ban system is #2, allow the teamkills to expire,
+						 * but if the player teamkills faster than kills can expire
+						 * ban the player.
 						 */
-						if (Plugin.Instance.Config.System == 2 && Plugin.Instance.Teamkillers[killerUserId].Teamkills.Count >= Plugin.Instance.Config.Amount)
+						if (Plugin.Instance.Config.System == 2 && killerTeamkiller.Teamkills.Count >= Plugin.Instance.Config.Amount)
 						{
-							t.Stop();
-							Plugin.Instance.OnBan(killer, killerNickname, Plugin.Instance.Config.Length, Plugin.Instance.Teamkillers[killerUserId].Teamkills);
+							Plugin.Instance.OnBan(killer, killerNickname, Plugin.Instance.Config.Length, killerTeamkiller.Teamkills);
 						}
 					}
 				}
@@ -392,7 +340,7 @@ namespace FriendlyFireAutoban
 							victimOutput + " " + victimTeam.ToString() + " and it was not detected as a teamkill.");
 					}
 
-					Plugin.Instance.Teamkillers[killerUserId].Kills++;
+					killerTeamkiller.Kills++;
 				}
 			}
 			else
