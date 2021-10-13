@@ -11,20 +11,23 @@ namespace FriendlyFireAutoban
 {
 	public class Plugin : Plugin<Config>
 	{
+		/*
+		 * Static Fields
+		 */
 		private static readonly Lazy<Plugin> LazyInstance = new Lazy<Plugin>(() => new Plugin());
-
-		private Plugin()
-		{
-		}
-
 		/// <summary>
 		/// Gets the lazy instance.
 		/// </summary>
 		public static Plugin Instance => LazyInstance.Value;
-		public EventHandlers EventHandlers;
 
 		/*
-		 * FFA internal values
+		 * Public Instance Fields
+		 */
+		public EventHandlers EventHandlers;
+		public override string Name { get; } = "Friendly Fire Autoban";
+
+		/*
+		 * Internal Instance Fields
 		 */
 		internal bool DuringRound = false;
 		internal bool ProcessingDisconnect = false;
@@ -75,122 +78,25 @@ namespace FriendlyFireAutoban
 			{ RoleType.Scp93989, RoleType.Scp93953 },
 		};
 
-		/*
-		 * Ban Events
-		 */
-		
-		public readonly string victim_message = "<size=36>{0} <color=red>teamkilled</color> you at {1}. If this was an accidental teamkill, please press ~ and then type .forgive to prevent this user from being banned.</size>";
-		
-		public readonly string killer_message = "You teamkilled {0} {1}.";
-		
-		public readonly string killer_kdr_message = "You teamkilled {0} {1}. Because your K/D ratio is {2}, you will not be punished. Please watch your fire.";
-		
-		public readonly string killer_warning = "If you teamkill {0} more times you will be banned.";
-		
-		public readonly string killer_request = "Please do not teamkill.";
-		
-		public readonly string noguns_output = "Your guns have been removed for <color=red>teamkilling</color>. You will get them back when your teamkill expires.";
-		
-		public readonly string tospec_output = "You have been moved to spectate for <color=red>teamkilling</color>.";
-		
-		public readonly string undead_killer_output = "{0} has been respawned because you are <color=red>teamkilling</color> too much. If you continue, you will be banned.";
-		
-		public readonly string undead_victim_output = "You have been respawned after being teamkilled by {0}.";
-		
-		public readonly string kicker_output = "You will be kicked for <color=red>teamkilling</color>.";
-		
-		public readonly string banned_output = "Player {0} has been banned for <color=red>teamkilling</color> {1} players.";
-
-		
-		// OFFLINE BAN, DO NOT ADD BBCODE
-		public readonly string offline_ban = "Banned {0} minutes for teamkilling {1} players";
-
-		/*
-		 * Teamkiller/Teamkill
-		 */
-		
-		public readonly string role_disarmed = "DISARMED ";
-		
-		public readonly string role_separator = "on";
-		
-		public readonly string role_dclass = "<color=orange>D-CLASS</color>";
-		
-		public readonly string role_scientist = "<color=yellow>SCIENTIST</color>";
-		
-		public readonly string role_guard = "<color=silver>GUARD</color>";
-		
-		public readonly string role_cadet = "<color=cyan>CADET</color>";
-		
-		public readonly string role_lieutenant = "<color=aqua>LIEUTENANT</color>";
-		
-		public readonly string role_commander = "<color=blue>COMMANDER</color>";
-		
-		public readonly string role_ntf_scientist = "<color=aqua>NTF SCIENTIST</color>";
-		
-		public readonly string role_chaos = "<color=green>CHAOS</color>";
-		
-		public readonly string role_tutorial = "<color=lime>TUTORIAL</color>";
-
-		/*
-		 * Commands
-		 */
-		
-		public readonly string toggle_description = "Toggle Friendly Fire Autoban on and off.";
-		
-		public readonly string toggle_disable = "Friendly fire Autoban has been disabled.";
-		
-		public readonly string toggle_enable = "Friendly fire Autoban has been enabled.";
-
-		
-		public readonly string whitelist_description = "Whitelist a user from being banned by FFA until the end of the round.";
-		
-		public readonly string whitelist_error = "A single name or Steam ID must be provided.";
-		
-		public readonly string whitelist_add = "Added player {0} ({1}) to ban whitelist.";
-		
-		public readonly string whitelist_remove = "Removed player {0} ({1}) from ban whitelist.";
-
-		/*
-		 * Client Commands
-		 */
-		
-		public readonly string forgive_command = "forgive";
-		
-		public readonly string forgive_success = "You have forgiven {0} {1}!";
-		
-		public readonly string forgive_duplicate = "You already forgave {0} {1}.";
-		
-		public readonly string forgive_disconnect = "The player has disconnected.";
-		
-		public readonly string forgive_invalid = "You have not been teamkilled yet.";
-
-		
-		public readonly string tks_command = "tks";
-		
-		public readonly string tks_no_teamkills = "No players by this name or Steam ID has any teamkills.";
-		
-		public readonly string tks_teamkill_entry = "({0}) {1} teamkilled {2} {3}.";
-		
-		public readonly string tks_not_found = "Player name not provided or not quoted.";
-
-		
-		public readonly string ffa_disabled = "Friendly Fire Autoban is currently disabled.";
+		private Plugin()
+		{
+		}
 
 		public string GetTranslation(string name)
 		{
-			Type t = typeof(FriendlyFireAutoban.Plugin);
-			FieldInfo p = t.GetField(name);
-			if (p != null)
+			//Type t = typeof(FriendlyFireAutoban.Plugin);
+			//FieldInfo p = t.GetField(name);
+			//if (p != null)
+			if (Plugin.Instance.Config.Translations.ContainsKey(name))
 			{
-				return (string) p.GetValue(this);
+				//return (string) p.GetValue(this);
+				return Plugin.Instance.Config.Translations[name];
 			}
 			else
 			{
 				return "INVALID TRANSLATION: " + name;
 			}
 		}
-
-		public override string Name { get; } = "Friendly Fire Autoban";
 
 		public override void OnEnabled()
 		{
@@ -353,6 +259,13 @@ namespace FriendlyFireAutoban
 				victimRole = this.InverseRoles[victimRole];
 				Log.Info(victimUserId + " is handcuffed, team inverted to " + victimTeam + " and role " + victimRole);
 			}
+
+			//List<RoleTuple> roleTuples = new List<RoleTuple>();
+			//foreach (string rawRoleTuple in Plugin.Instance.Config.RoleWL)
+			//{
+			//	string[] tuple = rawRoleTuple.Split(':');
+			//
+			//}
 
 			foreach (RoleTuple roleTuple in Plugin.Instance.Config.RoleWL)
 			{
@@ -592,15 +505,19 @@ namespace FriendlyFireAutoban
 
 		//[PipeEvent("patpeter.friendly.fire.autoban.OnCheckVote")]
 		//[PipeMethod]
-		/*public bool OnVoteTeamkill(Player killer)
+		public bool OnVoteTeamkill(Player killer)
 		{
+			string killerUserId = killer.UserId;
+			string killerNickname = killer.Nickname;
+			string killerIpAddress = killer.IPAddress;
+
 			if (Plugin.Instance.Config.OutAll)
 			{
-				Log.Info("votetk > 0: " + this.votetk);
+				Log.Info("votetk > 0: " + Plugin.Instance.Config.VoteTK);
 				Log.Info("Teamkiller count is greater than votetk? " + this.Teamkillers[killerUserId].Teamkills.Count);
 				Log.Info("Teamkiller is immune? " + this.isImmune(killer));
 			}
-			if (this.votetk > 0 && this.Teamkillers[killerUserId].Teamkills.Count >= this.votetk && !this.isImmune(killer))
+			if (Plugin.Instance.Config.VoteTK > 0 && this.Teamkillers[killerUserId].Teamkills.Count >= Plugin.Instance.Config.VoteTK && !this.isImmune(killer))
 			{
 				Log.Info("Player " + killerNickname + " " + killerUserId + " " + killerIpAddress + " is being voted on a ban for teamkilling " + this.Teamkillers[killerUserId].Teamkills.Count + " times.");
 				Dictionary<int, string> options = new Dictionary<int, string>();
@@ -609,7 +526,7 @@ namespace FriendlyFireAutoban
 				HashSet<string> votes = new HashSet<string>();
 				Dictionary<int, int> counter = new Dictionary<int, int>();
 
-				if (Voting != null && StartVote != null && !Voting.Invoke())
+				/*if (Voting != null && StartVote != null && !Voting.Invoke())
 				{
 					//Plugin.Instance.InvokeEvent("OnStartVote", "Ban " + killerNickname + "?", options, votes, counter);
 					Log.Info("Running vote: " + "Ban " + killerNickname + "?");
@@ -618,266 +535,16 @@ namespace FriendlyFireAutoban
 				}
 				else
 				{
-					this.Warn("patpeter.callvote Voting PipeLink is broken. Cannot start vote.");
+					Log.Warn("patpeter.callvote Voting PipeLink is broken. Cannot start vote.");
 					return false;
-				}
+				}*/
+				Log.Warn("patpeter.callvote Voting PipeLink is broken. Cannot start vote.");
+				return false;
 			}
 			else
 			{
 				return false;
 			}
-		}*/
-	}
-
-	public struct TeamTuple
-	{
-		public Team KillerTeam, VictimTeam;
-
-		public TeamTuple(Team killerTeam, Team victimRole)
-		{
-			this.KillerTeam = killerTeam;
-			this.VictimTeam = victimRole;
-		}
-
-		public override string ToString()
-		{
-			return KillerTeam + ":" + VictimTeam;
-		}
-	}
-
-	public struct RoleTuple
-	{
-		public RoleType KillerRole, VictimRole;
-
-		public RoleTuple(RoleType killerRole, RoleType victimRole)
-		{
-			this.KillerRole = killerRole;
-			this.VictimRole = victimRole;
-		}
-
-		public override string ToString()
-		{
-			return KillerRole + ":" + VictimRole;
-		}
-	}
-
-	public class Teamkiller
-	{
-		public int PlayerId;
-		public string Name;
-		public string UserId;
-		public string IpAddress;
-		// Must keep track of team and role for when the player is sent to spectator and events are still running
-		public short Team;
-		public short Role;
-		// For kdsafe
-		public int Kills;
-		public int Deaths;
-		public List<Teamkill> Teamkills = new List<Teamkill>();
-		//public Timer Timer;
-		public int TimerCountdown = 0;
-
-		public Teamkiller(int playerId, string name, string userId, string ipAddress)
-		{
-			this.PlayerId = playerId;
-			this.Name = name;
-			this.UserId = userId;
-			this.IpAddress = ipAddress;
-		}
-
-		public float GetKDR()
-		{
-			return Deaths == 0 ? 0 : (float)Kills / Deaths;
-		}
-
-		public override bool Equals(object obj)
-		{
-			var teamkiller = obj as Teamkiller;
-			return teamkiller != null &&
-				   PlayerId == teamkiller.PlayerId;
-		}
-
-		public override int GetHashCode()
-		{
-			var hashCode = -1156428363;
-			hashCode = hashCode * -1521134295 + PlayerId.GetHashCode();
-			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Name);
-			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(UserId);
-			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(IpAddress);
-			return hashCode;
-		}
-
-		public override string ToString()
-		{
-			return PlayerId + " " + Name + " " + UserId + " " + IpAddress;
-		}
-	}
-
-	public class Teamkill
-	{
-		public string KillerName;
-		public string KillerUserId;
-		public short KillerTeamRole;
-		public string VictimName;
-		public string VictimUserId;
-		public short VictimTeamRole;
-		public bool VictimDisarmed;
-		public short DamageType;
-		public int Duration;
-
-		public Teamkill(string killerName, string killerSteamId, short killerTeamRole, string victimName, string victimSteamId, short victimTeamRole, bool victimDisarmed, short damageType, int duration)
-		{
-			this.KillerName = killerName;
-			this.KillerUserId = killerSteamId;
-			this.KillerTeamRole = killerTeamRole;
-			this.VictimName = victimName;
-			this.VictimUserId = victimSteamId;
-			this.VictimTeamRole = victimTeamRole;
-			this.VictimDisarmed = victimDisarmed;
-			this.DamageType = damageType;
-			this.Duration = duration;
-		}
-
-		public string GetRoleDisplay()
-		{
-			string retval = "(";
-			switch (KillerTeamRole)
-			{
-				case (short)RoleType.ClassD:
-					retval += Plugin.Instance.GetTranslation("role_dclass");
-					break;
-
-				case (short)RoleType.Scientist:
-					retval += Plugin.Instance.GetTranslation("role_scientist");
-					break;
-
-				case (short)RoleType.FacilityGuard:
-					retval += Plugin.Instance.GetTranslation("role_guard");
-					break;
-
-				case (short)RoleType.NtfPrivate:
-					retval += Plugin.Instance.GetTranslation("role_cadet");
-					break;
-
-				case (short)RoleType.NtfSergeant:
-					retval += Plugin.Instance.GetTranslation("role_lieutenant");
-					break;
-
-				case (short)RoleType.NtfCaptain:
-					retval += Plugin.Instance.GetTranslation("role_commander");
-					break;
-
-				case (short)RoleType.NtfSpecialist:
-					retval += Plugin.Instance.GetTranslation("role_ntf_scientist");
-					break;
-
-				case (short)RoleType.ChaosConscript:
-					retval += Plugin.Instance.GetTranslation("role_chaos");
-					break;
-
-				case (short)RoleType.ChaosRifleman:
-					retval += Plugin.Instance.GetTranslation("role_chaos");
-					break;
-
-				case (short)RoleType.ChaosRepressor:
-					retval += Plugin.Instance.GetTranslation("role_chaos");
-					break;
-
-				case (short)RoleType.ChaosMarauder:
-					retval += Plugin.Instance.GetTranslation("role_chaos");
-					break;
-
-				case (short)RoleType.Tutorial:
-					retval += Plugin.Instance.GetTranslation("role_tutorial");
-					break;
-			}
-			retval += " " + Plugin.Instance.GetTranslation("role_separator") + " ";
-			if (VictimDisarmed)
-			{
-				retval += Plugin.Instance.GetTranslation("role_disarmed");
-			}
-			switch (VictimTeamRole)
-			{
-				case (short)RoleType.ClassD:
-					retval += Plugin.Instance.GetTranslation("role_dclass");
-					break;
-
-				case (short)RoleType.Scientist:
-					retval += Plugin.Instance.GetTranslation("role_scientist");
-					break;
-
-				case (short)RoleType.FacilityGuard:
-					retval += Plugin.Instance.GetTranslation("role_guard");
-					break;
-
-				case (short)RoleType.NtfPrivate:
-					retval += Plugin.Instance.GetTranslation("role_cadet");
-					break;
-
-				case (short)RoleType.NtfSergeant:
-					retval += Plugin.Instance.GetTranslation("role_lieutenant");
-					break;
-
-				case (short)RoleType.NtfCaptain:
-					retval += Plugin.Instance.GetTranslation("role_commander");
-					break;
-
-				case (short)RoleType.NtfSpecialist:
-					retval += Plugin.Instance.GetTranslation("role_ntf_scientist");
-					break;
-
-				case (short)RoleType.ChaosConscript:
-					retval += Plugin.Instance.GetTranslation("role_chaos");
-					break;
-
-				case (short)RoleType.ChaosRifleman:
-					retval += Plugin.Instance.GetTranslation("role_chaos");
-					break;
-
-				case (short)RoleType.ChaosRepressor:
-					retval += Plugin.Instance.GetTranslation("role_chaos");
-					break;
-
-				case (short)RoleType.ChaosMarauder:
-					retval += Plugin.Instance.GetTranslation("role_chaos");
-					break;
-
-				case (short)RoleType.Tutorial:
-					retval += Plugin.Instance.GetTranslation("role_tutorial");
-					break;
-			}
-			retval += ")";
-			return retval;
-		}
-
-		public override bool Equals(object obj)
-		{
-			var teamkill = obj as Teamkill;
-			return teamkill != null &&
-				   KillerName == teamkill.KillerName &&
-				   KillerUserId == teamkill.KillerUserId &&
-				   EqualityComparer<short>.Default.Equals(KillerTeamRole, teamkill.KillerTeamRole) &&
-				   VictimName == teamkill.VictimName &&
-				   VictimUserId == teamkill.VictimUserId &&
-				   EqualityComparer<short>.Default.Equals(VictimTeamRole, teamkill.VictimTeamRole) &&
-				   VictimDisarmed == teamkill.VictimDisarmed &&
-				   DamageType == teamkill.DamageType &&
-				   Duration == teamkill.Duration;
-		}
-
-		public override int GetHashCode()
-		{
-			var hashCode = -153347006;
-			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(KillerName);
-			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(KillerUserId);
-			hashCode = hashCode * -1521134295 + EqualityComparer<short>.Default.GetHashCode(KillerTeamRole);
-			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(VictimName);
-			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(VictimUserId);
-			hashCode = hashCode * -1521134295 + EqualityComparer<short>.Default.GetHashCode(VictimTeamRole);
-			hashCode = hashCode * -1521134295 + VictimDisarmed.GetHashCode();
-			hashCode = hashCode * -1521134295 + DamageType.GetHashCode();
-			hashCode = hashCode * -1521134295 + Duration.GetHashCode();
-			return hashCode;
 		}
 	}
 }

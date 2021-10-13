@@ -104,6 +104,10 @@
     <Compile Include="EventHandlers.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RoleTuple.cs" />
+    <Compile Include="Teamkill.cs" />
+    <Compile Include="Teamkiller.cs" />
+    <Compile Include="TeamTuple.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

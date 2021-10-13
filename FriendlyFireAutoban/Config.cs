@@ -166,5 +166,69 @@ namespace FriendlyFireAutoban
 		/// </summary>
 		[Description("The K/D ratio at which players will be immune from pre-ban and ban punishments. Takes effect when kills are greater than kdsafe, i.e. set to 2 requires a minimum of 4:2 (not 2:1), set to 3 requires a minimum of 6:2 (not 3:1), etc.")]
 		public int KDSafe = 0;
+
+
+		public Dictionary<string, string> Translations = new Dictionary<string, string>
+		{
+			/*
+			 * Ban Events
+			 */
+			{ "victim_message", "<size=36>{0}, <color=red>teamkilled</color> you at {1}. If this was an accidental teamkill, please press ~ and then type .forgive to prevent this user from being banned.</size>" },
+			{ "killer_message", "You teamkilled {0}, {1}." },
+			{ "killer_kdr_message", "You teamkilled {0}, {1}. Because your K/D ratio is {2}, you will not be punished. Please watch your fire." },
+			{ "killer_warning", "If you teamkill {0}, more times you will be banned." },
+			{ "killer_request", "Please do not teamkill." },
+			{ "noguns_output", "Your guns have been removed for <color=red>teamkilling</color>. You will get them back when your teamkill expires." },
+			{ "tospec_output", "You have been moved to spectate for <color=red>teamkilling</color>." },
+			{ "undead_killer_output", "{0}, has been respawned because you are <color=red>teamkilling</color> too much. If you continue, you will be banned." },
+			{ "undead_victim_output", "You have been respawned after being teamkilled by {0}." },
+			{ "kicker_output", "You will be kicked for <color=red>teamkilling</color>." },
+			{ "banned_output", "Player {0}, has been banned for <color=red>teamkilling</color> {1}, players." }, 
+
+			// OFFLINE BAN, DO NOT ADD BBCODE
+			{ "offline_ban", "Banned {0}, minutes for teamkilling {1}, players" }, 
+
+			/*
+			 * Teamkiller/Teamkill
+			 */
+			{ "role_disarmed", "DISARMED " },
+			{ "role_separator", "on" },
+			{ "role_dclass", "<color=orange>D-CLASS</color>" },
+			{ "role_scientist", "<color=yellow>SCIENTIST</color>" },
+			{ "role_guard", "<color=silver>GUARD</color>" },
+			{ "role_cadet", "<color=cyan>CADET</color>" },
+			{ "role_lieutenant", "<color=aqua>LIEUTENANT</color>" },
+			{ "role_commander", "<color=blue>COMMANDER</color>" },
+			{ "role_ntf_scientist", "<color=aqua>NTF SCIENTIST</color>" },
+			{ "role_chaos", "<color=green>CHAOS</color>" },
+			{ "role_tutorial", "<color=lime>TUTORIAL</color>" }, 
+
+			/*
+			 * Commands
+			 */
+			{ "toggle_description", "Toggle Friendly Fire Autoban on and off." },
+			{ "toggle_disable", "Friendly fire Autoban has been disabled." },
+			{ "toggle_enable", "Friendly fire Autoban has been enabled." },
+
+			{ "whitelist_description", "Whitelist a user from being banned by FFA until the end of the round." },
+			{ "whitelist_error", "A single name or Steam ID must be provided." },
+			{ "whitelist_add", "Added player {0}, ({1}) to ban whitelist." },
+			{ "whitelist_remove", "Removed player {0}, ({1}) from ban whitelist." }, 
+
+			/*
+			 * Client Commands
+			 */
+			{ "forgive_command", "forgive" },
+			{ "forgive_success", "You have forgiven {0}, {1}!" },
+			{ "forgive_duplicate", "You already forgave {0}, {1}." },
+			{ "forgive_disconnect", "The player has disconnected." },
+			{ "forgive_invalid", "You have not been teamkilled yet." },
+
+			{ "tks_command", "tks" },
+			{ "tks_no_teamkills", "No players by this name or Steam ID has any teamkills." },
+			{ "tks_teamkill_entry", "({0}) {1}, teamkilled {2}, {3}." },
+			{ "tks_not_found", "Player name not provided or not quoted." },
+			{ "ffa_disabled", "Friendly Fire Autoban is currently disabled." },
+		};
 	}
 }
