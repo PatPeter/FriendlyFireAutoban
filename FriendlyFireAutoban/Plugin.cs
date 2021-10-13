@@ -84,13 +84,13 @@ namespace FriendlyFireAutoban
 
 		public string GetTranslation(string name)
 		{
-			//Type t = typeof(FriendlyFireAutoban.Plugin);
-			//FieldInfo p = t.GetField(name);
-			//if (p != null)
-			if (Plugin.Instance.Config.Translations.ContainsKey(name))
+			Type t = typeof(FriendlyFireAutoban.Translation);
+			PropertyInfo p = t.GetProperty(name);
+			// Plugin.Instance.Config.Translations.ContainsKey(name)
+			if (p != null)
 			{
-				//return (string) p.GetValue(this);
-				return Plugin.Instance.Config.Translations[name];
+				return (string) p.GetValue(this);
+				//return Plugin.Instance.Config.Translations[name];
 			}
 			else
 			{

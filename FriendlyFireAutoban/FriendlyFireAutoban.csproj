@@ -111,9 +111,13 @@
     <Compile Include="Teamkill.cs" />
     <Compile Include="Teamkiller.cs" />
     <Compile Include="TeamTuple.cs" />
+    <Compile Include="Translation.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Commands\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

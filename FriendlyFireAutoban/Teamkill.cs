@@ -9,27 +9,27 @@ namespace FriendlyFireAutoban
 {
 	public class Teamkill
 	{
-		public string KillerName;
-		public string KillerUserId;
-		public short KillerTeamRole;
-		public string VictimName;
-		public string VictimUserId;
-		public short VictimTeamRole;
-		public bool VictimDisarmed;
-		public short DamageType;
-		public int Duration;
+		public string KillerName     { get; set; }
+		public string KillerUserId   { get; set; }
+		public short  KillerTeamRole { get; set; }
+		public string VictimName     { get; set; }
+		public string VictimUserId   { get; set; }
+		public short  VictimTeamRole { get; set; }
+		public bool   VictimDisarmed { get; set; }
+		public short  DamageType     { get; set; }
+		public int    Duration       { get; set; }
 
 		public Teamkill(string killerName, string killerSteamId, short killerTeamRole, string victimName, string victimSteamId, short victimTeamRole, bool victimDisarmed, short damageType, int duration)
 		{
-			this.KillerName = killerName;
-			this.KillerUserId = killerSteamId;
+			this.KillerName     = killerName;
+			this.KillerUserId   = killerSteamId;
 			this.KillerTeamRole = killerTeamRole;
-			this.VictimName = victimName;
-			this.VictimUserId = victimSteamId;
+			this.VictimName     = victimName;
+			this.VictimUserId   = victimSteamId;
 			this.VictimTeamRole = victimTeamRole;
 			this.VictimDisarmed = victimDisarmed;
-			this.DamageType = damageType;
-			this.Duration = duration;
+			this.DamageType     = damageType;
+			this.Duration       = duration;
 		}
 
 		public string GetRoleDisplay()

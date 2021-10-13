@@ -7,7 +7,7 @@ using System.Linq;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle(FriendlyFireAutoban.AssemblyInfo.Name)]
+[assembly: AssemblyTitle(FriendlyFireAutoban.AssemblyInfo.Name + "_" + FriendlyFireAutoban.AssemblyInfo.Version)]
 [assembly: AssemblyDescription(FriendlyFireAutoban.AssemblyInfo.Description)]
 #if DEBUG
 [assembly: AssemblyConfiguration("Debug")]
@@ -56,6 +56,6 @@ namespace FriendlyFireAutoban
 		/// <summary>
 		/// The AssemblyFileVersion of this web part
 		/// </summary>
-		internal const string Version = "6.0.3";
+		internal const string Version = "6.0.4";
 	}
 }

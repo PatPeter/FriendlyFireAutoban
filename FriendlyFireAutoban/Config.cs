@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.ComponentModel;
+using Exiled.API.Interfaces;
 
 namespace FriendlyFireAutoban
 {
-	using System.Collections.Generic;
-	using System.ComponentModel;
-	using Exiled.API.Interfaces;
-
 	/// <inheritdoc cref="IConfig"/>
 	public sealed class Config : IConfig
 	{
@@ -24,9 +23,12 @@ namespace FriendlyFireAutoban
 		public bool OutAll { get; private set; } = false;
 
 		/// <summary>
-		/// Change system for processing teamkills: (1) basic counter that will ban the player instantly upon reaching a threshold, (2) timer-based counter that will ban a player after reaching the threshold but will forgive 1 teamkill every `friendly_fire_autoban_expire` seconds, or (3) allow users to teamkill as much as possible and ban them after they have gone `friendly_fire_autoban_expire` seconds without teamkilling (will ban on round end and player disconnect).
+		/// Change system for processing teamkills:
+		/// (1) basic counter that will ban the player instantly upon reaching a threshold,
+		/// (2) timer-based counter that will ban a player after reaching the threshold but will forgive 1 teamkill every `friendly_fire_autoban_expire` seconds, or
+		/// (3) allow users to teamkill as much as possible and ban them after they have gone `friendly_fire_autoban_expire` seconds without teamkilling (will ban on round end and player disconnect).
 		/// </summary>
-		[Description("Change system for processing teamkills:\n(1) basic counter that will ban the player instantly upon reaching a threshold,\n(2) timer-based counter that will ban a player after reaching the threshold but will forgive 1 teamkill every `friendly_fire_autoban_expire` seconds, or\n(3) allow users to teamkill as much as possible and ban them after they have gone `friendly_fire_autoban_expire` seconds without teamkilling (will ban on round end and player disconnect).")]
+		[Description("Change system for processing teamkills:\n  # (1) basic counter that will ban the player instantly upon reaching a threshold,\n  # (2) timer-based counter that will ban a player after reaching the threshold but will forgive 1 teamkill every `friendly_fire_autoban_expire` seconds, or\n  # (3) allow users to teamkill as much as possible and ban them after they have gone `friendly_fire_autoban_expire` seconds without teamkilling (will ban on round end and player disconnect).")]
 		public int System { get; private set; } = 3;
 
 		/// <summary>
@@ -167,12 +169,13 @@ namespace FriendlyFireAutoban
 		[Description("The K/D ratio at which players will be immune from pre-ban and ban punishments. Takes effect when kills are greater than kdsafe, i.e. set to 2 requires a minimum of 4:2 (not 2:1), set to 3 requires a minimum of 6:2 (not 3:1), etc.")]
 		public int KDSafe = 0;
 
-
+		/// <summary>
+		/// Translations for using Friendly Fire Autoban in other languages.
+		/// </summary>
+		/*[Description("Translations for using Friendly Fire Autoban in other languages.")]
 		public Dictionary<string, string> Translations = new Dictionary<string, string>
 		{
-			/*
-			 * Ban Events
-			 */
+			// Ban Events
 			{ "victim_message", "<size=36>{0}, <color=red>teamkilled</color> you at {1}. If this was an accidental teamkill, please press ~ and then type .forgive to prevent this user from being banned.</size>" },
 			{ "killer_message", "You teamkilled {0}, {1}." },
 			{ "killer_kdr_message", "You teamkilled {0}, {1}. Because your K/D ratio is {2}, you will not be punished. Please watch your fire." },
@@ -188,9 +191,7 @@ namespace FriendlyFireAutoban
 			// OFFLINE BAN, DO NOT ADD BBCODE
 			{ "offline_ban", "Banned {0}, minutes for teamkilling {1}, players" }, 
 
-			/*
-			 * Teamkiller/Teamkill
-			 */
+			// Teamkiller/Teamkill
 			{ "role_disarmed", "DISARMED " },
 			{ "role_separator", "on" },
 			{ "role_dclass", "<color=orange>D-CLASS</color>" },
@@ -203,9 +204,7 @@ namespace FriendlyFireAutoban
 			{ "role_chaos", "<color=green>CHAOS</color>" },
 			{ "role_tutorial", "<color=lime>TUTORIAL</color>" }, 
 
-			/*
-			 * Commands
-			 */
+			// Commands
 			{ "toggle_description", "Toggle Friendly Fire Autoban on and off." },
 			{ "toggle_disable", "Friendly fire Autoban has been disabled." },
 			{ "toggle_enable", "Friendly fire Autoban has been enabled." },
@@ -215,9 +214,8 @@ namespace FriendlyFireAutoban
 			{ "whitelist_add", "Added player {0}, ({1}) to ban whitelist." },
 			{ "whitelist_remove", "Removed player {0}, ({1}) from ban whitelist." }, 
 
-			/*
-			 * Client Commands
-			 */
+			
+			//Client Commands
 			{ "forgive_command", "forgive" },
 			{ "forgive_success", "You have forgiven {0}, {1}!" },
 			{ "forgive_duplicate", "You already forgave {0}, {1}." },
@@ -229,6 +227,6 @@ namespace FriendlyFireAutoban
 			{ "tks_teamkill_entry", "({0}) {1}, teamkilled {2}, {3}." },
 			{ "tks_not_found", "Player name not provided or not quoted." },
 			{ "ffa_disabled", "Friendly Fire Autoban is currently disabled." },
-		};
+		};*/
 	}
 }

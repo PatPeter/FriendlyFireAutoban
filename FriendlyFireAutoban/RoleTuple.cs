@@ -7,9 +7,10 @@ using YamlDotNet.Serialization;
 
 namespace FriendlyFireAutoban
 {
-	public struct RoleTuple
+	public class RoleTuple
 	{
-		public RoleType KillerRole, VictimRole;
+		public RoleType KillerRole { get; set; }
+		public RoleType VictimRole { get; set; }
 
 		public RoleTuple(RoleType killerRole, RoleType victimRole)
 		{
@@ -17,9 +18,9 @@ namespace FriendlyFireAutoban
 			this.VictimRole = victimRole;
 		}
 
-		//public override string ToString()
-		//{
-		//	return KillerRole + ":" + VictimRole;
-		//}
+		public override string ToString()
+		{
+			return KillerRole + "," + VictimRole;
+		}
 	}
 }

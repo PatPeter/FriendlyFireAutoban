@@ -9,19 +9,17 @@ namespace FriendlyFireAutoban
 {
 	public class Teamkiller
 	{
-		public int PlayerId;
-		public string Name;
-		public string UserId;
-		public string IpAddress;
+		public int            PlayerId       { get; set; }
+		public string         Name           { get; set; }
+		public string         UserId         { get; set; }
+		public string         IpAddress      { get; set; }
 		// Must keep track of team and role for when the player is sent to spectator and events are still running
-		public short Team;
-		public short Role;
-		// For kdsafe
-		public int Kills;
-		public int Deaths;
-		public List<Teamkill> Teamkills = new List<Teamkill>();
-		//public Timer Timer;
-		public int TimerCountdown = 0;
+		public short          PlayerTeam     { get; set; }
+		public short          PlayerRole     { get; set; }
+		public int            Kills          { get; set; } = 0;
+		public int            Deaths         { get; set; } = 0;
+		public List<Teamkill> Teamkills      { get; set; } = new List<Teamkill>();
+		public int            TimerCountdown { get; set; } = 0;
 
 		public Teamkiller(int playerId, string name, string userId, string ipAddress)
 		{

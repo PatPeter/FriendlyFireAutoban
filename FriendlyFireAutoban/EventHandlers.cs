@@ -438,8 +438,8 @@ namespace FriendlyFireAutoban
 				Teamkiller teamkiller = Plugin.Instance.AddAndGetTeamkiller(ev.Player);
 				if (playerTeam != Team.RIP)
 				{
-					teamkiller.Team = (short)playerTeam;
-					teamkiller.Role = (short)playerRole;
+					teamkiller.PlayerTeam = (short)playerTeam;
+					teamkiller.PlayerRole = (short)playerRole;
 				}
 
 				Plugin.Instance.OnCheckRemoveGuns(ev.Player);
@@ -459,8 +459,8 @@ namespace FriendlyFireAutoban
 				Teamkiller teamkiller = Plugin.Instance.AddAndGetTeamkiller(ev.Player);
 				if (playerTeam != Team.RIP)
 				{
-					teamkiller.Team = (short)playerTeam;
-					teamkiller.Role = (short)playerRole;
+					teamkiller.PlayerTeam = (short)playerTeam;
+					teamkiller.PlayerRole = (short)playerRole;
 				}
 
 				Plugin.Instance.OnCheckRemoveGuns(ev.Player);

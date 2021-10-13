@@ -7,9 +7,10 @@ using YamlDotNet.Serialization;
 
 namespace FriendlyFireAutoban
 {
-	public struct TeamTuple
+	public class TeamTuple
 	{
-		public Team KillerTeam, VictimTeam;
+		public Team KillerTeam { get; set; }
+		public Team VictimTeam { get; set; }
 
 		public TeamTuple(Team killerTeam, Team victimRole)
 		{
@@ -17,9 +18,9 @@ namespace FriendlyFireAutoban
 			this.VictimTeam = victimRole;
 		}
 
-		//public override string ToString()
-		//{
-		//	return KillerTeam + ":" + VictimTeam;
-		//}
+		public override string ToString()
+		{
+			return KillerTeam + "," + VictimTeam;
+		}
 	}
 }
