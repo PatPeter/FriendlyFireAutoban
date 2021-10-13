@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using YamlDotNet.Serialization;
 
 namespace FriendlyFireAutoban
 {
@@ -16,9 +17,9 @@ namespace FriendlyFireAutoban
 			this.VictimRole = victimRole;
 		}
 
-		public override string ToString()
-		{
-			return KillerRole + ":" + VictimRole;
-		}
+		//public override string ToString()
+		//{
+		//	return KillerRole + ":" + VictimRole;
+		//}
 	}
 }
