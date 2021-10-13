@@ -24,7 +24,7 @@ namespace FriendlyFireAutoban
 		public bool OutAll { get; private set; } = false;
 
 		/// <summary>
-		/// Change system for processing teamkills:\n  # (1) basic counter that will ban the player instantly upon reaching a threshold,\n  # (2) timer-based counter that will ban a player after reaching the threshold but will forgive 1 teamkill every `friendly_fire_autoban_expire` seconds, or\n  # (3) allow users to teamkill as much as possible and ban them after they have gone `friendly_fire_autoban_expire` seconds without teamkilling (will ban on round end and player disconnect).
+		/// Change system for processing teamkills: (1) basic counter that will ban the player instantly upon reaching a threshold, (2) timer-based counter that will ban a player after reaching the threshold but will forgive 1 teamkill every `friendly_fire_autoban_expire` seconds, or (3) allow users to teamkill as much as possible and ban them after they have gone `friendly_fire_autoban_expire` seconds without teamkilling (will ban on round end and player disconnect).
 		/// </summary>
 		[Description("Change system for processing teamkills:\n(1) basic counter that will ban the player instantly upon reaching a threshold,\n(2) timer-based counter that will ban a player after reaching the threshold but will forgive 1 teamkill every `friendly_fire_autoban_expire` seconds, or\n(3) allow users to teamkill as much as possible and ban them after they have gone `friendly_fire_autoban_expire` seconds without teamkilling (will ban on round end and player disconnect).")]
 		public int System { get; private set; } = 3;
