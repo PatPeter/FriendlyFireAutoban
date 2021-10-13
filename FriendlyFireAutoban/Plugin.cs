@@ -122,7 +122,7 @@ namespace FriendlyFireAutoban
 				//Exiled.Events.Handlers.Server.SendingRemoteAdminCommand += EventHandlers.OnRACommand;
 				//Exiled.Events.Handlers.Server.SendingConsoleCommand += EventHandlers.OnConsoleCommand;
 
-				Log.Info($"Friendly Fire Autoban has been loaded!");
+				Log.Info(AssemblyInfo.Name + " v" + AssemblyInfo.Version + " by " + AssemblyInfo.Author + " has been enabled!");
 			}
 			catch (Exception e)
 			{

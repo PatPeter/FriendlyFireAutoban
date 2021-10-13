@@ -20,22 +20,22 @@ namespace FriendlyFireAutoban
 		/// Output all debugging messages for FFA.
 		/// </summary>
 		[Description("Output all debugging messages for FFA.")]
-		public bool OutAll { get; private set; } = false;
+		public bool OutAll { get; set; } = false;
 
 		/// <summary>
 		/// Change system for processing teamkills:
-		/// (1) basic counter that will ban the player instantly upon reaching a threshold,
-		/// (2) timer-based counter that will ban a player after reaching the threshold but will forgive 1 teamkill every `friendly_fire_autoban_expire` seconds, or
-		/// (3) allow users to teamkill as much as possible and ban them after they have gone `friendly_fire_autoban_expire` seconds without teamkilling (will ban on round end and player disconnect).
+		/// # 1. basic counter that will ban the player instantly upon reaching a threshold,
+		/// # 2. timer-based counter that will ban a player after reaching the threshold but will forgive 1 teamkill every `friendly_fire_autoban_expire` seconds, or
+		/// # 3. allow users to teamkill as much as possible and ban them after they have gone `friendly_fire_autoban_expire` seconds without teamkilling (will ban on round end and player disconnect).
 		/// </summary>
 		[Description("Change system for processing teamkills:\n  # (1) basic counter that will ban the player instantly upon reaching a threshold,\n  # (2) timer-based counter that will ban a player after reaching the threshold but will forgive 1 teamkill every `friendly_fire_autoban_expire` seconds, or\n  # (3) allow users to teamkill as much as possible and ban them after they have gone `friendly_fire_autoban_expire` seconds without teamkilling (will ban on round end and player disconnect).")]
-		public int System { get; private set; } = 3;
+		public int System { get; set; } = 3;
 
 		/// <summary>
 		/// Matrix of killer:victim team tuples that the plugin considers teamkills
 		/// </summary>
 		[Description("Matrix of killer:victim team tuples that the plugin considers teamkills")]
-		public List<TeamTuple> Matrix { get; private set; } = new List<TeamTuple>() {
+		public List<TeamTuple> Matrix { get; set; } = new List<TeamTuple>() {
 			new TeamTuple(Team.SCP, Team.SCP),
 			new TeamTuple(Team.MTF, Team.MTF),
 			new TeamTuple(Team.CHI, Team.CHI),
@@ -51,25 +51,25 @@ namespace FriendlyFireAutoban
 		/// Amount of teamkills before a ban will be issued.
 		/// </summary>
 		[Description("Amount of teamkills before a ban will be issued.")]
-		public int Amount { get; private set; } = 5;
+		public int Amount { get; set; } = 5;
 
 		/// <summary>
 		/// Length of ban in minutes.
 		/// </summary>
 		[Description("Length of ban in minutes.")]
-		public int Length { get; private set; } = 1440;
+		public int Length { get; set; } = 1440;
 
 		/// <summary>
 		/// For ban system #2, Time it takes in seconds for teamkill to degrade and not count towards ban.
 		/// </summary>
 		[Description("For ban system #2, Time it takes in seconds for teamkill to degrade and not count towards ban.")]
-		public int Expire { get; private set; } = 60;
+		public int Expire { get; set; } = 60;
 
 		/// <summary>
 		/// For ban system #2, Time it takes in seconds for teamkill to degrade and not count towards ban.
 		/// </summary>
 		[Description("For ban system #2, Time it takes in seconds for teamkill to degrade and not count towards ban.")]
-		public Dictionary<int, int> Scaled { get; private set; } = new Dictionary<int, int>()
+		public Dictionary<int, int> Scaled { get; set; } = new Dictionary<int, int>()
 		{
 			{ 4, 1440 },
 			{ 5, 4320 },
@@ -87,25 +87,25 @@ namespace FriendlyFireAutoban
 		/// Number of kills to remove the player's guns as a warning for teamkilling, and will remove guns every time the player picks them up or spawns with them. In ban system #1, this will remove the player's guns for the rest of the round.
 		/// </summary>
 		[Description("Number of kills to remove the player's guns as a warning for teamkilling, and will remove guns every time the player picks them up or spawns with them. In ban system #1, this will remove the player's guns for the rest of the round.")]
-		public int NoGuns { get; private set; } = 0;
+		public int NoGuns { get; set; } = 0;
 
 		/// <summary>
 		/// Number of kills at which to put a player into spectator as a warning for teamkilling.
 		/// </summary>
 		[Description("Number of kills at which to put a player into spectator as a warning for teamkilling.")]
-		public int ToSpec { get; private set; } = 0;
+		public int ToSpec { get; set; } = 0;
 
 		/// <summary>
 		/// Number of kills at which to kick the player as a warning for teamkilling.
 		/// </summary>
 		[Description("Number of kills at which to kick the player as a warning for teamkilling.")]
-		public int Kicker { get; private set; } = 0;
+		public int Kicker { get; set; } = 0;
 
 		/// <summary>
 		/// Groups that are immune to being autobanned.
 		/// </summary>
 		[Description("Groups that are immune to being autobanned.")]
-		public HashSet<string> Immune { get; private set; } = new HashSet<string>()
+		public HashSet<string> Immune { get; set; } = new HashSet<string>()
 		{
 			"owner",
 			"admin",
