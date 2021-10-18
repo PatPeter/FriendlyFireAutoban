@@ -89,7 +89,7 @@ namespace FriendlyFireAutoban
 			// Plugin.Instance.Config.Translations.ContainsKey(name)
 			if (p != null)
 			{
-				return (string) p.GetValue(this);
+				return (string) p.GetValue(Translation);
 				//return Plugin.Instance.Config.Translations[name];
 			}
 			else

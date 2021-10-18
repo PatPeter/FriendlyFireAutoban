@@ -33,7 +33,7 @@ namespace FriendlyFireAutoban
 		/// </summary>
 		[Description("Matrix of killer:victim team tuples that the plugin considers teamkills")]
 		public List<String> Matrix { get; set; } = new List<string>() {
-			(int)Team.SCP + ":" + (int)Team.SCP,
+			/*(int)Team.SCP + ":" + (int)Team.SCP,
 			(int)Team.MTF + ":" + (int)Team.MTF,
 			(int)Team.CHI + ":" + (int)Team.CHI,
 			(int)Team.RSC + ":" + (int)Team.RSC,
@@ -41,7 +41,16 @@ namespace FriendlyFireAutoban
 			(int)Team.MTF + ":" + (int)Team.RSC,
 			(int)Team.CHI + ":" + (int)Team.CDP,
 			(int)Team.RSC + ":" + (int)Team.MTF,
-			(int)Team.CDP + ":" + (int)Team.CHI,
+			(int)Team.CDP + ":" + (int)Team.CHI,*/
+			"0,0",
+			"1,1",
+			"2,2",
+			"3,3",
+			"4,4",
+			"1,3",
+			"2,4",
+			"3,1",
+			"4,2",
 		};
 
 		internal List<TeamTuple> GetMatrix()
@@ -49,7 +58,7 @@ namespace FriendlyFireAutoban
 			List<TeamTuple> retval = new List<TeamTuple>();
 			foreach (string tuple in Matrix)
 			{
-				byte[] parts = tuple.Split(':').Select(int.Parse).Select(Convert.ToByte).ToArray();
+				byte[] parts = tuple.Split(',').Select(int.Parse).Select(Convert.ToByte).ToArray();
 				if (parts.Length != 2)
 				{
 					continue;
@@ -154,7 +163,7 @@ namespace FriendlyFireAutoban
 			List<RoleTuple> retval = new List<RoleTuple>();
 			foreach (string tuple in RoleWl)
 			{
-				sbyte[] parts = tuple.Split(':').Select(int.Parse).Select(Convert.ToSByte).ToArray();
+				sbyte[] parts = tuple.Split(',').Select(int.Parse).Select(Convert.ToSByte).ToArray();
 				if (parts.Length != 2)
 				{
 					continue;
