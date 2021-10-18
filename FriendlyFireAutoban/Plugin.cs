@@ -9,7 +9,7 @@ using MEC;
 
 namespace FriendlyFireAutoban
 {
-	public class Plugin : Plugin<Config>
+	class Plugin : Plugin<Config, Translation>
 	{
 		/*
 		 * Static Fields

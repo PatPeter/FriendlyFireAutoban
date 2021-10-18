@@ -33,15 +33,15 @@ namespace FriendlyFireAutoban
 		/// </summary>
 		[Description("Matrix of killer:victim team tuples that the plugin considers teamkills")]
 		public List<String> Matrix { get; set; } = new List<string>() {
-			((int)Team.SCP + ":" + (int)Team.SCP),
-			((int)Team.MTF + ":" + (int)Team.MTF),
-			((int)Team.CHI + ":" + (int)Team.CHI),
-			((int)Team.RSC + ":" + (int)Team.RSC),
-			((int)Team.CDP + ":" + (int)Team.CDP),
-			((int)Team.MTF + ":" + (int)Team.RSC),
-			((int)Team.CHI + ":" + (int)Team.CDP),
-			((int)Team.RSC + ":" + (int)Team.MTF),
-			((int)Team.CDP + ":" + (int)Team.CHI),
+			(int)Team.SCP + ":" + (int)Team.SCP,
+			(int)Team.MTF + ":" + (int)Team.MTF,
+			(int)Team.CHI + ":" + (int)Team.CHI,
+			(int)Team.RSC + ":" + (int)Team.RSC,
+			(int)Team.CDP + ":" + (int)Team.CDP,
+			(int)Team.MTF + ":" + (int)Team.RSC,
+			(int)Team.CHI + ":" + (int)Team.CDP,
+			(int)Team.RSC + ":" + (int)Team.MTF,
+			(int)Team.CDP + ":" + (int)Team.CHI,
 		};
 
 		internal List<TeamTuple> GetMatrix()
