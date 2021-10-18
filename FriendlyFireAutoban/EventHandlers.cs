@@ -12,10 +12,10 @@ using FriendlyFireAutoban;
 
 namespace FriendlyFireAutoban
 {
-	public class EventHandlers
+	internal class EventHandlers
 	{
-		public Plugin plugin;
-		public EventHandlers(Plugin plugin) => this.plugin = plugin;
+		internal Plugin plugin;
+		internal EventHandlers(Plugin plugin) => this.plugin = plugin;
 
 		public void OnRoundStart()
 		{
