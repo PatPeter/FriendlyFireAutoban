@@ -49,7 +49,7 @@ namespace FriendlyFireAutoban
 			List<TeamTuple> retval = new List<TeamTuple>();
 			foreach (string tuple in Matrix)
 			{
-				sbyte[] parts = tuple.Split(':').Select(int.Parse).Select(Convert.ToSByte).ToArray();
+				byte[] parts = tuple.Split(':').Select(int.Parse).Select(Convert.ToByte).ToArray();
 				if (parts.Length != 2)
 				{
 					continue;
@@ -138,13 +138,13 @@ namespace FriendlyFireAutoban
 		/// Whether disarmed players should be considered members of the opposite team and role.
 		/// </summary>
 		[Description("Whether disarmed players should be considered members of the opposite team and role.")]
-		public bool Disarm { get; set; } = false;
+		public bool Disarm { get; set; } = true;
 
 		/// <summary>
 		/// Matrix of `killer:victim` role tuples that the plugin will NOT consider teamkills.<br><br>If you want NTF to be able to teamkill based on the chain of command, use this value (on one line): <br>12:11,12:4,12:13,12:15,<br>4:11,4:13,4:15,<br>11:13,11:15,13:15
 		/// </summary>
 		[Description("Matrix of `killer:victim` role tuples that the plugin will NOT consider teamkills. If you want NTF to be able to teamkill based on the chain of command, use this value (on one line): <br>12:11,12:4,12:13,12:15,<br>4:11,4:13,4:15,<br>11:13,11:15,13:15")]
-		public List<string> RoleWL { get; set; } = new List<string>
+		public List<string> RoleWl { get; set; } = new List<string>
 		{
 
 		};
@@ -152,7 +152,7 @@ namespace FriendlyFireAutoban
 		internal List<RoleTuple> GetRoleWL()
 		{
 			List<RoleTuple> retval = new List<RoleTuple>();
-			foreach (string tuple in RoleWL)
+			foreach (string tuple in RoleWl)
 			{
 				sbyte[] parts = tuple.Split(':').Select(int.Parse).Select(Convert.ToSByte).ToArray();
 				if (parts.Length != 2)
@@ -190,19 +190,19 @@ namespace FriendlyFireAutoban
 		/// How many teamkills before a ban should a teamkiller be warned (>=1), give a generic warning (0), or give no warning (-1).
 		/// </summary>
 		[Description("How many teamkills before a ban should a teamkiller be warned (>=1), give a generic warning (0), or give no warning (-1).")]
-		public int WarnTK { get; set; } = 0;
+		public int WarnTk { get; set; } = 0;
 
 		/// <summary>
 		/// [not implemented yet] The number of teamkills at which to call a vote via the callvote plugin to ban a user by the ban amount.
 		/// </summary>
 		[Description("[not implemented yet] The number of teamkills at which to call a vote via the callvote plugin to ban a user by the ban amount.")]
-		public int VoteTK { get; set; } = 0;
+		public int VoteTk { get; set; } = 0;
 
 		/// <summary>
 		/// The K/D ratio at which players will be immune from pre-ban and ban punishments. Takes effect when kills are greater than kdsafe, i.e. set to 2 requires a minimum of 4:2 (not 2:1), set to 3 requires a minimum of 6:2 (not 3:1), etc.
 		/// </summary>
 		[Description("The K/D ratio at which players will be immune from pre-ban and ban punishments. Takes effect when kills are greater than kdsafe, i.e. set to 2 requires a minimum of 4:2 (not 2:1), set to 3 requires a minimum of 6:2 (not 3:1), etc.")]
-		public int KDSafe { get; set; } = 0;
+		public int KdSafe { get; set; } = 0;
 
 		/// <summary>
 		/// Translations for using Friendly Fire Autoban in other languages.

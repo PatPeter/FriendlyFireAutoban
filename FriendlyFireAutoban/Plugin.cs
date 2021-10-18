@@ -513,11 +513,11 @@ namespace FriendlyFireAutoban
 
 			if (Plugin.Instance.Config.OutAll)
 			{
-				Log.Info("votetk > 0: " + Plugin.Instance.Config.VoteTK);
+				Log.Info("votetk > 0: " + Plugin.Instance.Config.VoteTk);
 				Log.Info("Teamkiller count is greater than votetk? " + this.Teamkillers[killerUserId].Teamkills.Count);
 				Log.Info("Teamkiller is immune? " + this.isImmune(killer));
 			}
-			if (Plugin.Instance.Config.VoteTK > 0 && this.Teamkillers[killerUserId].Teamkills.Count >= Plugin.Instance.Config.VoteTK && !this.isImmune(killer))
+			if (Plugin.Instance.Config.VoteTk > 0 && this.Teamkillers[killerUserId].Teamkills.Count >= Plugin.Instance.Config.VoteTk && !this.isImmune(killer))
 			{
 				Log.Info("Player " + killerNickname + " " + killerUserId + " " + killerIpAddress + " is being voted on a ban for teamkilling " + this.Teamkillers[killerUserId].Teamkills.Count + " times.");
 				Dictionary<int, string> options = new Dictionary<int, string>();

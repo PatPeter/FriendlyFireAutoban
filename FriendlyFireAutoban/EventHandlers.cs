@@ -262,24 +262,24 @@ namespace FriendlyFireAutoban
 						// If kdr is greater than K/D safe amount, AND if the number of kils is greater than kdsafe to exclude low K/D values
 						if (Plugin.Instance.Config.OutAll)
 						{
-							Log.Info("kdsafe set to: " + Plugin.Instance.Config.KDSafe);
+							Log.Info("kdsafe set to: " + Plugin.Instance.Config.KdSafe);
 							Log.Info("Player " + killerOutput + " KDR: " + kdr);
-							Log.Info("Is KDR greater than kdsafe? " + (kdr > (float)Plugin.Instance.Config.KDSafe));
-							Log.Info("Are kills greater than kdsafe? " + (killerTeamkiller.Kills > Plugin.Instance.Config.KDSafe));
+							Log.Info("Is KDR greater than kdsafe? " + (kdr > (float)Plugin.Instance.Config.KdSafe));
+							Log.Info("Are kills greater than kdsafe? " + (killerTeamkiller.Kills > Plugin.Instance.Config.KdSafe));
 						}
 
-						if (Plugin.Instance.Config.KDSafe > 0 && kdr > (float)Plugin.Instance.Config.KDSafe && killerTeamkiller.Kills > Plugin.Instance.Config.KDSafe)
+						if (Plugin.Instance.Config.KdSafe > 0 && kdr > (float)Plugin.Instance.Config.KdSafe && killerTeamkiller.Kills > Plugin.Instance.Config.KdSafe)
 						{
 							killer.Broadcast(new Exiled.API.Features.Broadcast(string.Format(Plugin.Instance.GetTranslation("killer_kdr_message"), victimNickname, teamkill.GetRoleDisplay(), kdr), 5), true);
 							return;
 						}
-						else if (Plugin.Instance.Config.WarnTK != -1)
+						else if (Plugin.Instance.Config.WarnTk != -1)
 						{
 							string broadcast = string.Format(Plugin.Instance.GetTranslation("killer_message"), victimNickname, teamkill.GetRoleDisplay()) + " ";
-							if (Plugin.Instance.Config.WarnTK > 0)
+							if (Plugin.Instance.Config.WarnTk > 0)
 							{
 								int teamkillsBeforeBan = Plugin.Instance.Config.Amount - killerTeamkiller.Teamkills.Count;
-								if (teamkillsBeforeBan <= Plugin.Instance.Config.WarnTK)
+								if (teamkillsBeforeBan <= Plugin.Instance.Config.WarnTk)
 								{
 									broadcast += string.Format(Plugin.Instance.GetTranslation("killer_warning"), teamkillsBeforeBan) + " ";
 								}
