@@ -49,7 +49,7 @@ namespace FriendlyFireAutoban
 			List<TeamTuple> retval = new List<TeamTuple>();
 			foreach (string tuple in Matrix)
 			{
-				int[] parts = tuple.Split(':').Select(int.Parse).ToArray();
+				sbyte[] parts = tuple.Split(':').Select(int.Parse).Select(Convert.ToSByte).ToArray();
 				if (parts.Length != 2)
 				{
 					continue;
@@ -132,19 +132,19 @@ namespace FriendlyFireAutoban
 		/// Whether to delay grenade damage of thrower by one second [experimental] (2), make player immune to grenade damage (1), or keep disabled (0).
 		/// </summary>
 		[Description("Whether to delay grenade damage of thrower by one second [experimental] (2), make player immune to grenade damage (1), or keep disabled (0).")]
-		public int Bomber = 0;
+		public int Bomber { get; set; } = 0;
 
 		/// <summary>
 		/// Whether disarmed players should be considered members of the opposite team and role.
 		/// </summary>
 		[Description("Whether disarmed players should be considered members of the opposite team and role.")]
-		public bool Disarm = false;
+		public bool Disarm { get; set; } = false;
 
 		/// <summary>
 		/// Matrix of `killer:victim` role tuples that the plugin will NOT consider teamkills.<br><br>If you want NTF to be able to teamkill based on the chain of command, use this value (on one line): <br>12:11,12:4,12:13,12:15,<br>4:11,4:13,4:15,<br>11:13,11:15,13:15
 		/// </summary>
 		[Description("Matrix of `killer:victim` role tuples that the plugin will NOT consider teamkills. If you want NTF to be able to teamkill based on the chain of command, use this value (on one line): <br>12:11,12:4,12:13,12:15,<br>4:11,4:13,4:15,<br>11:13,11:15,13:15")]
-		public List<ValueTuple<int, int>> RoleWL = new List<ValueTuple<int, int>>
+		public List<string> RoleWL { get; set; } = new List<string>
 		{
 
 		};
@@ -152,9 +152,9 @@ namespace FriendlyFireAutoban
 		internal List<RoleTuple> GetRoleWL()
 		{
 			List<RoleTuple> retval = new List<RoleTuple>();
-			foreach (string tuple in Matrix)
+			foreach (string tuple in RoleWL)
 			{
-				int[] parts = tuple.Split(':').Select(int.Parse).ToArray();
+				sbyte[] parts = tuple.Split(':').Select(int.Parse).Select(Convert.ToSByte).ToArray();
 				if (parts.Length != 2)
 				{
 					continue;
@@ -172,37 +172,37 @@ namespace FriendlyFireAutoban
 		/// Reverse Friendly Fire. If greater than 0, value of mirror will only apply after this many teamkills.
 		/// </summary>
 		[Description("Reverse Friendly Fire. If greater than 0, value of mirror will only apply after this many teamkills.")]
-		public int Invert = 0;
+		public int Invert { get; set; } = 0;
 
 		/// <summary>
 		/// Whether damage should be mirrored back to a teamkiller, with values greater than (1) being considered a multiplier.
 		/// </summary>
 		[Description("Whether damage should be mirrored back to a teamkiller, with values greater than (1) being considered a multiplier.")]
-		public float Mirror = 0;
+		public float Mirror { get; set; } = 0;
 
 		/// <summary>
 		/// Respawns teamkilled players after this many teamkills.
 		/// </summary>
 		[Description("Respawns teamkilled players after this many teamkills.")]
-		public int Undead = 0;
+		public int Undead { get; set; } = 0;
 
 		/// <summary>
 		/// How many teamkills before a ban should a teamkiller be warned (>=1), give a generic warning (0), or give no warning (-1).
 		/// </summary>
 		[Description("How many teamkills before a ban should a teamkiller be warned (>=1), give a generic warning (0), or give no warning (-1).")]
-		public int WarnTK = 0;
+		public int WarnTK { get; set; } = 0;
 
 		/// <summary>
 		/// [not implemented yet] The number of teamkills at which to call a vote via the callvote plugin to ban a user by the ban amount.
 		/// </summary>
 		[Description("[not implemented yet] The number of teamkills at which to call a vote via the callvote plugin to ban a user by the ban amount.")]
-		public int VoteTK = 0;
+		public int VoteTK { get; set; } = 0;
 
 		/// <summary>
 		/// The K/D ratio at which players will be immune from pre-ban and ban punishments. Takes effect when kills are greater than kdsafe, i.e. set to 2 requires a minimum of 4:2 (not 2:1), set to 3 requires a minimum of 6:2 (not 3:1), etc.
 		/// </summary>
 		[Description("The K/D ratio at which players will be immune from pre-ban and ban punishments. Takes effect when kills are greater than kdsafe, i.e. set to 2 requires a minimum of 4:2 (not 2:1), set to 3 requires a minimum of 6:2 (not 3:1), etc.")]
-		public int KDSafe = 0;
+		public int KDSafe { get; set; } = 0;
 
 		/// <summary>
 		/// Translations for using Friendly Fire Autoban in other languages.
