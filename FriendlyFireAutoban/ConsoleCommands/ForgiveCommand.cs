@@ -14,11 +14,11 @@ namespace FriendlyFireAutoban.ConsoleCommands
 		[CommandHandler(typeof(ClientCommandHandler))]
 		class AccpetInviteCommand : ICommand
 		{
-			public string Command => "tks";
+			public string Command => "forgive";
 
-			public string[] Aliases => new string[] { "teamkills" };
+			public string[] Aliases => new string[] { "np" };
 
-			public string Description => "View a player's teamkills.";
+			public string Description => "Forgive a player for a teamkill using .forgive or .np.";
 
 			public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
 			{
