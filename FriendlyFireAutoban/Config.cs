@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using Exiled.API.Interfaces;
 
 namespace FriendlyFireAutoban
@@ -31,26 +32,32 @@ namespace FriendlyFireAutoban
 		/// Matrix of killer:victim team tuples that the plugin considers teamkills
 		/// </summary>
 		[Description("Matrix of killer:victim team tuples that the plugin considers teamkills")]
-		public List<ValueTuple<int, int>> Matrix { get; set; } = new List<ValueTuple<int, int>>() {
-			((int)Team.SCP, (int)Team.SCP),
-			((int)Team.MTF, (int)Team.MTF),
-			((int)Team.CHI, (int)Team.CHI),
-			((int)Team.RSC, (int)Team.RSC),
-			((int)Team.CDP, (int)Team.CDP),
-			((int)Team.MTF, (int)Team.RSC),
-			((int)Team.CHI, (int)Team.CDP),
-			((int)Team.RSC, (int)Team.MTF),
-			((int)Team.CDP, (int)Team.CHI),
+		public List<String> Matrix { get; set; } = new List<string>() {
+			((int)Team.SCP + ":" + (int)Team.SCP),
+			((int)Team.MTF + ":" + (int)Team.MTF),
+			((int)Team.CHI + ":" + (int)Team.CHI),
+			((int)Team.RSC + ":" + (int)Team.RSC),
+			((int)Team.CDP + ":" + (int)Team.CDP),
+			((int)Team.MTF + ":" + (int)Team.RSC),
+			((int)Team.CHI + ":" + (int)Team.CDP),
+			((int)Team.RSC + ":" + (int)Team.MTF),
+			((int)Team.CDP + ":" + (int)Team.CHI),
 		};
 
 		internal List<TeamTuple> GetMatrix()
 		{
 			List<TeamTuple> retval = new List<TeamTuple>();
-			foreach (ValueTuple<int, int> tuple in Matrix)
+			foreach (string tuple in Matrix)
 			{
-				if (Enum.IsDefined(typeof(Team), tuple.Item1) && Enum.IsDefined(typeof(Team), tuple.Item2))
+				int[] parts = tuple.Split(':').Select(int.Parse).ToArray();
+				if (parts.Length != 2)
 				{
-					retval.Add(new TeamTuple((Team) tuple.Item1, (Team) tuple.Item2));
+					continue;
+				}
+
+				if (Enum.IsDefined(typeof(Team), parts[0]) && Enum.IsDefined(typeof(Team), parts[0]))
+				{
+					retval.Add(new TeamTuple((Team)parts[0], (Team)parts[0]));
 				}
 			}
 			return retval;
@@ -116,7 +123,7 @@ namespace FriendlyFireAutoban
 		[Description("Groups that are immune to being autobanned.")]
 		public HashSet<string> Immune { get; set; } = new HashSet<string>()
 		{
-			"owner",
+			//"owner",
 			"admin",
 			"moderator"
 		};
@@ -145,11 +152,17 @@ namespace FriendlyFireAutoban
 		internal List<RoleTuple> GetRoleWL()
 		{
 			List<RoleTuple> retval = new List<RoleTuple>();
-			foreach (ValueTuple<int, int> tuple in Matrix)
+			foreach (string tuple in Matrix)
 			{
-				if (Enum.IsDefined(typeof(RoleType), tuple.Item1) && Enum.IsDefined(typeof(RoleType), tuple.Item2))
+				int[] parts = tuple.Split(':').Select(int.Parse).ToArray();
+				if (parts.Length != 2)
 				{
-					retval.Add(new RoleTuple((RoleType)tuple.Item1, (RoleType)tuple.Item2));
+					continue;
+				}
+
+				if (Enum.IsDefined(typeof(RoleType), parts[0]) && Enum.IsDefined(typeof(RoleType), parts[0]))
+				{
+					retval.Add(new RoleTuple((RoleType)parts[0], (RoleType)parts[0]));
 				}
 			}
 			return retval;
