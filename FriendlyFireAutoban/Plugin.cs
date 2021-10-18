@@ -152,7 +152,7 @@ namespace FriendlyFireAutoban
 			EventHandlers = null;
 		}
 
-		public IEnumerator<float> FFACoRoutine()
+		internal IEnumerator<float> FFACoRoutine()
 		{
 			for (; ; )
 			{
@@ -209,7 +209,7 @@ namespace FriendlyFireAutoban
 			}
 		}
 
-		public bool isImmune(Player player)
+		internal bool isImmune(Player player)
 		{
 			if (Plugin.Instance.Config.Immune.Contains(player.GroupName) || (player.GlobalBadge.HasValue ? Plugin.Instance.Config.Immune.Contains(player.GlobalBadge.Value.Text) : false))
 			{
@@ -235,7 +235,7 @@ namespace FriendlyFireAutoban
 			return false;*/
 		}
 
-		public bool isTeamkill(Player killer, Player victim)
+		internal bool isTeamkill(Player killer, Player victim)
 		{
 			Teamkiller teamkiller = Plugin.Instance.AddAndGetTeamkiller(killer);
 
@@ -267,7 +267,7 @@ namespace FriendlyFireAutoban
 			//
 			//}
 
-			foreach (RoleTuple roleTuple in Plugin.Instance.Config.RoleWL)
+			foreach (RoleTuple roleTuple in Plugin.Instance.Config.GetRoleWL())
 			{
 				if (killerRole == roleTuple.KillerRole && victimRole == roleTuple.VictimRole)
 				{
@@ -276,7 +276,7 @@ namespace FriendlyFireAutoban
 				}
 			}
 
-			foreach (TeamTuple teamTuple in Plugin.Instance.Config.Matrix)
+			foreach (TeamTuple teamTuple in Plugin.Instance.Config.GetMatrix())
 			{
 				if (killerTeam == teamTuple.KillerTeam && victimTeam == teamTuple.VictimTeam)
 				{
@@ -294,7 +294,7 @@ namespace FriendlyFireAutoban
 		/// </summary>
 		/// <param name="userId"></param>
 		/// <returns>scaled ban amount in minutes</returns>
-		public int GetScaledBanAmount(string userId)
+		internal int GetScaledBanAmount(string userId)
 		{
 			int banLength = 0;
 			foreach (int banAmount in Plugin.Instance.Config.Scaled.Keys.OrderBy(k => k))
@@ -329,7 +329,7 @@ namespace FriendlyFireAutoban
 
 		//[PipeEvent("patpeter.friendly.fire.autoban.OnBan")]
 		//[PipeMethod]
-		public bool OnBan(Player player, string playerName, int banLength, List<Teamkill> teamkills)
+		internal bool OnBan(Player player, string playerName, int banLength, List<Teamkill> teamkills)
 		{
 			string playerUserId = player.UserId;
 			string playerIpAddress = player.IPAddress;
@@ -362,7 +362,7 @@ namespace FriendlyFireAutoban
 
 		//[PipeEvent("patpeter.friendly.fire.autoban.OnCheckRemoveGuns")]
 		//[PipeMethod]
-		public bool OnCheckRemoveGuns(Player killer)
+		internal bool OnCheckRemoveGuns(Player killer)
 		{
 			string killerUserId = killer.UserId;
 			string killerNickname = killer.Nickname;
@@ -409,7 +409,7 @@ namespace FriendlyFireAutoban
 
 		//[PipeEvent("patpeter.friendly.fire.autoban.OnCheckToSpectator")]
 		//[PipeMethod]
-		public bool OnCheckToSpectator(Player killer)
+		internal bool OnCheckToSpectator(Player killer)
 		{
 			string killerUserId = killer.UserId;
 			string killerNickname = killer.Nickname;
@@ -428,7 +428,7 @@ namespace FriendlyFireAutoban
 		}
 
 		//[PipeMethod]
-		public bool OnCheckUndead(Player killer, Player victim)
+		internal bool OnCheckUndead(Player killer, Player victim)
 		{
 			string killerUserId = killer.UserId;
 			string killerNickname = killer.Nickname;
@@ -466,7 +466,7 @@ namespace FriendlyFireAutoban
 
 		//[PipeEvent("patpeter.friendly.fire.autoban.OnCheckKick")]
 		//[PipeMethod]
-		public bool OnCheckKick(Player killer)
+		internal bool OnCheckKick(Player killer)
 		{
 			string killerUserId = killer.UserId;
 			string killerNickname = killer.Nickname;
@@ -484,7 +484,7 @@ namespace FriendlyFireAutoban
 			}
 		}
 
-		public Teamkiller AddAndGetTeamkiller(Player player)
+		internal Teamkiller AddAndGetTeamkiller(Player player)
 		{
 			int playerId = player.Id;
 			string playerNickname = player.Nickname;
@@ -505,7 +505,7 @@ namespace FriendlyFireAutoban
 
 		//[PipeEvent("patpeter.friendly.fire.autoban.OnCheckVote")]
 		//[PipeMethod]
-		public bool OnVoteTeamkill(Player killer)
+		internal bool OnVoteTeamkill(Player killer)
 		{
 			string killerUserId = killer.UserId;
 			string killerNickname = killer.Nickname;

@@ -7,7 +7,7 @@ using YamlDotNet.Serialization;
 
 namespace FriendlyFireAutoban
 {
-	public class RoleTuple
+	internal class RoleTuple
 	{
 		public RoleType KillerRole { get; set; }
 		public RoleType VictimRole { get; set; }

@@ -7,7 +7,7 @@ using YamlDotNet.Serialization;
 
 namespace FriendlyFireAutoban
 {
-	public class Teamkill
+	internal class Teamkill
 	{
 		public string KillerName     { get; set; }
 		public string KillerUserId   { get; set; }

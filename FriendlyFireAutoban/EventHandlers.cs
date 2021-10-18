@@ -8,7 +8,7 @@ using Exiled.API.Features;
 using Exiled.Events.EventArgs;
 using MEC;
 using static BanHandler;
-
+using FriendlyFireAutoban;
 
 namespace FriendlyFireAutoban
 {
@@ -493,133 +493,6 @@ namespace FriendlyFireAutoban
 				}
 			}
 			// TODO: Add whitelist functionality back for global devs
-		}
-
-		public void OnConsoleCommand(SendingConsoleCommandEventArgs ev)
-		{
-			//string command = ev.Command.Split(' ')[0];
-			string command = ev.Name;
-			string[] quotedArgs = Regex.Matches(string.Join(" ", ev.Arguments), "[^\\s\"\']+|\"([^\"]*)\"|\'([^\']*)\'")
-				.Cast<Match>()
-				.Select(m => {
-					return Regex.Replace(Regex.Replace(m.Value, "^\'([^\']*)\'$", "$1"), "^\"([^\"]*)\"$", "$1");
-				})
-				.ToArray()
-				.Skip(1)
-				.ToArray();
-			Player player = ev.Player;
-			String playerUserId = player.UserId;
-
-			if (Plugin.Instance.Config.OutAll)
-			{
-				Log.Info("Quoted Args for command: " + string.Join(" | ", quotedArgs));
-			}
-
-			if (command.Equals(Plugin.Instance.GetTranslation("forgive_command")))
-			{
-				if (Plugin.Instance.Config.IsEnabled)
-				{
-					if (Plugin.Instance.TeamkillVictims.ContainsKey(playerUserId) &&
-						Plugin.Instance.TeamkillVictims[playerUserId] != null)
-					{
-						Teamkill teamkill = Plugin.Instance.TeamkillVictims[playerUserId];
-						if (Plugin.Instance.Teamkillers.ContainsKey(teamkill.KillerUserId))
-						{
-							int removedBans = Plugin.Instance.Teamkillers[teamkill.KillerUserId].Teamkills.RemoveAll(x => x.Equals(teamkill));
-							if (removedBans > 0)
-							{
-								// No need for broadcast with return message
-								//ev.Player.PersonalBroadcast(5, "You forgave this player.", false);
-								// TODO: Send a broadcast to the killer
-								ev.ReturnMessage = string.Format(Plugin.Instance.GetTranslation("forgive_success"), teamkill.KillerName, teamkill.GetRoleDisplay());
-							}
-							else
-							{
-								ev.ReturnMessage = string.Format(Plugin.Instance.GetTranslation("forgive_duplicate"), teamkill.KillerName, teamkill.GetRoleDisplay());
-							}
-						}
-						else
-						{
-							ev.ReturnMessage = Plugin.Instance.GetTranslation("forgive_disconnect");
-						}
-
-						// No matter what, remove this teamkill cached in the array
-						Plugin.Instance.TeamkillVictims.Remove(playerUserId);
-					}
-					else
-					{
-						ev.ReturnMessage = Plugin.Instance.GetTranslation("forgive_invalid");
-					}
-				}
-				else
-				{
-					ev.ReturnMessage = Plugin.Instance.GetTranslation("ffa_disabled");
-				}
-			}
-			else if (command.Equals(Plugin.Instance.GetTranslation("tks_command")))
-			{
-				if (Plugin.Instance.Config.IsEnabled)
-				{
-					if (quotedArgs.Length == 1)
-					{
-						List<Teamkiller> teamkillers = new List<Teamkiller>();
-						try
-						{
-							if (Regex.Match(quotedArgs[0], "^[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]$").Success)
-							{
-								// https://stackoverflow.com/questions/55436309/how-do-i-use-linq-to-select-from-a-list-inside-a-map
-								teamkillers = Plugin.Instance.Teamkillers.Values.Where(
-									x => x.UserId.Equals(quotedArgs[0])
-								).ToList();
-							}
-							else
-							{
-								// https://stackoverflow.com/questions/55436309/how-do-i-use-linq-to-select-from-a-list-inside-a-map
-								teamkillers = Plugin.Instance.Teamkillers.Values.Where(
-									x => x.Name.Contains(quotedArgs[0])
-								).ToList();
-							}
-						}
-						catch (Exception e)
-						{
-							if (Plugin.Instance.Config.OutAll)
-							{
-								Log.Error(e.Message);
-								Log.Error(e.StackTrace);
-							}
-						}
-
-						if (teamkillers.Count == 1)
-						{
-							string retval = "Player " + teamkillers[0].Name + " has a K/D ratio of " + teamkillers[0].Kills + ":" + teamkillers[0].Deaths + " or " + teamkillers[0].GetKDR() + ".\n";
-							foreach (Teamkill tk in teamkillers[0].Teamkills)
-							{
-								retval +=
-									string.Format(
-										Plugin.Instance.GetTranslation("tks_teamkill_entry"),
-										(tk.Duration / 60) + ":" + (tk.Duration % 60),
-										tk.KillerName,
-										tk.VictimName,
-										tk.GetRoleDisplay()
-									) + "\n";
-							}
-							ev.ReturnMessage = retval;
-						}
-						else
-						{
-							ev.ReturnMessage = Plugin.Instance.GetTranslation("tks_no_teamkills");
-						}
-					}
-					else
-					{
-						ev.ReturnMessage = Plugin.Instance.GetTranslation("tks_not_found");
-					}
-				}
-				else
-				{
-					ev.ReturnMessage = Plugin.Instance.GetTranslation("ffa_disabled");
-				}
-			}
 		}*/
 	}
 }

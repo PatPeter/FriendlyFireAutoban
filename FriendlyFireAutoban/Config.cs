@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 using System.ComponentModel;
 using Exiled.API.Interfaces;
 
@@ -35,17 +31,30 @@ namespace FriendlyFireAutoban
 		/// Matrix of killer:victim team tuples that the plugin considers teamkills
 		/// </summary>
 		[Description("Matrix of killer:victim team tuples that the plugin considers teamkills")]
-		public List<TeamTuple> Matrix { get; set; } = new List<TeamTuple>() {
-			new TeamTuple(Team.SCP, Team.SCP),
-			new TeamTuple(Team.MTF, Team.MTF),
-			new TeamTuple(Team.CHI, Team.CHI),
-			new TeamTuple(Team.RSC, Team.RSC),
-			new TeamTuple(Team.CDP, Team.CDP),
-			new TeamTuple(Team.MTF, Team.RSC),
-			new TeamTuple(Team.CHI, Team.CDP),
-			new TeamTuple(Team.RSC, Team.MTF),
-			new TeamTuple(Team.CDP, Team.CHI),
+		public List<ValueTuple<int, int>> Matrix { get; set; } = new List<ValueTuple<int, int>>() {
+			((int)Team.SCP, (int)Team.SCP),
+			((int)Team.MTF, (int)Team.MTF),
+			((int)Team.CHI, (int)Team.CHI),
+			((int)Team.RSC, (int)Team.RSC),
+			((int)Team.CDP, (int)Team.CDP),
+			((int)Team.MTF, (int)Team.RSC),
+			((int)Team.CHI, (int)Team.CDP),
+			((int)Team.RSC, (int)Team.MTF),
+			((int)Team.CDP, (int)Team.CHI),
 		};
+
+		internal List<TeamTuple> GetMatrix()
+		{
+			List<TeamTuple> retval = new List<TeamTuple>();
+			foreach (ValueTuple<int, int> tuple in Matrix)
+			{
+				if (Enum.IsDefined(typeof(Team), tuple.Item1) && Enum.IsDefined(typeof(Team), tuple.Item2))
+				{
+					retval.Add(new TeamTuple((Team) tuple.Item1, (Team) tuple.Item2));
+				}
+			}
+			return retval;
+		}
 
 		/// <summary>
 		/// Amount of teamkills before a ban will be issued.
@@ -128,10 +137,23 @@ namespace FriendlyFireAutoban
 		/// Matrix of `killer:victim` role tuples that the plugin will NOT consider teamkills.<br><br>If you want NTF to be able to teamkill based on the chain of command, use this value (on one line): <br>12:11,12:4,12:13,12:15,<br>4:11,4:13,4:15,<br>11:13,11:15,13:15
 		/// </summary>
 		[Description("Matrix of `killer:victim` role tuples that the plugin will NOT consider teamkills. If you want NTF to be able to teamkill based on the chain of command, use this value (on one line): <br>12:11,12:4,12:13,12:15,<br>4:11,4:13,4:15,<br>11:13,11:15,13:15")]
-		public List<RoleTuple> RoleWL = new List<RoleTuple>
+		public List<ValueTuple<int, int>> RoleWL = new List<ValueTuple<int, int>>
 		{
 
 		};
+
+		internal List<RoleTuple> GetRoleWL()
+		{
+			List<RoleTuple> retval = new List<RoleTuple>();
+			foreach (ValueTuple<int, int> tuple in Matrix)
+			{
+				if (Enum.IsDefined(typeof(RoleType), tuple.Item1) && Enum.IsDefined(typeof(RoleType), tuple.Item2))
+				{
+					retval.Add(new RoleTuple((RoleType)tuple.Item1, (RoleType)tuple.Item2));
+				}
+			}
+			return retval;
+		}
 
 		/// <summary>
 		/// Reverse Friendly Fire. If greater than 0, value of mirror will only apply after this many teamkills.
