@@ -19,7 +19,7 @@ namespace FriendlyFireAutoban
 		public int            Kills          { get; set; } = 0;
 		public int            Deaths         { get; set; } = 0;
 		public List<Teamkill> Teamkills      { get; set; } = new List<Teamkill>();
-		public int            TimerCountdown { get; set; } = 0;
+		public int            TimerCountdown { get; set; } = -1;
 
 		public Teamkiller(int playerId, string name, string userId, string ipAddress)
 		{

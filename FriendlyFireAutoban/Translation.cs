@@ -8,6 +8,7 @@ using Exiled.API.Interfaces;
 
 namespace FriendlyFireAutoban
 {
+	/// <inheritdoc cref="ITranslation"/>
 	class Translation : ITranslation
 	{
 		/// <summary>

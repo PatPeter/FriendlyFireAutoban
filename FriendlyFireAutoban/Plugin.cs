@@ -156,7 +156,7 @@ namespace FriendlyFireAutoban
 		{
 			for (; ; )
 			{
-				List<Player> players = Player.List.Where(p => Plugin.Instance.Teamkillers.ContainsKey(p.UserId) && Plugin.Instance.Teamkillers[p.UserId].Teamkills.Count > 0).ToList();
+				List<Player> players = Player.List.Where(p => Plugin.Instance.Teamkillers.ContainsKey(p.UserId) && Plugin.Instance.Teamkillers[p.UserId].Teamkills.Count > 0).Distinct().ToList();
 
 				foreach (Player killer in players)
 				{
@@ -172,7 +172,7 @@ namespace FriendlyFireAutoban
 						// Decrease teamkiller timer by 1 second
 						killerTeamkiller.TimerCountdown--;
 					}
-					else
+					else if (killerTeamkiller.TimerCountdown == 0)
 					{
 						/*
 						 * If ban system is #3, every player teamkill cancels and restarts the timer

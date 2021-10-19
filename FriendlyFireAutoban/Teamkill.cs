@@ -32,6 +32,11 @@ namespace FriendlyFireAutoban
 			this.Duration       = duration;
 		}
 
+		public override string ToString()
+		{
+			return KillerName + " X " + VictimName + " " + GetRoleDisplay();
+		}
+
 		public string GetRoleDisplay()
 		{
 			string retval = "(";
