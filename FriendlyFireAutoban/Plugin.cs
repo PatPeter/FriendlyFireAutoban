@@ -170,6 +170,10 @@ namespace FriendlyFireAutoban
 					if (killerTeamkiller.TimerCountdown > 0)
 					{
 						// Decrease teamkiller timer by 1 second
+						if (Plugin.Instance.Config.OutAll)
+						{
+							Log.Info("Decrease timer for " + killerTeamkiller + " from " + killerTeamkiller.TimerCountdown + " to " + (killerTeamkiller.TimerCountdown - 1));
+						}
 						killerTeamkiller.TimerCountdown--;
 					}
 					else if (killerTeamkiller.TimerCountdown == 0)
@@ -185,6 +189,7 @@ namespace FriendlyFireAutoban
 							if (banLength > 0)
 							{
 								Plugin.Instance.OnBan(killer, killerNickname, banLength, killerTeamkiller.Teamkills);
+								Log.Info("Banned player " + killerTeamkiller + " for accumulating scaled ban amount " + banLength + " for " + killerTeamkiller.Teamkills.Count + " teamkills.");
 							}
 							else
 							{
@@ -496,10 +501,13 @@ namespace FriendlyFireAutoban
 				Log.Info("Adding Teamkiller entry for player #" + playerId + " " + playerNickname + " [" + playerUserId + "] [" + playerIpAddress + "]");
 				Plugin.Instance.Teamkillers[playerUserId] = new Teamkiller(playerId, playerNickname, playerUserId, playerIpAddress);
 			}
-			else
-			{
-				Log.Info("Fetching Teamkiller entry for player #" + playerId + " " + playerNickname + " [" + playerUserId + "] [" + playerIpAddress + "]");
-			}
+			//else
+			//{
+			//	if (Plugin.Config.OutAll)
+			//	{
+			//		Log.Info("Fetching Teamkiller entry for player #" + playerId + " " + playerNickname + " [" + playerUserId + "] [" + playerIpAddress + "]");
+			//	}
+			//}
 			return Plugin.Instance.Teamkillers[playerUserId];
 		}
 

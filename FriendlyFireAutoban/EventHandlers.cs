@@ -215,7 +215,10 @@ namespace FriendlyFireAutoban
 			bool victimIsHandcuffed = victim.IsCuffed;
 			string victimOutput = victimNickname + " " + victimUserId + " " + victimIpAddress;
 
-			Log.Info(killerOutput + " killed " + victimOutput + " while plugin is enabled? " + Plugin.Instance.Config.IsEnabled + " and during round? " + Plugin.Instance.DuringRound);
+			if (Plugin.Instance.Config.OutAll)
+			{
+				Log.Info(killerOutput + " killed " + victimOutput + " while plugin is enabled? " + Plugin.Instance.Config.IsEnabled + " and during round? " + Plugin.Instance.DuringRound);
+			}
 
 			if (!Plugin.Instance.DuringRound)
 			{
@@ -242,7 +245,9 @@ namespace FriendlyFireAutoban
 
 				Teamkiller killerTeamkiller = Plugin.Instance.Teamkillers[killerUserId];
 
-				Log.Info("Was this a teamkill? " + Plugin.Instance.isTeamkill(killer, victim));
+				if (Plugin.Instance.Config.OutAll) {
+					Log.Info("Was this a teamkill? " + Plugin.Instance.isTeamkill(killer, victim));
+				}
 				if (Plugin.Instance.isTeamkill(killer, victim))
 				{
 					killerTeamkiller.Kills--;
@@ -251,6 +256,7 @@ namespace FriendlyFireAutoban
 					Plugin.Instance.TeamkillVictims[victimUserId] = teamkill;
 					killerTeamkiller.Teamkills.Add(teamkill);
 
+					// Not a debug log, do not add to OutAll
 					Log.Info("Player " + killerOutput + " " + killerTeam.ToString() + " teamkilled " +
 						victimOutput + " " + victimTeam.ToString() + ", for a total of " + killerTeamkiller.Teamkills.Count + " teamkills.");
 
@@ -301,35 +307,36 @@ namespace FriendlyFireAutoban
 
 						//Plugin.Instance.OnVoteTeamkill(ev.Killer);
 
+						/*
+						 * If ban system is #1, do not create timers and perform a ban based on a static number of teamkills
+						 */
+						if (Plugin.Instance.Config.System == 1 && killerTeamkiller.Teamkills.Count >= Plugin.Instance.Config.Amount)
+						{
+							Plugin.Instance.OnBan(killer, killerNickname, Plugin.Instance.Config.Length, killerTeamkiller.Teamkills);
+						}
+						else
+						{
+							// If the player has teamkilled again, reset the timer to the default
+							// for both ban systems #2 and #3
+							Log.Info("Set teamkiller " + killerTeamkiller + " forgiveness countdown to " + Plugin.Instance.Config.Expire);
+							killerTeamkiller.TimerCountdown = Plugin.Instance.Config.Expire;
+
+							/*
+							 * If ban system is #2, allow the teamkills to expire,
+							 * but if the player teamkills faster than kills can expire
+							 * ban the player.
+							 */
+							if (Plugin.Instance.Config.System == 2 && killerTeamkiller.Teamkills.Count >= Plugin.Instance.Config.Amount)
+							{
+								Plugin.Instance.OnBan(killer, killerNickname, Plugin.Instance.Config.Length, killerTeamkiller.Teamkills);
+							}
+						}
+						return;
 					}
 					else
 					{
 						Log.Info("Player " + killerOutput + " not being punished by FFA because the player is whitelisted.");
 						return;
-					}
-
-					/*
-					 * If ban system is #1, do not create timers and perform a ban based on a static number of teamkills
-					 */
-					if (Plugin.Instance.Config.System == 1 && killerTeamkiller.Teamkills.Count >= Plugin.Instance.Config.Amount)
-					{
-						Plugin.Instance.OnBan(killer, killerNickname, Plugin.Instance.Config.Length, killerTeamkiller.Teamkills);
-					}
-					else
-					{
-						// If the player has teamkilled again, reset the timer to the default
-						// for both ban systems #2 and #3
-						killerTeamkiller.TimerCountdown = Plugin.Instance.Config.Expire;
-
-						/*
-						 * If ban system is #2, allow the teamkills to expire,
-						 * but if the player teamkills faster than kills can expire
-						 * ban the player.
-						 */
-						if (Plugin.Instance.Config.System == 2 && killerTeamkiller.Teamkills.Count >= Plugin.Instance.Config.Amount)
-						{
-							Plugin.Instance.OnBan(killer, killerNickname, Plugin.Instance.Config.Length, killerTeamkiller.Teamkills);
-						}
 					}
 				}
 				else
@@ -341,12 +348,14 @@ namespace FriendlyFireAutoban
 					}
 
 					killerTeamkiller.Kills++;
+					return;
 				}
 			}
 			else
 			{
 				Log.Info("Player " + killerOutput + " " + killerTeam.ToString() + " killed " +
 					victimOutput + " " + victimTeam.ToString() + ", but FriendlyFireAutoban is not enabled.");
+				return;
 			}
 		}
 
@@ -364,17 +373,17 @@ namespace FriendlyFireAutoban
 
 				if (Plugin.Instance.Config.Mirror > 0f && ev.DamageType != DamageTypes.Falldown) // && ev.DamageType != DamageTypes.Grenade
 				{
-					Log.Info("Mirroring " + ev.Amount + " of " + ev.DamageType.ToString() + " damage.");
+					//Log.Info("Mirroring " + ev.Amount + " of " + ev.DamageType.ToString() + " damage.");
 					if (Plugin.Instance.isTeamkill(attacker, victim) && !Plugin.Instance.isImmune(attacker) && !Plugin.Instance.BanWhitelist.Contains(attackerUserId))
 					{
 						if (Plugin.Instance.Config.Invert > 0)
 						{
 							if (Plugin.Instance.Teamkillers.ContainsKey(attackerUserId) && Plugin.Instance.Teamkillers[attackerUserId].Teamkills.Count >= Plugin.Instance.Config.Invert)
 							{
-								if (Plugin.Instance.Config.OutAll)
-								{
-									Log.Info("Dealing damage to " + attackerNickname + ": " + (ev.Amount * Plugin.Instance.Config.Mirror));
-								}
+								//if (Plugin.Instance.Config.OutAll)
+								//{
+								//	Log.Info("Dealing damage to " + attackerNickname + ": " + (ev.Amount * Plugin.Instance.Config.Mirror));
+								//}
 								//attacker.playerStats.HurtPlayer(new PlayerStats.HitInfo(ev.Amount * Plugin.Instance.mirror, attackerNickname, DamageTypes.Falldown, attackerPlayerId), attacker.gameObject);
 								attacker.Hurt(ev.Amount * Plugin.Instance.Config.Mirror, DamageTypes.Falldown, attackerNickname, attackerPlayerId);
 							}
@@ -382,10 +391,10 @@ namespace FriendlyFireAutoban
 						}
 						else
 						{
-							if (Plugin.Instance.Config.OutAll)
-							{
-								Log.Info("Dealing damage to " + attackerNickname + ": " + (ev.Amount * Plugin.Instance.Config.Mirror));
-							}
+							//if (Plugin.Instance.Config.OutAll)
+							//{
+							//	Log.Info("Dealing damage to " + attackerNickname + ": " + (ev.Amount * Plugin.Instance.Config.Mirror));
+							//}
 							//attacker.playerStats.HurtPlayer(new PlayerStats.HitInfo(ev.Amount * Plugin.Instance.mirror, attackerNickname, DamageTypes.Falldown, attackerPlayerId), attacker.gameObject);
 							attacker.Hurt(ev.Amount * Plugin.Instance.Config.Mirror, DamageTypes.Falldown, attackerNickname, attackerPlayerId);
 						}
