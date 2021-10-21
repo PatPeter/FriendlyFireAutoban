@@ -34,7 +34,7 @@ namespace FriendlyFireAutoban
 
 		public override string ToString()
 		{
-			return KillerName + " X " + VictimName + " " + GetRoleDisplay();
+			return "(" + KillerName + " killed " + VictimName + ")";
 		}
 
 		public string GetRoleDisplay()

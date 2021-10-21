@@ -207,6 +207,7 @@ namespace FriendlyFireAutoban
 							killerTeamkiller.Teamkills.RemoveAt(0);
 							Log.Info("Player " + killerOutput + " " + killerTeam.ToString() + " teamkill " + firstTeamkill + " expired, counter now at " + killerTeamkiller.Teamkills.Count + ".");
 						}
+						killerTeamkiller.TimerCountdown--;
 					}
 				}
 				

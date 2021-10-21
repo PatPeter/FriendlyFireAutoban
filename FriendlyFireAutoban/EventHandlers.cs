@@ -385,7 +385,7 @@ namespace FriendlyFireAutoban
 								//	Log.Info("Dealing damage to " + attackerNickname + ": " + (ev.Amount * Plugin.Instance.Config.Mirror));
 								//}
 								//attacker.playerStats.HurtPlayer(new PlayerStats.HitInfo(ev.Amount * Plugin.Instance.mirror, attackerNickname, DamageTypes.Falldown, attackerPlayerId), attacker.gameObject);
-								attacker.Hurt(ev.Amount * Plugin.Instance.Config.Mirror, DamageTypes.Falldown, attackerNickname, attackerPlayerId);
+								Timing.CallDelayed(0.5f, () => attacker.Hurt(ev.Amount * Plugin.Instance.Config.Mirror, DamageTypes.Falldown, attackerNickname, attackerPlayerId));
 							}
 							// else do nothing
 						}
@@ -396,7 +396,7 @@ namespace FriendlyFireAutoban
 							//	Log.Info("Dealing damage to " + attackerNickname + ": " + (ev.Amount * Plugin.Instance.Config.Mirror));
 							//}
 							//attacker.playerStats.HurtPlayer(new PlayerStats.HitInfo(ev.Amount * Plugin.Instance.mirror, attackerNickname, DamageTypes.Falldown, attackerPlayerId), attacker.gameObject);
-							attacker.Hurt(ev.Amount * Plugin.Instance.Config.Mirror, DamageTypes.Falldown, attackerNickname, attackerPlayerId);
+							Timing.CallDelayed(0.5f, () => attacker.Hurt(ev.Amount * Plugin.Instance.Config.Mirror, DamageTypes.Falldown, attackerNickname, attackerPlayerId));
 						}
 					}
 				}
