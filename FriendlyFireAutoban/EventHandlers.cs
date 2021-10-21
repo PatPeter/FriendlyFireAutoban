@@ -400,9 +400,9 @@ namespace FriendlyFireAutoban
 						}
 					}
 				}
-				/*else if (victimPlayerId == attackerPlayerId && ev.DamageType == DamageTypes.Grenade)
+				else if (victimPlayerId == attackerPlayerId && ev.DamageType == DamageTypes.Grenade)
 				{
-					if (Plugin.Instance.Config.Outall)
+					if (Plugin.Instance.Config.OutAll)
 					{
 						Log.Info("[BOMBER] Player " + victimPlayerId + " damaged by his/her own grenade, bomber triggered.");
 					}
@@ -410,27 +410,13 @@ namespace FriendlyFireAutoban
 					{
 						int damage = (int)ev.Amount;
 						ev.Amount = 0;
-						Timer t = new Timer
-						{
-							Interval = 1000,
-							Enabled = true
-						};
-						t.Elapsed += delegate
-						{
-							if (Plugin.Instance.Config.Outall)
-							{
-								Log.Info("[BOMBER] Player " + attackerPlayerId + " taking " + damage + " delayed damage after throwing a grenade.");
-							}
-							//Player.AddHealth(attacker, damage * -1, DamageTypes.Falldown);
-							attacker.playerStats.HurtPlayer(new PlayerStats.HitInfo(damage, attackerNickname, DamageTypes.Falldown, attackerPlayerId), attacker.gameObject);
-							t.Dispose();
-						};
+						Timing.CallDelayed(0.5f, () => attacker.Hurt(damage, DamageTypes.Falldown, attackerNickname, attackerPlayerId));
 					}
 					else if (Plugin.Instance.Config.Bomber == 1)
 					{
 						ev.Amount = 0;
 					}
-				}*/
+				}
 			}
 		}
 
@@ -480,7 +466,7 @@ namespace FriendlyFireAutoban
 		{
 			if (Plugin.Instance.Config.IsEnabled)
 			{
-				Plugin.Instance.OnCheckRemoveGuns(ev.Player);
+				Timing.CallDelayed(0.5f, () => Plugin.Instance.OnCheckRemoveGuns(ev.Player));
 			}
 		}
 
