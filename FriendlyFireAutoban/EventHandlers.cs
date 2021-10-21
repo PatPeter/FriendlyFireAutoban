@@ -246,9 +246,9 @@ namespace FriendlyFireAutoban
 				Teamkiller killerTeamkiller = Plugin.Instance.Teamkillers[killerUserId];
 
 				if (Plugin.Instance.Config.OutAll) {
-					Log.Info("Was this a teamkill? " + Plugin.Instance.isTeamkill(killer, victim));
+					Log.Info("Was this a teamkill? " + Plugin.Instance.isTeamkill(killer, victim, true));
 				}
-				if (Plugin.Instance.isTeamkill(killer, victim))
+				if (Plugin.Instance.isTeamkill(killer, victim, true))
 				{
 					killerTeamkiller.Kills--;
 
@@ -374,7 +374,7 @@ namespace FriendlyFireAutoban
 				if (Plugin.Instance.Config.Mirror > 0f && ev.DamageType != DamageTypes.Falldown) // && ev.DamageType != DamageTypes.Grenade
 				{
 					//Log.Info("Mirroring " + ev.Amount + " of " + ev.DamageType.ToString() + " damage.");
-					if (Plugin.Instance.isTeamkill(attacker, victim) && !Plugin.Instance.isImmune(attacker) && !Plugin.Instance.BanWhitelist.Contains(attackerUserId))
+					if (Plugin.Instance.isTeamkill(attacker, victim, false) && !Plugin.Instance.isImmune(attacker) && !Plugin.Instance.BanWhitelist.Contains(attackerUserId))
 					{
 						if (Plugin.Instance.Config.Invert > 0)
 						{

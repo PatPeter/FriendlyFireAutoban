@@ -246,7 +246,7 @@ namespace FriendlyFireAutoban
 			return false;*/
 		}
 
-		internal bool isTeamkill(Player killer, Player victim)
+		internal bool isTeamkill(Player killer, Player victim, bool death)
 		{
 			Teamkiller teamkiller = Plugin.Instance.AddAndGetTeamkiller(killer);
 
@@ -260,7 +260,7 @@ namespace FriendlyFireAutoban
 
 			if (string.Equals(killerUserId, victimUserId))
 			{
-				Log.Info(killerUserId + " equals " + victimUserId + ", this is a suicide and not a teamkill.");
+				if (death) Log.Info(killerUserId + " equals " + victimUserId + ", this is a suicide and not a teamkill.");
 				return false;
 			}
 
@@ -268,7 +268,7 @@ namespace FriendlyFireAutoban
 			{
 				victimTeam = this.InverseTeams[victimTeam];
 				victimRole = this.InverseRoles[victimRole];
-				Log.Info(victimUserId + " is handcuffed, team inverted to " + victimTeam + " and role " + victimRole);
+				if (death) Log.Info(victimUserId + " is handcuffed, team inverted to " + victimTeam + " and role " + victimRole);
 			}
 
 			//List<RoleTuple> roleTuples = new List<RoleTuple>();
@@ -282,7 +282,7 @@ namespace FriendlyFireAutoban
 			{
 				if (killerRole == roleTuple.KillerRole && victimRole == roleTuple.VictimRole)
 				{
-					Log.Info("Killer role " + killerRole + " and victim role " + victimRole + " is whitelisted, not a teamkill.");
+					if (death) Log.Info("Killer role " + killerRole + " and victim role " + victimRole + " is whitelisted, not a teamkill.");
 					return false;
 				}
 			}
@@ -291,12 +291,12 @@ namespace FriendlyFireAutoban
 			{
 				if (killerTeam == teamTuple.KillerTeam && victimTeam == teamTuple.VictimTeam)
 				{
-					Log.Info("Team " + killerTeam + " killing " + victimTeam + " WAS detected as a teamkill.");
+					if (death) Log.Info("Team " + killerTeam + " killing " + victimTeam + " WAS detected as a teamkill.");
 					return true;
 				}
 			}
 
-			Log.Info("Team " + killerTeam + " killing " + victimTeam + " was not detected as a teamkill.");
+			if (death) Log.Info("Team " + killerTeam + " killing " + victimTeam + " was not detected as a teamkill.");
 			return false;
 		}
 
