@@ -9,6 +9,7 @@ namespace FriendlyFireAutoban
 {
 	internal class Teamkill
 	{
+		public long   Id            { get; set; }
 		public string KillerName     { get; set; }
 		public string KillerUserId   { get; set; }
 		public short  KillerTeamRole { get; set; }
@@ -19,8 +20,9 @@ namespace FriendlyFireAutoban
 		public short  DamageType     { get; set; }
 		public int    Duration       { get; set; }
 
-		public Teamkill(string killerName, string killerSteamId, short killerTeamRole, string victimName, string victimSteamId, short victimTeamRole, bool victimDisarmed, short damageType, int duration)
+		public Teamkill(long ticks, string killerName, string killerSteamId, short killerTeamRole, string victimName, string victimSteamId, short victimTeamRole, bool victimDisarmed, short damageType, int duration)
 		{
+			this.Id          = ticks;
 			this.KillerName     = killerName;
 			this.KillerUserId   = killerSteamId;
 			this.KillerTeamRole = killerTeamRole;
@@ -34,7 +36,7 @@ namespace FriendlyFireAutoban
 
 		public override string ToString()
 		{
-			return "(" + KillerName + " killed " + VictimName + ")";
+			return Id + " (" + KillerName + " killed " + VictimName + ")";
 		}
 
 		public string GetRoleDisplay()

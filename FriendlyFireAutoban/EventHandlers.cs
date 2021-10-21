@@ -252,7 +252,7 @@ namespace FriendlyFireAutoban
 				{
 					killerTeamkiller.Kills--;
 
-					Teamkill teamkill = new Teamkill(killerNickname, killerUserId, (short)killerRole, victimNickname, victimUserId, (short)victimRole, victimIsHandcuffed, (short) ev.HitInformations.Tool.Weapon, ev.HitInformations.Time); // TODO: ev.HitInformations.Time is probably wrong
+					Teamkill teamkill = new Teamkill(DateTime.Now.Ticks, killerNickname, killerUserId, (short)killerRole, victimNickname, victimUserId, (short)victimRole, victimIsHandcuffed, (short) ev.HitInformations.Tool.Weapon, ev.HitInformations.Time); // TODO: ev.HitInformations.Time is probably wrong
 					Plugin.Instance.TeamkillVictims[victimUserId] = teamkill;
 					killerTeamkiller.Teamkills.Add(teamkill);
 
@@ -260,7 +260,7 @@ namespace FriendlyFireAutoban
 					Log.Info("Player " + killerOutput + " " + killerTeam.ToString() + " teamkilled " +
 						victimOutput + " " + victimTeam.ToString() + ", for a total of " + killerTeamkiller.Teamkills.Count + " teamkills.");
 
-					victim.Broadcast(new Exiled.API.Features.Broadcast(string.Format(Plugin.Instance.GetTranslation("victim_message"), killerNickname, DateTime.Today.ToString("yyyy-MM-dd hh:mm tt")), 10), true);
+					victim.Broadcast(new Exiled.API.Features.Broadcast(string.Format(Plugin.Instance.GetTranslation("victim_message"), killerNickname, DateTime.Now.ToString("yyyy-MM-dd hh:mm tt")), 10), true);
 
 					if (!Plugin.Instance.BanWhitelist.Contains(killerUserId))
 					{

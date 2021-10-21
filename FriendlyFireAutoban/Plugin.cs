@@ -169,15 +169,16 @@ namespace FriendlyFireAutoban
 					
 					if (killerTeamkiller.TimerCountdown > 0)
 					{
-						// Decrease teamkiller timer by 1 second
-						if (Plugin.Instance.Config.OutAll)
-						{
-							Log.Info("Decrease timer for " + killerTeamkiller + " from " + killerTeamkiller.TimerCountdown + " to " + (killerTeamkiller.TimerCountdown - 1));
-						}
 						killerTeamkiller.TimerCountdown--;
+						// Decrease teamkiller timer by 1 second
+						//if (Plugin.Instance.Config.OutAll)
+						//{
+						//	Log.Info("Decrease timer for " + killerTeamkiller + " from " + killerTeamkiller.TimerCountdown + " to " + (killerTeamkiller.TimerCountdown - 1));
+						//}
 					}
 					else if (killerTeamkiller.TimerCountdown == 0)
 					{
+						killerTeamkiller.TimerCountdown--;
 						/*
 						 * If ban system is #3, every player teamkill cancels and restarts the timer
 						 * Wait until the timer expires after the teamkilling has ended to find out 
@@ -207,7 +208,11 @@ namespace FriendlyFireAutoban
 							killerTeamkiller.Teamkills.RemoveAt(0);
 							Log.Info("Player " + killerOutput + " " + killerTeam.ToString() + " teamkill " + firstTeamkill + " expired, counter now at " + killerTeamkiller.Teamkills.Count + ".");
 						}
-						killerTeamkiller.TimerCountdown--;
+
+						if (killerTeamkiller.Teamkills.Count > 0)
+						{
+							killerTeamkiller.TimerCountdown = Plugin.Instance.Config.Expire;
+						}
 					}
 				}
 				
