@@ -71,9 +71,9 @@ namespace FriendlyFireAutoban
 						continue;
 					}
 
-					if (Enum.IsDefined(typeof(Team), parts[0]) && Enum.IsDefined(typeof(Team), parts[0]))
+					if (Enum.IsDefined(typeof(Team), parts[0]) && Enum.IsDefined(typeof(Team), parts[1]))
 					{
-						_MatrixCache.Add(new TeamTuple((Team)parts[0], (Team)parts[0]));
+						_MatrixCache.Add(new TeamTuple((Team)parts[0], (Team)parts[1]));
 					}
 				}
 			}
@@ -194,9 +194,9 @@ namespace FriendlyFireAutoban
 						continue;
 					}
 
-					if (Enum.IsDefined(typeof(RoleType), parts[0]) && Enum.IsDefined(typeof(RoleType), parts[0]))
+					if (Enum.IsDefined(typeof(RoleType), parts[0]) && Enum.IsDefined(typeof(RoleType), parts[1]))
 					{
-						_RoleWlCache.Add(new RoleTuple((RoleType)parts[0], (RoleType)parts[0]));
+						_RoleWlCache.Add(new RoleTuple((RoleType)parts[0], (RoleType)parts[1]));
 					}
 				}
 			}
