@@ -29,6 +29,11 @@ namespace FriendlyFireAutoban
 			 */
 			//Plugin.Instance.Teamkillers = new Dictionary<string, Teamkiller>();
 			//Plugin.Instance.TeamkillTimers = new Dictionary<string, Timer>();
+
+			if (Plugin.Instance.Config.OutAll)
+			{
+				Plugin.Instance.PrintConfigs();
+			}
 		}
 
 		public void OnRoundEnd(RoundEndedEventArgs ev)

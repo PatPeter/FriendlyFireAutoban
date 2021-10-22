@@ -152,6 +152,73 @@ namespace FriendlyFireAutoban
 			EventHandlers = null;
 		}
 
+		public void PrintConfigs()
+		{
+			Log.Info("friendly_fire_autoban.enable value: " + Plugin.Instance.Config.IsEnabled);
+			Log.Info("friendly_fire_autoban.system value: " + Plugin.Instance.Config.System);
+
+			Log.Info("friendly_fire_autoban.matrix default value: " + string.Join(";", Plugin.Instance.Config.Matrix));
+			string matrix = "";
+			foreach (TeamTuple tt in Plugin.Instance.Config.GetMatrixCache())
+			{
+				if (matrix.Length == 0)
+				{
+					matrix += tt;
+				}
+				else
+				{
+					matrix += ";" + tt;
+				}
+			}
+			Log.Info("friendly_fire_autoban.matrix cached  value: " + matrix);
+
+			Log.Info("friendly_fire_autoban.amount value: " + Plugin.Instance.Config.Amount);
+			Log.Info("friendly_fire_autoban.length value: " + Plugin.Instance.Config.Length);
+			Log.Info("friendly_fire_autoban.expire value: " + Plugin.Instance.Config.Expire);
+
+			string scaled = "";
+			foreach (KeyValuePair<int, int> scale in Plugin.Instance.Config.Scaled)
+			{
+				if (scaled.Length == 0)
+				{
+					scaled += scale.Key + ":" + scale.Value;
+				}
+				else
+				{
+					scaled += ',' + scale.Key + ":" + scale.Value;
+				}
+			}
+			Log.Info("friendly_fire_autoban.scaled value: " + scaled);
+
+			Log.Info("friendly_fire_autoban.noguns value: " + Plugin.Instance.Config.NoGuns);
+			Log.Info("friendly_fire_autoban.tospec value: " + Plugin.Instance.Config.ToSpec);
+			Log.Info("friendly_fire_autoban.kicker value: " + Plugin.Instance.Config.Kicker);
+			Log.Info("friendly_fire_autoban.bomber value: " + Plugin.Instance.Config.Bomber);
+			Log.Info("friendly_fire_autoban.disarm value: " + Plugin.Instance.Config.Disarm);
+
+			Log.Info("friendly_fire_autoban.rolewl default value: " + string.Join(";", Plugin.Instance.Config.RoleWl));
+			string roleTuples = "";
+			foreach (RoleTuple rt in Plugin.Instance.Config.GetRoleWlCache())
+			{
+				if (roleTuples.Length == 0)
+				{
+					roleTuples += rt;
+				}
+				else
+				{
+					roleTuples += ";" + rt;
+				}
+			}
+			Log.Info("friendly_fire_autoban.rolewl cached  value: " + roleTuples);
+
+			Log.Info("friendly_fire_autoban.invert value: " + Plugin.Instance.Config.Invert);
+			Log.Info("friendly_fire_autoban.mirror value: " + Plugin.Instance.Config.Mirror);
+			Log.Info("friendly_fire_autoban.undead value: " + Plugin.Instance.Config.Undead);
+			Log.Info("friendly_fire_autoban.warntk value: " + Plugin.Instance.Config.WarnTk);
+			Log.Info("friendly_fire_autoban.votetk value: " + Plugin.Instance.Config.VoteTk);
+			Log.Info("friendly_fire_autoban.immune value: " + string.Join(",", Plugin.Instance.Config.Immune));
+		}
+
 		internal IEnumerator<float> FFACoRoutine()
 		{
 			for (; ; )
@@ -278,7 +345,7 @@ namespace FriendlyFireAutoban
 			//
 			//}
 
-			foreach (RoleTuple roleTuple in Plugin.Instance.Config.GetRoleWL())
+			foreach (RoleTuple roleTuple in Plugin.Instance.Config.GetRoleWlCache())
 			{
 				if (killerRole == roleTuple.KillerRole && victimRole == roleTuple.VictimRole)
 				{
@@ -287,7 +354,7 @@ namespace FriendlyFireAutoban
 				}
 			}
 
-			foreach (TeamTuple teamTuple in Plugin.Instance.Config.GetMatrix())
+			foreach (TeamTuple teamTuple in Plugin.Instance.Config.GetMatrixCache())
 			{
 				if (killerTeam == teamTuple.KillerTeam && victimTeam == teamTuple.VictimTeam)
 				{

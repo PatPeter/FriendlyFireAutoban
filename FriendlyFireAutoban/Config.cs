@@ -9,6 +9,28 @@ namespace FriendlyFireAutoban
 	/// <inheritdoc cref="IConfig"/>
 	public sealed class Config : IConfig
 	{
+		private List<string> _Matrix = new List<string>();
+
+		private List<TeamTuple> _MatrixCache = new List<TeamTuple>()
+		{
+			new TeamTuple(Team.SCP, Team.SCP),
+			new TeamTuple(Team.MTF, Team.MTF),
+			new TeamTuple(Team.CHI, Team.CHI),
+			new TeamTuple(Team.RSC, Team.RSC),
+			new TeamTuple(Team.CDP, Team.CDP),
+			new TeamTuple(Team.MTF, Team.RSC),
+			new TeamTuple(Team.CHI, Team.CDP),
+			new TeamTuple(Team.RSC, Team.MTF),
+			new TeamTuple(Team.CDP, Team.CHI),
+		};
+
+		private List<string> _RoleWl = new List<string>();
+
+		private List<RoleTuple> _RoleWlCache = new List<RoleTuple>()
+		{
+
+		};
+
 		/// <inheritdoc/>
 		[Description("Enable or disable the plugin. Defaults to true.")]
 		public bool IsEnabled { get; set; } = true;
@@ -32,16 +54,32 @@ namespace FriendlyFireAutoban
 		/// Matrix of killer:victim team tuples that the plugin considers teamkills
 		/// </summary>
 		[Description("Matrix of killer:victim team tuples that the plugin considers teamkills")]
-		public List<String> Matrix { get; set; } = new List<string>() {
-			/*(int)Team.SCP + ":" + (int)Team.SCP,
-			(int)Team.MTF + ":" + (int)Team.MTF,
-			(int)Team.CHI + ":" + (int)Team.CHI,
-			(int)Team.RSC + ":" + (int)Team.RSC,
-			(int)Team.CDP + ":" + (int)Team.CDP,
-			(int)Team.MTF + ":" + (int)Team.RSC,
-			(int)Team.CHI + ":" + (int)Team.CDP,
-			(int)Team.RSC + ":" + (int)Team.MTF,
-			(int)Team.CDP + ":" + (int)Team.CHI,*/
+		public List<String> Matrix {
+			get
+			{
+				return _Matrix;
+			}
+			set
+			{
+				_Matrix = value;
+				_MatrixCache = new List<TeamTuple>();
+				foreach (string tuple in value)
+				{
+					byte[] parts = tuple.Split(',').Select(int.Parse).Select(Convert.ToByte).ToArray();
+					if (parts.Length != 2)
+					{
+						continue;
+					}
+
+					if (Enum.IsDefined(typeof(Team), parts[0]) && Enum.IsDefined(typeof(Team), parts[0]))
+					{
+						_MatrixCache.Add(new TeamTuple((Team)parts[0], (Team)parts[0]));
+					}
+				}
+			}
+		}
+		/*= new List<string>() {
+			
 			"0,0",
 			"1,1",
 			"2,2",
@@ -51,25 +89,11 @@ namespace FriendlyFireAutoban
 			"2,4",
 			"3,1",
 			"4,2",
-		};
+		};*/
 
-		internal List<TeamTuple> GetMatrix()
+		internal List<TeamTuple> GetMatrixCache()
 		{
-			List<TeamTuple> retval = new List<TeamTuple>();
-			foreach (string tuple in Matrix)
-			{
-				byte[] parts = tuple.Split(',').Select(int.Parse).Select(Convert.ToByte).ToArray();
-				if (parts.Length != 2)
-				{
-					continue;
-				}
-
-				if (Enum.IsDefined(typeof(Team), parts[0]) && Enum.IsDefined(typeof(Team), parts[0]))
-				{
-					retval.Add(new TeamTuple((Team)parts[0], (Team)parts[0]));
-				}
-			}
-			return retval;
+			return _MatrixCache;
 		}
 
 		/// <summary>
@@ -153,28 +177,34 @@ namespace FriendlyFireAutoban
 		/// Matrix of `killer:victim` role tuples that the plugin will NOT consider teamkills.<br><br>If you want NTF to be able to teamkill based on the chain of command, use this value (on one line): <br>12:11,12:4,12:13,12:15,<br>4:11,4:13,4:15,<br>11:13,11:15,13:15
 		/// </summary>
 		[Description("Matrix of `killer:victim` role tuples that the plugin will NOT consider teamkills. If you want NTF to be able to teamkill based on the chain of command, use this value (on one line): <br>12:11,12:4,12:13,12:15,<br>4:11,4:13,4:15,<br>11:13,11:15,13:15")]
-		public List<string> RoleWl { get; set; } = new List<string>
-		{
-
-		};
-
-		internal List<RoleTuple> GetRoleWL()
-		{
-			List<RoleTuple> retval = new List<RoleTuple>();
-			foreach (string tuple in RoleWl)
+		public List<string> RoleWl {
+			get
 			{
-				sbyte[] parts = tuple.Split(',').Select(int.Parse).Select(Convert.ToSByte).ToArray();
-				if (parts.Length != 2)
+				return _RoleWl;
+			}
+			set
+			{
+				_RoleWl = value;
+				_RoleWlCache = new List<RoleTuple>();
+				foreach (string tuple in RoleWl)
 				{
-					continue;
-				}
+					sbyte[] parts = tuple.Split(',').Select(int.Parse).Select(Convert.ToSByte).ToArray();
+					if (parts.Length != 2)
+					{
+						continue;
+					}
 
-				if (Enum.IsDefined(typeof(RoleType), parts[0]) && Enum.IsDefined(typeof(RoleType), parts[0]))
-				{
-					retval.Add(new RoleTuple((RoleType)parts[0], (RoleType)parts[0]));
+					if (Enum.IsDefined(typeof(RoleType), parts[0]) && Enum.IsDefined(typeof(RoleType), parts[0]))
+					{
+						_RoleWlCache.Add(new RoleTuple((RoleType)parts[0], (RoleType)parts[0]));
+					}
 				}
 			}
-			return retval;
+		}
+
+		internal List<RoleTuple> GetRoleWlCache()
+		{
+			return _RoleWlCache;
 		}
 
 		/// <summary>

@@ -7,7 +7,7 @@ using YamlDotNet.Serialization;
 
 namespace FriendlyFireAutoban
 {
-	internal class TeamTuple
+	internal struct TeamTuple
 	{
 		public Team KillerTeam { get; set; }
 		public Team VictimTeam { get; set; }
