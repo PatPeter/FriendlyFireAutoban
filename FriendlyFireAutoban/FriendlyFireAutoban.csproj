@@ -55,9 +55,6 @@
     <Reference Include="Assembly-CSharp-firstpass">
       <HintPath>..\..\References\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
-    <Reference Include="Assembly-CSharp_publicized">
-      <HintPath>..\..\References\Assembly-CSharp_publicized.dll</HintPath>
-    </Reference>
     <Reference Include="CommandSystem.Core, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\References\CommandSystem.Core.dll</HintPath>
