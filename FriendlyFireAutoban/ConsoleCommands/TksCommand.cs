@@ -56,7 +56,7 @@ namespace FriendlyFireAutoban.ConsoleCommands
 							{
 								// https://stackoverflow.com/questions/55436309/how-do-i-use-linq-to-select-from-a-list-inside-a-map
 								teamkillers = Plugin.Instance.Teamkillers.Values.Where(
-									x => x.Name.Contains(quotedArgs[0])
+									x => x.Nickname.Contains(quotedArgs[0])
 								).ToList();
 							}
 						}
@@ -71,7 +71,7 @@ namespace FriendlyFireAutoban.ConsoleCommands
 
 						if (teamkillers.Count == 1)
 						{
-							string retval = "Player " + teamkillers[0].Name + " has a K/D ratio of " + teamkillers[0].Kills + ":" + teamkillers[0].Deaths + " or " + teamkillers[0].GetKDR() + ".\n";
+							string retval = "Player " + teamkillers[0].Nickname + " has a K/D ratio of " + teamkillers[0].Kills + ":" + teamkillers[0].Deaths + " or " + teamkillers[0].GetKDR() + ".\n";
 							foreach (Teamkill tk in teamkillers[0].Teamkills)
 							{
 								retval +=

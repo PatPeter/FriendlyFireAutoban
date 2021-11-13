@@ -10,24 +10,25 @@ namespace FriendlyFireAutoban
 	internal class Teamkiller
 	{
 		public int            PlayerId       { get; set; }
-		public string         Name           { get; set; }
+		public string         Nickname       { get; set; }
 		public string         UserId         { get; set; }
-		public string         IpAddress      { get; set; }
+		public string         IPAddress      { get; set; }
 		// Must keep track of team and role for when the player is sent to spectator and events are still running
-		public short          PlayerTeam     { get; set; }
-		public short          PlayerRole     { get; set; }
+		public Team           Team           { get; set; }
+		public RoleType       PlayerRole     { get; set; }
 		public int            Kills          { get; set; } = 0;
 		public int            Deaths         { get; set; } = 0;
 		public List<Teamkill> Teamkills      { get; set; } = new List<Teamkill>();
 		public int            TimerCountdown { get; set; } = -1;
+		public bool           Disconnected   { get; set; } = false;
 		public bool           Banned         { get; set; } = false;
 
 		public Teamkiller(int playerId, string name, string userId, string ipAddress)
 		{
 			this.PlayerId = playerId;
-			this.Name = name;
+			this.Nickname = name;
 			this.UserId = userId;
-			this.IpAddress = ipAddress;
+			this.IPAddress = ipAddress;
 		}
 
 		public float GetKDR()
@@ -46,15 +47,15 @@ namespace FriendlyFireAutoban
 		{
 			var hashCode = -1156428363;
 			hashCode = hashCode * -1521134295 + PlayerId.GetHashCode();
-			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Name);
+			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Nickname);
 			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(UserId);
-			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(IpAddress);
+			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(IPAddress);
 			return hashCode;
 		}
 
 		public override string ToString()
 		{
-			return PlayerId + " " + Name + " " + UserId + " " + IpAddress;
+			return PlayerId + " " + Nickname + " " + UserId + " " + IPAddress;
 		}
 	}
 }

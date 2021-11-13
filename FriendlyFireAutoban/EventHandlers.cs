@@ -40,7 +40,7 @@ namespace FriendlyFireAutoban
 		{
 			//if (EventPlugin.GetRoundDuration() >= 3)
 			//{
-			Log.Info("Set round end to false and check if ban system is #3 " + Plugin.Instance.Config.System);
+			//Log.Info("Set round end to false and check if ban system is #3 " + Plugin.Instance.Config.System);
 			Plugin.Instance.DuringRound = false;
 			Timing.KillCoroutines(Plugin.Instance.FFAHandle);
 			//}
@@ -50,7 +50,9 @@ namespace FriendlyFireAutoban
 			//{
 			//	timer.Dispose();
 			//}
-			if (Plugin.Instance.Config.System == 3)
+
+			// Do all of this logic in the coroutine
+			/*if (Plugin.Instance.Config.System == 3)
 			{
 				Log.Info("[SYSTEM 3] Iterating over players and issuing scaled bans on round end...");
 				foreach (Player player in Player.List)
@@ -97,7 +99,7 @@ namespace FriendlyFireAutoban
 					// Wait won't disconnected users periodically clean up users?
 					// Yes it will, this isn't needed
 				//}
-			}
+			}*/
 
 
 			/*
@@ -112,13 +114,18 @@ namespace FriendlyFireAutoban
 
 		public void OnPlayerVerified(VerifiedEventArgs ev)
 		{
-			Plugin.Instance.AddAndGetTeamkiller(ev.Player);
+			Teamkiller teamkiller = Plugin.Instance.AddAndGetTeamkiller(ev.Player);
+			teamkiller.Banned = false;
+			teamkiller.Disconnected = false;
 		}
 
 		public void OnPlayerDestroying(DestroyingEventArgs ev)
 		{
 			Log.Info("[OnPlayerLeave] Triggered, Enabled: " + Plugin.Instance.Config.IsEnabled + ", during round: " + Plugin.Instance.DuringRound + ", processing player leave: " + Plugin.Instance.ProcessingDisconnect);
-			if (Plugin.Instance.Config.IsEnabled && // plugin must be enabled
+			// Flag player as a disconnected user
+			Plugin.Instance.Teamkillers.Values.Where(tker => tker.UserId == ev.Player.UserId).First().Disconnected = true;
+
+			/*if (Plugin.Instance.Config.IsEnabled && // plugin must be enabled
 				Plugin.Instance.DuringRound && // must be during round, otherwise will process on 20+ player leaves on round restart
 				!Plugin.Instance.ProcessingDisconnect // mutual exclusion lock
 			) {
@@ -135,7 +142,7 @@ namespace FriendlyFireAutoban
 							int teamkills = Plugin.Instance.Teamkillers[teamkiller.UserId].Teamkills.Count;
 							if (Plugin.Instance.Config.OutAll)
 							{
-								Log.Info("Player " + teamkiller.Name + " that committed " + teamkills + " teamkills has left the server.");
+								Log.Info("Player " + teamkiller.Nickname + " that committed " + teamkills + " teamkills has left the server.");
 							}
 
 							// Only issued scaled bans for system #3
@@ -147,7 +154,7 @@ namespace FriendlyFireAutoban
 									long now = DateTime.Now.Ticks;
 
 									BanDetails userBan = new BanDetails();
-									userBan.OriginalName = teamkiller.Name;
+									userBan.OriginalName = teamkiller.Nickname;
 									userBan.Id = teamkiller.UserId;
 									// Calculate ticks
 									userBan.Expires = now + (banLength * 60 * 10000000);
@@ -155,24 +162,24 @@ namespace FriendlyFireAutoban
 									userBan.Issuer = "FriendlyFireAutoban";
 									userBan.IssuanceTime = now;
 									BanHandler.IssueBan(userBan, BanType.UserId);
-									Log.Info(teamkiller.Name + " / " + teamkiller.UserId + ": Banned " + banLength + " minutes for teamkilling " + teamkills + " players");
+									Log.Info(teamkiller.Nickname + " / " + teamkiller.UserId + ": Banned " + banLength + " minutes for teamkilling " + teamkills + " players");
 
 									BanDetails ipBan = new BanDetails();
-									ipBan.OriginalName = teamkiller.Name;
-									ipBan.Id = teamkiller.IpAddress;
+									ipBan.OriginalName = teamkiller.Nickname;
+									ipBan.Id = teamkiller.IPAddress;
 									// Calculate ticks
 									ipBan.Expires = now + (banLength * 60 * 10000000);
 									ipBan.Reason = string.Format(Plugin.Instance.GetTranslation("offline_ban"), banLength, teamkills);
 									ipBan.Issuer = "FriendlyFireAutoban";
 									ipBan.IssuanceTime = now;
 									BanHandler.IssueBan(ipBan, BanType.IP);
-									Log.Info(teamkiller.Name + " / " + teamkiller.IpAddress + ": Banned " + banLength + " minutes for teamkilling " + teamkills + " players");
+									Log.Info(teamkiller.Nickname + " / " + teamkiller.IPAddress + ": Banned " + banLength + " minutes for teamkilling " + teamkills + " players");
 								}
 								else
 								{
 									if (Plugin.Instance.Config.OutAll)
 									{
-										Log.Info("Player " + teamkiller.Name + " " + Plugin.Instance.Teamkillers[teamkiller.UserId].Teamkills.Count + " teamkills is not bannable.");
+										Log.Info("Player " + teamkiller.Nickname + " " + Plugin.Instance.Teamkillers[teamkiller.UserId].Teamkills.Count + " teamkills is not bannable.");
 									}
 								}
 							}
@@ -196,7 +203,7 @@ namespace FriendlyFireAutoban
 			else
 			{
 				Log.Info("Not processing OnPlayerLeave");
-			}
+			}*/
 		}
 
 		public void OnPlayerDeath(DiedEventArgs ev)
@@ -317,7 +324,7 @@ namespace FriendlyFireAutoban
 						 */
 						if (Plugin.Instance.Config.System == 1 && killerTeamkiller.Teamkills.Count >= Plugin.Instance.Config.Amount)
 						{
-							Plugin.Instance.OnBan(killer, killerNickname, Plugin.Instance.Config.Length, killerTeamkiller.Teamkills);
+							Plugin.Instance.OnBan(killerTeamkiller, killerNickname, Plugin.Instance.Config.Length);
 						}
 						else
 						{
@@ -333,7 +340,7 @@ namespace FriendlyFireAutoban
 							 */
 							if (Plugin.Instance.Config.System == 2 && killerTeamkiller.Teamkills.Count >= Plugin.Instance.Config.Amount)
 							{
-								Plugin.Instance.OnBan(killer, killerNickname, Plugin.Instance.Config.Length, killerTeamkiller.Teamkills);
+								Plugin.Instance.OnBan(killerTeamkiller, killerNickname, Plugin.Instance.Config.Length);
 							}
 						}
 						return;
@@ -438,8 +445,8 @@ namespace FriendlyFireAutoban
 				Teamkiller teamkiller = Plugin.Instance.AddAndGetTeamkiller(ev.Player);
 				if (playerTeam != Team.RIP)
 				{
-					teamkiller.PlayerTeam = (short)playerTeam;
-					teamkiller.PlayerRole = (short)playerRole;
+					teamkiller.Team = playerTeam;
+					teamkiller.PlayerRole = playerRole;
 				}
 
 				Plugin.Instance.OnCheckRemoveGuns(ev.Player);
@@ -459,8 +466,8 @@ namespace FriendlyFireAutoban
 				Teamkiller teamkiller = Plugin.Instance.AddAndGetTeamkiller(ev.Player);
 				if (playerTeam != Team.RIP)
 				{
-					teamkiller.PlayerTeam = (short)playerTeam;
-					teamkiller.PlayerRole = (short)playerRole;
+					teamkiller.Team = playerTeam;
+					teamkiller.PlayerRole = playerRole;
 				}
 
 				Plugin.Instance.OnCheckRemoveGuns(ev.Player);

@@ -6,6 +6,7 @@ using System.Timers;
 using Exiled.API.Features;
 using Exiled.API.Features.Items;
 using MEC;
+using static BanHandler;
 
 namespace FriendlyFireAutoban
 {
@@ -223,9 +224,10 @@ namespace FriendlyFireAutoban
 		{
 			for (; ; )
 			{
-				List<Player> players = Player.List.Where(p => Plugin.Instance.Teamkillers.ContainsKey(p.UserId) && Plugin.Instance.Teamkillers[p.UserId].Teamkills.Count > 0).Distinct().ToList();
+				//List<Player> players = Player.List.Where(p => Plugin.Instance.Teamkillers.ContainsKey(p.UserId) && Plugin.Instance.Teamkillers[p.UserId].Teamkills.Count > 0).Distinct().ToList();
+				List<Teamkiller> teamkillers = Plugin.Instance.Teamkillers.Values.Where(tker => tker.Teamkills.Count > 0).Distinct().ToList();
 
-				foreach (Player killer in players)
+				foreach (Teamkiller killer in teamkillers)
 				{
 					string killerUserId = killer.UserId;
 					string killerIpAddress = killer.IPAddress;
@@ -233,12 +235,6 @@ namespace FriendlyFireAutoban
 					Team killerTeam = killer.Team;
 					string killerOutput = killerNickname + " " + killerUserId + " " + killerIpAddress;
 					Teamkiller killerTeamkiller = Plugin.Instance.Teamkillers[killer.UserId];
-					
-					if (killerTeamkiller.Banned)
-					{
-						Log.Warn("{WARN] Attemped to ban player " + killerTeamkiller + " who was already banned.");
-						continue;
-					}
 
 					if (killerTeamkiller.TimerCountdown > 0)
 					{
@@ -260,12 +256,11 @@ namespace FriendlyFireAutoban
 						if (Plugin.Instance.Config.System == 3)
 						{
 							int banLength = Plugin.Instance.GetScaledBanAmount(killerUserId);
-							if (banLength > 0)
+							if (banLength > 0 && !killerTeamkiller.Banned)
 							{
-								Plugin.Instance.OnBan(killer, killerNickname, banLength, killerTeamkiller.Teamkills);
-								killerTeamkiller.Banned = true;
+								Plugin.Instance.OnBan(killer, killerNickname, banLength);
 								Log.Info("Banned player " + killerTeamkiller + " for accumulating scaled ban amount " + banLength + " for " + killerTeamkiller.Teamkills.Count + " teamkills.");
-								continue;
+								//continue;
 							}
 							//else
 							//{
@@ -277,6 +272,7 @@ namespace FriendlyFireAutoban
 						}
 						
 						// Forgive teamkills in ban system #2 and #3
+						// Continue to forgive teamkills after players leave the server
 						if (Plugin.Instance.Config.System > 1)
 						{
 							Teamkill firstTeamkill = killerTeamkiller.Teamkills[0];
@@ -415,11 +411,33 @@ namespace FriendlyFireAutoban
 
 		//[PipeEvent("patpeter.friendly.fire.autoban.OnBan")]
 		//[PipeMethod]
-		internal bool OnBan(Player player, string playerName, int banLength, List<Teamkill> teamkills)
+		internal bool OnBan(Teamkiller teamkiller, string playerName, int banLength)
 		{
-			string playerUserId = player.UserId;
-			string playerIpAddress = player.IPAddress;
-			bool immune = isImmune(player);
+			if (teamkiller.Banned)
+			{
+				Log.Warn("[OnBan] Attempted to log repeat ban for " + teamkiller);
+				return false;
+			}
+
+			// If two players with the same UserId are on the server, this will cause a problem
+			Player player = Player.List.Where(tk => tk.UserId == teamkiller.UserId).First();
+			string playerUserId, playerIpAddress;
+			bool immune;
+			if (player != null)
+			{
+				playerUserId = player.UserId;
+				playerIpAddress = player.IPAddress;
+				immune = isImmune(player);
+			}
+			else
+			{
+				playerUserId = teamkiller.UserId;
+				playerIpAddress = teamkiller.IPAddress;
+				// TODO: Save UserGroup in Teamkiller so that the method can be used here?
+				immune = false;
+			}
+			List<Teamkill> teamkills = teamkiller.Teamkills;
+
 			if (immune)
 			{
 				Log.Info("Admin/Moderator " + playerName + " has avoided a ban for " + banLength + " minutes after teamkilling " + teamkills + " players during the round.");
@@ -432,17 +450,52 @@ namespace FriendlyFireAutoban
 			}
 			else
 			{
+				string banReason;
 				// If teamkills are more than 3, simply provide the count instead of listing each name off
 				if (teamkills.Count > 3)
 				{
-					player.Ban(banLength, "Banned " + banLength + " minutes for teamkilling " + teamkills.Count + " players", "FriendlyFireAutoban");
-					player.Kick("Banned " + banLength + " minutes for teamkilling " + teamkills.Count + " players", "FriendlyFireAutoban");
+					banReason = "Banned " + banLength + " minutes for teamkilling " + teamkills.Count + " players";
 				}
 				else
 				{
-					player.Ban(banLength, "Banned " + banLength + " minutes for teamkilling player(s) " + string.Join(", ", teamkills.Select(teamkill => teamkill.VictimName).ToArray()), "FriendlyFireAutoban");
-					player.Kick("Banned " + banLength + " minutes for teamkilling player(s) " + string.Join(", ", teamkills.Select(teamkill => teamkill.VictimName).ToArray()), "FriendlyFireAutoban");
+					banReason = "Banned " + banLength + " minutes for teamkilling player(s) " + string.Join(", ", teamkills.Select(teamkill => teamkill.VictimName).ToArray());
 				}
+
+				if (player != null)
+				{
+					player.Ban(banLength, banReason, "FriendlyFireAutoban");
+				}
+				else
+				// if (teamkiller.Disconnected)
+				// If the player cannot be found, then by defintion it is a disconnected user
+				// Continue to track the boolean for garbage collection
+				{
+					long now = DateTime.Now.Ticks;
+
+					BanDetails userBan = new BanDetails();
+					userBan.OriginalName = teamkiller.Nickname;
+					userBan.Id = teamkiller.UserId;
+					// Calculate ticks
+					userBan.Expires = now + (banLength * 60 * 10000000);
+					userBan.Reason = string.Format(Plugin.Instance.GetTranslation("offline_ban"), banLength, teamkills);
+					userBan.Issuer = "FriendlyFireAutoban";
+					userBan.IssuanceTime = now;
+					BanHandler.IssueBan(userBan, BanType.UserId);
+					Log.Info(teamkiller.Nickname + " / " + teamkiller.UserId + ": Banned " + banLength + " minutes for teamkilling " + teamkills + " players");
+
+					BanDetails ipBan = new BanDetails();
+					ipBan.OriginalName = teamkiller.Nickname;
+					ipBan.Id = teamkiller.IPAddress;
+					// Calculate ticks
+					ipBan.Expires = now + (banLength * 60 * 10000000);
+					ipBan.Reason = string.Format(Plugin.Instance.GetTranslation("offline_ban"), banLength, teamkills);
+					ipBan.Issuer = "FriendlyFireAutoban";
+					ipBan.IssuanceTime = now;
+					BanHandler.IssueBan(ipBan, BanType.IP);
+					Log.Info(teamkiller.Nickname + " / " + teamkiller.IPAddress + ": Banned " + banLength + " minutes for teamkilling " + teamkills + " players");
+				}
+
+				teamkiller.Banned = true;
 				Log.Info("Player " + playerName + " has been banned for " + banLength + " minutes after teamkilling " + teamkills + " players during the round.");
 				Map.Broadcast(new Exiled.API.Features.Broadcast(string.Format(this.GetTranslation("banned_output"), playerName, teamkills.Count), 3), false);
 				return true;
