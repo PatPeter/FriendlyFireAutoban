@@ -7,6 +7,7 @@ using Exiled.API.Features;
 using Exiled.API.Features.Items;
 using MEC;
 using static BanHandler;
+using Exiled.Permissions.Extensions;
 
 namespace FriendlyFireAutoban
 {
@@ -217,7 +218,7 @@ namespace FriendlyFireAutoban
 			Log.Info("friendly_fire_autoban.undead value: " + Plugin.Instance.Config.Undead);
 			Log.Info("friendly_fire_autoban.warntk value: " + Plugin.Instance.Config.WarnTk);
 			Log.Info("friendly_fire_autoban.votetk value: " + Plugin.Instance.Config.VoteTk);
-			Log.Info("friendly_fire_autoban.immune value: " + string.Join(",", Plugin.Instance.Config.Immune));
+			//Log.Info("friendly_fire_autoban.immune value: " + string.Join(",", Plugin.Instance.Config.Immune));
 		}
 
 		internal IEnumerator<float> FFACoRoutine()
@@ -293,7 +294,8 @@ namespace FriendlyFireAutoban
 
 		internal bool isImmune(Player player)
 		{
-			if (Plugin.Instance.Config.Immune.Contains(player.GroupName) || (player.GlobalBadge.HasValue ? Plugin.Instance.Config.Immune.Contains(player.GlobalBadge.Value.Text) : false))
+			//if (Plugin.Instance.Config.Immune.Contains(player.GroupName) || (player.GlobalBadge.HasValue ? Plugin.Instance.Config.Immune.Contains(player.GlobalBadge.Value.Text) : false))
+			if (player.CheckPermission("ffa.immune"))
 			{
 				return true;
 			}

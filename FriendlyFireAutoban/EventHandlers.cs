@@ -264,7 +264,7 @@ namespace FriendlyFireAutoban
 				{
 					killerTeamkiller.Kills--;
 
-					Teamkill teamkill = new Teamkill(DateTime.Now.Ticks, killerNickname, killerUserId, (short)killerRole, victimNickname, victimUserId, (short)victimRole, victimIsHandcuffed, (short) ev.HitInformations.Tool.Weapon, ev.HitInformations.Time); // TODO: ev.HitInformations.Time is probably wrong
+					Teamkill teamkill = new Teamkill(DateTime.Now.Ticks, killerNickname, killerUserId, (short)killerRole, victimNickname, victimUserId, (short)victimRole, victimIsHandcuffed, (short) ev.Handler.Item.Type, Round.ElapsedTime.Seconds);
 					Plugin.Instance.TeamkillVictims[victimUserId] = teamkill;
 					killerTeamkiller.Teamkills.Add(teamkill);
 
@@ -383,7 +383,7 @@ namespace FriendlyFireAutoban
 				Player victim = ev.Target;
 				int victimPlayerId = victim.Id;
 
-				if (Plugin.Instance.Config.Mirror > 0f && ev.DamageType != DamageTypes.Falldown) // && ev.DamageType != DamageTypes.Grenade
+				if (Plugin.Instance.Config.Mirror > 0f && ev.Handler.Type != Exiled.API.Enums.DamageType.Falldown) // && ev.DamageType != DamageTypes.Grenade
 				{
 					//Log.Info("Mirroring " + ev.Amount + " of " + ev.DamageType.ToString() + " damage.");
 					if (Plugin.Instance.isTeamkill(attacker, victim, false) && !Plugin.Instance.isImmune(attacker) && !Plugin.Instance.BanWhitelist.Contains(attackerUserId))
@@ -397,7 +397,7 @@ namespace FriendlyFireAutoban
 								//	Log.Info("Dealing damage to " + attackerNickname + ": " + (ev.Amount * Plugin.Instance.Config.Mirror));
 								//}
 								//attacker.playerStats.HurtPlayer(new PlayerStats.HitInfo(ev.Amount * Plugin.Instance.mirror, attackerNickname, DamageTypes.Falldown, attackerPlayerId), attacker.gameObject);
-								Timing.CallDelayed(0.5f, () => attacker.Hurt(ev.Amount * Plugin.Instance.Config.Mirror, DamageTypes.Falldown, attackerNickname, attackerPlayerId));
+								Timing.CallDelayed(0.5f, () => attacker.Hurt(Exiled.API.Enums.DamageType.Falldown.ToString(), ev.Amount * Plugin.Instance.Config.Mirror));
 							}
 							// else do nothing
 						}
@@ -408,11 +408,11 @@ namespace FriendlyFireAutoban
 							//	Log.Info("Dealing damage to " + attackerNickname + ": " + (ev.Amount * Plugin.Instance.Config.Mirror));
 							//}
 							//attacker.playerStats.HurtPlayer(new PlayerStats.HitInfo(ev.Amount * Plugin.Instance.mirror, attackerNickname, DamageTypes.Falldown, attackerPlayerId), attacker.gameObject);
-							Timing.CallDelayed(0.5f, () => attacker.Hurt(ev.Amount * Plugin.Instance.Config.Mirror, DamageTypes.Falldown, attackerNickname, attackerPlayerId));
+							Timing.CallDelayed(0.5f, () => attacker.Hurt(Exiled.API.Enums.DamageType.Falldown.ToString(), ev.Amount * Plugin.Instance.Config.Mirror));
 						}
 					}
 				}
-				else if (victimPlayerId == attackerPlayerId && ev.DamageType == DamageTypes.Grenade)
+				else if (victimPlayerId == attackerPlayerId && ev.Handler.Type == Exiled.API.Enums.DamageType.Explosion)
 				{
 					if (Plugin.Instance.Config.OutAll)
 					{
@@ -422,7 +422,7 @@ namespace FriendlyFireAutoban
 					{
 						int damage = (int)ev.Amount;
 						ev.Amount = 0;
-						Timing.CallDelayed(0.5f, () => attacker.Hurt(damage, DamageTypes.Falldown, attackerNickname, attackerPlayerId));
+						Timing.CallDelayed(0.5f, () => attacker.Hurt(Exiled.API.Enums.DamageType.Falldown.ToString(), damage));
 					}
 					else if (Plugin.Instance.Config.Bomber == 1)
 					{

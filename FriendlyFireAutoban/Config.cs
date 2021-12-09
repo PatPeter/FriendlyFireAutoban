@@ -150,7 +150,7 @@ namespace FriendlyFireAutoban
 		[Description("Number of kills at which to kick the player as a warning for teamkilling.")]
 		public int Kicker { get; set; } = 0;
 
-		/// <summary>
+		/*/// <summary>
 		/// Groups that are immune to being autobanned.
 		/// </summary>
 		[Description("Groups that are immune to being autobanned.")]
@@ -159,7 +159,7 @@ namespace FriendlyFireAutoban
 			//"owner",
 			"admin",
 			"moderator"
-		};
+		};*/
 
 		/// <summary>
 		/// Whether to delay grenade damage of thrower by one second [experimental] (2), make player immune to grenade damage (1), or keep disabled (0).
