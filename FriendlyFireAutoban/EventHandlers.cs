@@ -408,6 +408,11 @@ namespace FriendlyFireAutoban
 				Player victim = ev.Target;
 				int victimPlayerId = victim.Id;
 
+				if (ev.Handler == null)
+				{
+					return;
+				}
+
 				if (Plugin.Instance.Config.Mirror > 0f && ev.Handler.Type != Exiled.API.Enums.DamageType.Falldown) // && ev.DamageType != DamageTypes.Grenade
 				{
 					//Log.Info("Mirroring " + ev.Amount + " of " + ev.DamageType.ToString() + " damage.");

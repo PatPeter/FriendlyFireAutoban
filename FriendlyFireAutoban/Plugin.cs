@@ -108,6 +108,8 @@ namespace FriendlyFireAutoban
 				//Set instance varible to a new instance, this should be nulled again in OnDisable
 				EventHandlers = new EventHandlers(this);
 				//Hook the events you will be using in the plugin. You should hook all events you will be using here, all events should be unhooked in OnDisabled
+				Exiled.Events.Handlers.Server.ReloadedConfigs += EventHandlers.OnReloadedConfig;
+
 				Exiled.Events.Handlers.Server.RoundStarted += EventHandlers.OnRoundStart;
 				Exiled.Events.Handlers.Server.RoundEnded += EventHandlers.OnRoundEnd;
 
@@ -135,6 +137,8 @@ namespace FriendlyFireAutoban
 
 		public override void OnDisabled()
 		{
+			Exiled.Events.Handlers.Server.ReloadedConfigs -= EventHandlers.OnReloadedConfig;
+
 			Exiled.Events.Handlers.Server.RoundStarted -= EventHandlers.OnRoundStart;
 			Exiled.Events.Handlers.Server.RoundEnded -= EventHandlers.OnRoundEnd;
 
