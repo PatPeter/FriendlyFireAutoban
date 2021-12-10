@@ -50,12 +50,11 @@ namespace FriendlyFireAutoban
 		internal const string Name = "Friendly Fire Autoban";
 		internal const string Description = "Plugin that autobans players for friendly firing.";
 		internal const string Id = "patpeter.friendly.fire.autoban";
-		internal const string ConfigPrefix = "ffa";
-		internal const string LangFile = "friendly_fire_autoban";
+		internal const string ConfigPrefix = "friendly_fire_autoban";
 
 		/// <summary>
 		/// The AssemblyFileVersion of this web part
 		/// </summary>
-		internal const string Version = "6.2.3";
+		internal const string Version = "6.2.4";
 	}
 }

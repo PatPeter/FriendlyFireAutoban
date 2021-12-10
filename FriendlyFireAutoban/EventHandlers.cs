@@ -233,6 +233,11 @@ namespace FriendlyFireAutoban
 
 		public void OnPlayerDeath(DiedEventArgs ev)
 		{
+			if (ev.Killer == null || ev.Target == null)
+			{
+				return;
+			}
+
 			Player killer = ev.Killer;
 			int killerPlayerId = killer.Id;
 			string killerNickname = killer.Nickname;
@@ -398,40 +403,32 @@ namespace FriendlyFireAutoban
 
 		public void OnPlayerHurt(HurtingEventArgs ev)
 		{
-			if (Plugin.Instance.Config.IsEnabled)
+			if (ev.Attacker == null || ev.Target == null)
 			{
-				Player attacker = ev.Attacker;
-				int attackerPlayerId = attacker.Id;
-				String attackerUserId = attacker.UserId;
-				String attackerNickname = attacker.Nickname;
+				return;
+			}
 
-				Player victim = ev.Target;
-				int victimPlayerId = victim.Id;
+			Player attacker = ev.Attacker;
+			int attackerPlayerId = attacker.Id;
+			String attackerUserId = attacker.UserId;
+			String attackerNickname = attacker.Nickname;
 
-				if (ev.Handler == null)
+			Player victim = ev.Target;
+			int victimPlayerId = victim.Id;
+
+			if (ev.Handler == null)
+			{
+				return;
+			}
+
+			if (Plugin.Instance.Config.Mirror > 0f && ev.Handler.Type != Exiled.API.Enums.DamageType.Falldown) // && ev.DamageType != DamageTypes.Grenade
+			{
+				//Log.Info("Mirroring " + ev.Amount + " of " + ev.DamageType.ToString() + " damage.");
+				if (Plugin.Instance.isTeamkill(attacker, victim, false) && !Plugin.Instance.isImmune(attacker) && !Plugin.Instance.BanWhitelist.Contains(attackerUserId))
 				{
-					return;
-				}
-
-				if (Plugin.Instance.Config.Mirror > 0f && ev.Handler.Type != Exiled.API.Enums.DamageType.Falldown) // && ev.DamageType != DamageTypes.Grenade
-				{
-					//Log.Info("Mirroring " + ev.Amount + " of " + ev.DamageType.ToString() + " damage.");
-					if (Plugin.Instance.isTeamkill(attacker, victim, false) && !Plugin.Instance.isImmune(attacker) && !Plugin.Instance.BanWhitelist.Contains(attackerUserId))
+					if (Plugin.Instance.Config.Invert > 0)
 					{
-						if (Plugin.Instance.Config.Invert > 0)
-						{
-							if (Plugin.Instance.Teamkillers.ContainsKey(attackerUserId) && Plugin.Instance.Teamkillers[attackerUserId].Teamkills.Count >= Plugin.Instance.Config.Invert)
-							{
-								//if (Plugin.Instance.Config.OutAll)
-								//{
-								//	Log.Info("Dealing damage to " + attackerNickname + ": " + (ev.Amount * Plugin.Instance.Config.Mirror));
-								//}
-								//attacker.playerStats.HurtPlayer(new PlayerStats.HitInfo(ev.Amount * Plugin.Instance.mirror, attackerNickname, DamageTypes.Falldown, attackerPlayerId), attacker.gameObject);
-								Timing.CallDelayed(0.5f, () => attacker.Hurt(Exiled.API.Enums.DamageType.Falldown.ToString(), ev.Amount * Plugin.Instance.Config.Mirror));
-							}
-							// else do nothing
-						}
-						else
+						if (Plugin.Instance.Teamkillers.ContainsKey(attackerUserId) && Plugin.Instance.Teamkillers[attackerUserId].Teamkills.Count >= Plugin.Instance.Config.Invert)
 						{
 							//if (Plugin.Instance.Config.OutAll)
 							//{
@@ -440,24 +437,34 @@ namespace FriendlyFireAutoban
 							//attacker.playerStats.HurtPlayer(new PlayerStats.HitInfo(ev.Amount * Plugin.Instance.mirror, attackerNickname, DamageTypes.Falldown, attackerPlayerId), attacker.gameObject);
 							Timing.CallDelayed(0.5f, () => attacker.Hurt(Exiled.API.Enums.DamageType.Falldown.ToString(), ev.Amount * Plugin.Instance.Config.Mirror));
 						}
+						// else do nothing
+					}
+					else
+					{
+						//if (Plugin.Instance.Config.OutAll)
+						//{
+						//	Log.Info("Dealing damage to " + attackerNickname + ": " + (ev.Amount * Plugin.Instance.Config.Mirror));
+						//}
+						//attacker.playerStats.HurtPlayer(new PlayerStats.HitInfo(ev.Amount * Plugin.Instance.mirror, attackerNickname, DamageTypes.Falldown, attackerPlayerId), attacker.gameObject);
+						Timing.CallDelayed(0.5f, () => attacker.Hurt(Exiled.API.Enums.DamageType.Falldown.ToString(), ev.Amount * Plugin.Instance.Config.Mirror));
 					}
 				}
-				else if (victimPlayerId == attackerPlayerId && ev.Handler.Type == Exiled.API.Enums.DamageType.Explosion)
+			}
+			else if (victimPlayerId == attackerPlayerId && ev.Handler.Type == Exiled.API.Enums.DamageType.Explosion)
+			{
+				if (Plugin.Instance.Config.OutAll)
 				{
-					if (Plugin.Instance.Config.OutAll)
-					{
-						Log.Info("[BOMBER] Player " + victimPlayerId + " damaged by his/her own grenade, bomber triggered.");
-					}
-					if (Plugin.Instance.Config.Bomber == 2)
-					{
-						int damage = (int)ev.Amount;
-						ev.Amount = 0;
-						Timing.CallDelayed(0.5f, () => attacker.Hurt(Exiled.API.Enums.DamageType.Falldown.ToString(), damage));
-					}
-					else if (Plugin.Instance.Config.Bomber == 1)
-					{
-						ev.Amount = 0;
-					}
+					Log.Info("[BOMBER] Player " + victimPlayerId + " damaged by his/her own grenade, bomber triggered.");
+				}
+				if (Plugin.Instance.Config.Bomber == 2)
+				{
+					int damage = (int)ev.Amount;
+					ev.Amount = 0;
+					Timing.CallDelayed(0.5f, () => attacker.Hurt(Exiled.API.Enums.DamageType.Falldown.ToString(), damage));
+				}
+				else if (Plugin.Instance.Config.Bomber == 1)
+				{
+					ev.Amount = 0;
 				}
 			}
 		}
