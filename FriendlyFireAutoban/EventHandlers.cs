@@ -17,6 +17,31 @@ namespace FriendlyFireAutoban
 		internal Plugin plugin;
 		internal EventHandlers(Plugin plugin) => this.plugin = plugin;
 
+		public void OnReloadedConfig()
+		{
+			Log.Debug($"{AssemblyInfo.ConfigPrefix}.is_enabled: {Plugin.Instance.Config.IsEnabled}");
+			Log.Debug($"{AssemblyInfo.ConfigPrefix}.out_all: {Plugin.Instance.Config.OutAll}");
+			Log.Debug($"{AssemblyInfo.ConfigPrefix}.system: {Plugin.Instance.Config.System}");
+			Log.Debug($"{AssemblyInfo.ConfigPrefix}.matrix: {string.Join(",", Plugin.Instance.Config.Matrix)}");
+			Log.Debug($"{AssemblyInfo.ConfigPrefix}.amount: {Plugin.Instance.Config.Amount}");
+			Log.Debug($"{AssemblyInfo.ConfigPrefix}.length: {Plugin.Instance.Config.Length}");
+			Log.Debug($"{AssemblyInfo.ConfigPrefix}.expire: {Plugin.Instance.Config.Expire}");
+			Log.Debug($"{AssemblyInfo.ConfigPrefix}.scaled: {string.Join(",", Plugin.Instance.Config.Scaled)}");
+			Log.Debug($"{AssemblyInfo.ConfigPrefix}.no_guns: {Plugin.Instance.Config.NoGuns}");
+			Log.Debug($"{AssemblyInfo.ConfigPrefix}.to_spec: {Plugin.Instance.Config.ToSpec}");
+			Log.Debug($"{AssemblyInfo.ConfigPrefix}.kicker: {Plugin.Instance.Config.Kicker}");
+			//Log.Debug($"{AssemblyInfo.ConfigPrefix}.immune: {string.Join(",", Plugin.Instance.Config.Immune)}");
+			Log.Debug($"{AssemblyInfo.ConfigPrefix}.bomber: {Plugin.Instance.Config.Bomber}");
+			Log.Debug($"{AssemblyInfo.ConfigPrefix}.disarm: {Plugin.Instance.Config.Disarm}");
+			Log.Debug($"{AssemblyInfo.ConfigPrefix}.role_wl: {string.Join(",", Plugin.Instance.Config.RoleWl)}");
+			Log.Debug($"{AssemblyInfo.ConfigPrefix}.invert: {Plugin.Instance.Config.Invert}");
+			Log.Debug($"{AssemblyInfo.ConfigPrefix}.mirror: {Plugin.Instance.Config.Mirror}");
+			Log.Debug($"{AssemblyInfo.ConfigPrefix}.undead: {Plugin.Instance.Config.Undead}");
+			Log.Debug($"{AssemblyInfo.ConfigPrefix}.warn_tk: {Plugin.Instance.Config.WarnTk}");
+			Log.Debug($"{AssemblyInfo.ConfigPrefix}.vote_tk: {Plugin.Instance.Config.VoteTk}");
+			Log.Debug($"{AssemblyInfo.ConfigPrefix}.kd_safe: {Plugin.Instance.Config.KdSafe}");
+		}
+
 		public void OnRoundStart()
 		{
 			Log.Info("Round has started.");
