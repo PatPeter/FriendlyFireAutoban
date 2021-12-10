@@ -116,8 +116,8 @@ namespace FriendlyFireAutoban
 				Exiled.Events.Handlers.Player.Verified += EventHandlers.OnPlayerVerified;
 				Exiled.Events.Handlers.Player.Destroying += EventHandlers.OnPlayerDestroying;
 
-				Exiled.Events.Handlers.Player.Died += EventHandlers.OnPlayerDeath;
-				Exiled.Events.Handlers.Player.Hurting += EventHandlers.OnPlayerHurt;
+				Exiled.Events.Handlers.Player.Hurting += EventHandlers.OnPlayerHurting;
+				Exiled.Events.Handlers.Player.Dying += EventHandlers.OnPlayerDying;
 
 				Exiled.Events.Handlers.Player.Spawning += EventHandlers.OnPlayerSpawn;
 				Exiled.Events.Handlers.Player.ChangingRole += EventHandlers.OnSetClass;
@@ -144,9 +144,9 @@ namespace FriendlyFireAutoban
 
 			Exiled.Events.Handlers.Player.Verified -= EventHandlers.OnPlayerVerified;
 			Exiled.Events.Handlers.Player.Destroying -= EventHandlers.OnPlayerDestroying;
-
-			Exiled.Events.Handlers.Player.Died -= EventHandlers.OnPlayerDeath;
-			Exiled.Events.Handlers.Player.Hurting -= EventHandlers.OnPlayerHurt;
+			
+			Exiled.Events.Handlers.Player.Hurting -= EventHandlers.OnPlayerHurting;
+			Exiled.Events.Handlers.Player.Dying -= EventHandlers.OnPlayerDying;
 
 			Exiled.Events.Handlers.Player.Spawning -= EventHandlers.OnPlayerSpawn;
 			Exiled.Events.Handlers.Player.ChangingRole -= EventHandlers.OnSetClass;

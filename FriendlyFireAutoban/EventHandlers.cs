@@ -231,7 +231,7 @@ namespace FriendlyFireAutoban
 			}*/
 		}
 
-		public void OnPlayerDeath(DiedEventArgs ev)
+		public void OnPlayerDying(DyingEventArgs ev)
 		{
 			if (ev.Killer == null || ev.Target == null)
 			{
@@ -401,7 +401,7 @@ namespace FriendlyFireAutoban
 			}
 		}
 
-		public void OnPlayerHurt(HurtingEventArgs ev)
+		public void OnPlayerHurting(HurtingEventArgs ev)
 		{
 			if (ev.Attacker == null || ev.Target == null)
 			{

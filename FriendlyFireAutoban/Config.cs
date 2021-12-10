@@ -214,9 +214,9 @@ namespace FriendlyFireAutoban
 		public int Invert { get; set; } = 0;
 
 		/// <summary>
-		/// Whether damage should be mirrored back to a teamkiller, with values greater than (1) being considered a multiplier.
+		/// Whether damage should be mirrored back to a teamkiller, with values greater than (0) being considered a multiplier.
 		/// </summary>
-		[Description("Whether damage should be mirrored back to a teamkiller, with values greater than (1) being considered a multiplier.")]
+		[Description("Whether damage should be mirrored back to a teamkiller, with values greater than (0) being considered a multiplier.")]
 		public float Mirror { get; set; } = 0;
 
 		/// <summary>
