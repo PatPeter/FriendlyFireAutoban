@@ -8,25 +8,24 @@ using Exiled.API.Features.Items;
 using MEC;
 using static BanHandler;
 using Exiled.Permissions.Extensions;
+using Exiled.API.Enums;
 
 namespace FriendlyFireAutoban
 {
 	class Plugin : Plugin<Config, Translation>
 	{
-		/*
-		 * Static Fields
-		 */
-		private static readonly Lazy<Plugin> LazyInstance = new Lazy<Plugin>(() => new Plugin());
-		/// <summary>
-		/// Gets the lazy instance.
-		/// </summary>
-		public static Plugin Instance => LazyInstance.Value;
+		public static Plugin Instance { get; set; } = null;
 
 		/*
 		 * Public Instance Fields
 		 */
 		public EventHandlers EventHandlers;
-		public override string Name { get; } = "Friendly Fire Autoban";
+		public override string Name { get; } = FriendlyFireAutoban.AssemblyInfo.Author;
+		public override string Author { get; } = FriendlyFireAutoban.AssemblyInfo.Author;
+		public override Version Version { get; } = new Version(FriendlyFireAutoban.AssemblyInfo.Version);
+		public override string Prefix { get; } = FriendlyFireAutoban.AssemblyInfo.ConfigPrefix;
+		public override Version RequiredExiledVersion { get; } = new Version(5, 1, 3);
+		public override PluginPriority Priority { get; } = PluginPriority.Default;
 
 		/*
 		 * Internal Instance Fields
@@ -96,7 +95,7 @@ namespace FriendlyFireAutoban
 			}
 			else
 			{
-				return "INVALID TRANSLATION: " + name;
+				return $"INVALID TRANSLATION: {name}";
 			}
 		}
 
@@ -126,7 +125,7 @@ namespace FriendlyFireAutoban
 				//Exiled.Events.Handlers.Server.SendingRemoteAdminCommand += EventHandlers.OnRACommand;
 				//Exiled.Events.Handlers.Server.SendingConsoleCommand += EventHandlers.OnConsoleCommand;
 
-				Log.Info(AssemblyInfo.Name + " v" + AssemblyInfo.Version + " by " + AssemblyInfo.Author + " has been enabled!");
+				Log.Info($"{AssemblyInfo.Name} v{AssemblyInfo.Version} by {AssemblyInfo.Author} has been enabled!");
 			}
 			catch (Exception e)
 			{
@@ -238,7 +237,7 @@ namespace FriendlyFireAutoban
 					string killerIpAddress = killer.IPAddress;
 					string killerNickname = killer.Nickname;
 					Team killerTeam = killer.Team;
-					string killerOutput = killerNickname + " " + killerUserId + " " + killerIpAddress;
+					string killerOutput = $"{killerNickname} {killerUserId} {killerIpAddress}";
 					Teamkiller killerTeamkiller = Plugin.Instance.Teamkillers[killer.UserId];
 
 					if (killerTeamkiller.TimerCountdown > 0)
@@ -264,7 +263,7 @@ namespace FriendlyFireAutoban
 							if (banLength > 0 && !killerTeamkiller.Banned)
 							{
 								Plugin.Instance.OnBan(killer, killerNickname, banLength);
-								Log.Info("Banned player " + killerTeamkiller + " for accumulating scaled ban amount " + banLength + " for " + killerTeamkiller.Teamkills.Count + " teamkills.");
+								Log.Info($"Banned player {killerTeamkiller} for accumulating scaled ban amount {banLength} for {killerTeamkiller.Teamkills.Count} teamkills.");
 								//continue;
 							}
 							//else
@@ -282,7 +281,7 @@ namespace FriendlyFireAutoban
 						{
 							Teamkill firstTeamkill = killerTeamkiller.Teamkills[0];
 							killerTeamkiller.Teamkills.RemoveAt(0);
-							Log.Info("Player " + killerOutput + " " + killerTeam.ToString() + " teamkill " + firstTeamkill + " expired, counter now at " + killerTeamkiller.Teamkills.Count + ".");
+							Log.Info($"Player {killerOutput} {killerTeam} teamkill {firstTeamkill} expired, counter now at {killerTeamkiller.Teamkills.Count}.");
 						}
 
 						if (killerTeamkiller.Teamkills.Count > 0)
@@ -337,7 +336,7 @@ namespace FriendlyFireAutoban
 
 			if (string.Equals(killerUserId, victimUserId))
 			{
-				if (death) Log.Info(killerUserId + " equals " + victimUserId + ", this is a suicide and not a teamkill.");
+				if (death) Log.Info($"{killerUserId} equals {victimUserId}, this is a suicide and not a teamkill.");
 				return false;
 			}
 
@@ -345,7 +344,7 @@ namespace FriendlyFireAutoban
 			{
 				victimTeam = this.InverseTeams[victimTeam];
 				victimRole = this.InverseRoles[victimRole];
-				if (death) Log.Info(victimUserId + " is handcuffed, team inverted to " + victimTeam + " and role " + victimRole);
+				if (death) Log.Info($"{victimUserId} is handcuffed, team inverted to {victimTeam} and role {victimRole}.");
 			}
 
 			//List<RoleTuple> roleTuples = new List<RoleTuple>();
@@ -359,7 +358,7 @@ namespace FriendlyFireAutoban
 			{
 				if (killerRole == roleTuple.KillerRole && victimRole == roleTuple.VictimRole)
 				{
-					if (death) Log.Info("Killer role " + killerRole + " and victim role " + victimRole + " is whitelisted, not a teamkill.");
+					if (death) Log.Info($"Killer role {killerRole} and victim role {victimRole} is whitelisted, not a teamkill.");
 					return false;
 				}
 			}
@@ -368,12 +367,12 @@ namespace FriendlyFireAutoban
 			{
 				if (killerTeam == teamTuple.KillerTeam && victimTeam == teamTuple.VictimTeam)
 				{
-					if (death) Log.Info("Team " + killerTeam + " killing " + victimTeam + " WAS detected as a teamkill.");
+					if (death) Log.Info($"Team {killerTeam} killing {victimTeam} WAS detected as a teamkill.");
 					return true;
 				}
 			}
 
-			if (death) Log.Info("Team " + killerTeam + " killing " + victimTeam + " was not detected as a teamkill.");
+			if (death) Log.Info($"Team {killerTeam} killing {victimTeam} was not detected as a teamkill.");
 			return false;
 		}
 
@@ -387,7 +386,7 @@ namespace FriendlyFireAutoban
 			int banLength = 0;
 			foreach (int banAmount in Plugin.Instance.Config.Scaled.Keys.OrderBy(k => k))
 			{
-				if (Plugin.Instance.Config.OutAll) Log.Info("Ban length set to " + banLength + ". Checking ban amount for key " + banAmount);
+				if (Plugin.Instance.Config.OutAll) Log.Info($"Ban length set to {banLength}. Checking ban amount for key {banAmount}.");
 				// If ban kills is less than player's kills, set the banLength
 				// This will ensure that players who teamkill more than the maximum
 				// will still serve the maximum ban length
@@ -417,7 +416,7 @@ namespace FriendlyFireAutoban
 
 		//[PipeEvent("patpeter.friendly.fire.autoban.OnBan")]
 		//[PipeMethod]
-		internal bool OnBan(Teamkiller teamkiller, string playerName, int banLength)
+		internal bool OnBan(Teamkiller teamkiller, string killerNickname, int banLength)
 		{
 			if (teamkiller.Banned)
 			{
@@ -427,18 +426,18 @@ namespace FriendlyFireAutoban
 
 			// If two players with the same UserId are on the server, this will cause a problem
 			Player player = Player.List.Where(tk => tk.UserId == teamkiller.UserId).First();
-			string playerUserId, playerIpAddress;
+			string killerUserId, killerIpAddress;
 			bool immune;
 			if (player != null)
 			{
-				playerUserId = player.UserId;
-				playerIpAddress = player.IPAddress;
+				killerUserId = player.UserId;
+				killerIpAddress = player.IPAddress;
 				immune = isImmune(player);
 			}
 			else
 			{
-				playerUserId = teamkiller.UserId;
-				playerIpAddress = teamkiller.IPAddress;
+				killerUserId = teamkiller.UserId;
+				killerIpAddress = teamkiller.IPAddress;
 				// TODO: Save UserGroup in Teamkiller so that the method can be used here?
 				immune = false;
 			}
@@ -446,12 +445,12 @@ namespace FriendlyFireAutoban
 
 			if (immune)
 			{
-				Log.Info("Admin/Moderator " + playerName + " has avoided a ban for " + banLength + " minutes after teamkilling " + teamkills + " players during the round.");
+				Log.Info($"Admin/Moderator {killerNickname} has avoided a ban for {banLength} minutes after teamkilling {teamkills.Count} players during the round.");
 				return false;
 			}
-			else if (Plugin.Instance.BanWhitelist.Contains(playerUserId))
+			else if (Plugin.Instance.BanWhitelist.Contains(killerUserId))
 			{
-				Log.Info("Player " + playerName + " " + playerUserId + " " + playerIpAddress + " not being punished by FFA because the player is whitelisted.");
+				Log.Info($"Player {killerNickname} {killerUserId} {killerIpAddress} not being punished by FFA because the player is whitelisted.");
 				return false;
 			}
 			else
@@ -460,11 +459,11 @@ namespace FriendlyFireAutoban
 				// If teamkills are more than 3, simply provide the count instead of listing each name off
 				if (teamkills.Count > 3)
 				{
-					banReason = "Banned " + banLength + " minutes for teamkilling " + teamkills.Count + " players";
+					banReason = $"Banned {banLength} minutes for teamkilling {teamkills.Count} players";
 				}
 				else
 				{
-					banReason = "Banned " + banLength + " minutes for teamkilling player(s) " + string.Join(", ", teamkills.Select(teamkill => teamkill.VictimName).ToArray());
+					banReason = $"Banned {banLength} minutes for teamkilling player(s) " + string.Join(", ", teamkills.Select(teamkill => teamkill.VictimName).ToArray());
 				}
 
 				if (player != null)
@@ -487,7 +486,7 @@ namespace FriendlyFireAutoban
 					userBan.Issuer = "FriendlyFireAutoban";
 					userBan.IssuanceTime = now;
 					BanHandler.IssueBan(userBan, BanType.UserId);
-					Log.Info(teamkiller.Nickname + " / " + teamkiller.UserId + ": Banned " + banLength + " minutes for teamkilling " + teamkills + " players");
+					Log.Info($"{teamkiller.Nickname} / {teamkiller.UserId}: Banned {banLength} minutes for teamkilling {teamkills} players");
 
 					BanDetails ipBan = new BanDetails();
 					ipBan.OriginalName = teamkiller.Nickname;
@@ -498,12 +497,12 @@ namespace FriendlyFireAutoban
 					ipBan.Issuer = "FriendlyFireAutoban";
 					ipBan.IssuanceTime = now;
 					BanHandler.IssueBan(ipBan, BanType.IP);
-					Log.Info(teamkiller.Nickname + " / " + teamkiller.IPAddress + ": Banned " + banLength + " minutes for teamkilling " + teamkills + " players");
+					Log.Info($"{teamkiller.Nickname} / {teamkiller.UserId}: Banned {banLength} minutes for teamkilling {teamkills} players");
 				}
 
 				teamkiller.Banned = true;
-				Log.Info("Player " + playerName + " has been banned for " + banLength + " minutes after teamkilling " + teamkills + " players during the round.");
-				Map.Broadcast(new Exiled.API.Features.Broadcast(string.Format(this.GetTranslation("banned_output"), playerName, teamkills.Count), 3), false);
+				Log.Info($"Player {killerNickname} has been banned for {banLength} minutes after teamkilling {teamkills} players during the round.");
+				Map.Broadcast(new Exiled.API.Features.Broadcast(string.Format(this.GetTranslation("banned_output"), killerNickname, teamkills.Count), 3), false);
 				return true;
 			}
 		}
@@ -517,7 +516,7 @@ namespace FriendlyFireAutoban
 			string killerIpAddress = killer.IPAddress;
 			if (Plugin.Instance.Config.NoGuns > 0 && this.Teamkillers.ContainsKey(killerUserId) && this.Teamkillers[killerUserId].Teamkills.Count >= Plugin.Instance.Config.NoGuns && !this.isImmune(killer))
 			{
-				Log.Info("Player " + killerNickname + " " + killerUserId + " " + killerIpAddress + " has had his/her guns removed for teamkilling.");
+				Log.Info($"Player {killerNickname} {killerUserId} {killerIpAddress} has had his/her guns removed for teamkilling.");
 
 
 				List<Item> itemsToRemove = new List<Item>();
@@ -564,7 +563,7 @@ namespace FriendlyFireAutoban
 			string killerIpAddress = killer.IPAddress;
 			if (Plugin.Instance.Config.ToSpec > 0 && this.Teamkillers[killerUserId].Teamkills.Count >= Plugin.Instance.Config.ToSpec && !this.isImmune(killer))
 			{
-				Log.Info("Player " + killerNickname + " " + killerUserId + " " + killerIpAddress + " has been moved to spectator for teamkilling " + this.Teamkillers[killerUserId].Teamkills.Count + " times.");
+				Log.Info($"Player {killerNickname} {killerUserId} {killerIpAddress} has been moved to spectator for teamkilling {this.Teamkillers[killerUserId].Teamkills.Count} times.");
 				killer.Broadcast(new Exiled.API.Features.Broadcast(this.GetTranslation("tospec_output"), 5), false);
 				killer.SetRole(RoleType.Spectator);
 				return true;
@@ -589,7 +588,7 @@ namespace FriendlyFireAutoban
 			{
 				RoleType oldRole = victimRole;
 				//Vector oldPosition = victim.GetPosition();
-				Log.Info("Player " + victimNickname + " " + victimUserId + " " + victimIpAddress + " has been respawned as " + oldRole + " after " + killerNickname + " " + killerUserId + " " + killerIpAddress + " teamkilled " + this.Teamkillers[killerUserId].Teamkills.Count + " times.");
+				Log.Info($"Player {victimNickname} {victimUserId} {victimIpAddress} has been respawned as {oldRole} after {killerNickname} {killerUserId} {killerIpAddress} teamkilled " + this.Teamkillers[killerUserId].Teamkills.Count + " times.");
 				killer.Broadcast(new Exiled.API.Features.Broadcast(string.Format(this.GetTranslation("undead_killer_output"), victimNickname), 5), false);
 				victim.Broadcast(new Exiled.API.Features.Broadcast(string.Format(this.GetTranslation("undead_victim_output"), killerNickname), 5), false);
 				Timer t = new Timer
@@ -599,7 +598,7 @@ namespace FriendlyFireAutoban
 				};
 				t.Elapsed += delegate
 				{
-					Log.Info("Respawning victim " + victimNickname + " " + victimUserId + " " + victimIpAddress + "as " + victimRole + "...");
+					Log.Info($"Respawning victim {victimNickname} {victimUserId} {victimIpAddress} as {victimRole}...");
 					victim.SetRole(oldRole);
 					//victim.Teleport(oldPosition);
 					t.Dispose();
@@ -621,7 +620,7 @@ namespace FriendlyFireAutoban
 			string killerIpAddress = killer.IPAddress;
 			if (Plugin.Instance.Config.Kicker > 0 && this.Teamkillers[killerUserId].Teamkills.Count == Plugin.Instance.Config.Kicker && !this.isImmune(killer))
 			{
-				Log.Info("Player " + killerNickname + " " + killerUserId + " " + killerIpAddress + " has been kicked for teamkilling " + this.Teamkillers[killerUserId].Teamkills.Count + " times.");
+				Log.Info($"Player {killerNickname} {killerUserId} {killerIpAddress} has been kicked for teamkilling " + this.Teamkillers[killerUserId].Teamkills.Count + " times.");
 				killer.Broadcast(new Exiled.API.Features.Broadcast(this.GetTranslation("kicker_output"), 5), true);
 				killer.Kick(this.GetTranslation("kicker_output"), "FriendlyFireAutoban");
 				return true;
@@ -641,7 +640,7 @@ namespace FriendlyFireAutoban
 
 			if (!Plugin.Instance.Teamkillers.ContainsKey(playerUserId))
 			{
-				Log.Info("Adding Teamkiller entry for player #" + playerId + " " + playerNickname + " [" + playerUserId + "] [" + playerIpAddress + "]");
+				Log.Info($"Adding Teamkiller entry for player #{playerId} {playerNickname} [{playerUserId}] [{playerIpAddress}]");
 				Plugin.Instance.Teamkillers[playerUserId] = new Teamkiller(playerId, playerNickname, playerUserId, playerIpAddress);
 			}
 			//else
@@ -670,7 +669,7 @@ namespace FriendlyFireAutoban
 			}
 			if (Plugin.Instance.Config.VoteTk > 0 && this.Teamkillers[killerUserId].Teamkills.Count >= Plugin.Instance.Config.VoteTk && !this.isImmune(killer))
 			{
-				Log.Info("Player " + killerNickname + " " + killerUserId + " " + killerIpAddress + " is being voted on a ban for teamkilling " + this.Teamkillers[killerUserId].Teamkills.Count + " times.");
+				Log.Info($"Player {killerNickname} {killerUserId} {killerIpAddress} is being voted on a ban for teamkilling {this.Teamkillers[killerUserId].Teamkills.Count} times.");
 				Dictionary<int, string> options = new Dictionary<int, string>();
 				options[1] = "Yes";
 				options[2] = "No";
@@ -679,9 +678,9 @@ namespace FriendlyFireAutoban
 
 				/*if (Voting != null && StartVote != null && !Voting.Invoke())
 				{
-					//Plugin.Instance.InvokeEvent("OnStartVote", "Ban " + killerNickname + "?", options, votes, counter);
-					Log.Info("Running vote: " + "Ban " + killerNickname + "?");
-					this.StartVote.Invoke("Ban " + killerNickname + "?", options, votes, counter);
+					//Plugin.Instance.InvokeEvent("OnStartVote", $"Ban {killerNickname}?", options, votes, counter);
+					Log.Info($"Running vote:  Ban {killerNickname}?");
+					this.StartVote.Invoke($"Ban {killerNickname}?", options, votes, counter);
 					return true;
 				}
 				else
