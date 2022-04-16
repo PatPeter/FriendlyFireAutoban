@@ -2,57 +2,60 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
+using YamlDotNet.Serialization;
 
 namespace FriendlyFireAutoban
 {
-
-	class Teamkiller
+	internal class Teamkiller
 	{
-		public int PlayerId;
-		public string Name;
-		public string UserId;
-		public string IpAddress;
-		public int Kills;
-		public int Deaths;
-		public List<Teamkill> Teamkills = new List<Teamkill>();
-		//public Timer Timer;
+		public int            PlayerId       { get; set; }
+		public string         Nickname       { get; set; }
+		public string         UserId         { get; set; }
+		public string         IPAddress      { get; set; }
+		// Must keep track of team and role for when the player is sent to spectator and events are still running
+		public Team           Team           { get; set; }
+		public RoleType       PlayerRole     { get; set; }
+		public int            Kills          { get; set; } = 0;
+		public int            Deaths         { get; set; } = 0;
+		public List<Teamkill> Teamkills      { get; set; } = new List<Teamkill>();
+		public int            TimerCountdown { get; set; } = -1;
+		public bool           Disconnected   { get; set; } = false;
+		public bool           Banned         { get; set; } = false;
 
-		public Teamkiller(int playerId, string name, string steamId, string ipAddress)
+		public Teamkiller(int playerId, string name, string userId, string ipAddress)
 		{
 			this.PlayerId = playerId;
-			this.Name = name;
-			this.UserId = steamId;
-			this.IpAddress = ipAddress;
+			this.Nickname = name;
+			this.UserId = userId;
+			this.IPAddress = ipAddress;
 		}
 
 		public float GetKDR()
 		{
-			return Deaths == 0 ? 0 : (float) Kills / Deaths;
+			return Deaths == 0 ? 0 : (float)Kills / Deaths;
 		}
 
 		public override bool Equals(object obj)
 		{
 			var teamkiller = obj as Teamkiller;
 			return teamkiller != null &&
-				   PlayerId == teamkiller.PlayerId &&
-				   Name == teamkiller.Name &&
-				   UserId == teamkiller.UserId &&
-				   IpAddress == teamkiller.IpAddress;
+				   PlayerId == teamkiller.PlayerId;
 		}
 
 		public override int GetHashCode()
 		{
 			var hashCode = -1156428363;
 			hashCode = hashCode * -1521134295 + PlayerId.GetHashCode();
-			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Name);
+			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Nickname);
 			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(UserId);
-			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(IpAddress);
+			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(IPAddress);
 			return hashCode;
 		}
 
 		public override string ToString()
 		{
-			return PlayerId + " " + Name + " " + UserId + " " + IpAddress;
+			return PlayerId + " " + Nickname + " " + UserId + " " + IPAddress;
 		}
 	}
 }
