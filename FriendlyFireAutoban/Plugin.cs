@@ -14,7 +14,7 @@ namespace FriendlyFireAutoban
 {
 	class Plugin : Plugin<Config, Translation>
 	{
-		public static Plugin Instance { get; set; } = null;
+		public static Plugin Instance { get; set; } = new Plugin();
 
 		/*
 		 * Public Instance Fields
