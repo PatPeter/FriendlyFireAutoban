@@ -327,11 +327,11 @@ namespace FriendlyFireAutoban
 			Teamkiller teamkiller = Plugin.Instance.AddAndGetTeamkiller(killer);
 
 			string killerUserId = killer.UserId;
-			Team killerTeam = killer.Team;
+			Team killerTeam = killer.Role.Team;
 			RoleType killerRole = killer.Role;
 
 			string victimUserId = victim.UserId;
-			Team victimTeam = victim.Team;
+			Team victimTeam = victim.Role.Team;
 			RoleType victimRole = victim.Role;
 
 			if (string.Equals(killerUserId, victimUserId))

@@ -243,7 +243,7 @@ namespace FriendlyFireAutoban
 			string killerNickname = killer.Nickname;
 			string killerUserId = killer.UserId;
 			string killerIpAddress = killer.IPAddress;
-			Team killerTeam = killer.Team;
+			Team killerTeam = killer.Role.Team;
 			RoleType killerRole = killer.Role;
 			string killerOutput = killerNickname + " " + killerUserId + " " + killerIpAddress;
 
@@ -252,7 +252,7 @@ namespace FriendlyFireAutoban
 			string victimNickname = victim.Nickname;
 			string victimUserId = victim.UserId;
 			string victimIpAddress = victim.IPAddress;
-			Team victimTeam = victim.Team;
+			Team victimTeam = victim.Role.Team;
 			RoleType victimRole = victim.Role;
 			bool victimIsHandcuffed = victim.IsCuffed;
 			string victimOutput = victimNickname + " " + victimUserId + " " + victimIpAddress;
@@ -294,7 +294,7 @@ namespace FriendlyFireAutoban
 				{
 					killerTeamkiller.Kills--;
 
-					Teamkill teamkill = new Teamkill(DateTime.Now.Ticks, killerNickname, killerUserId, (short)killerRole, victimNickname, victimUserId, (short)victimRole, victimIsHandcuffed, (short) ev.Handler.Item.Type, Round.ElapsedTime.Seconds);
+					Teamkill teamkill = new Teamkill(DateTime.Now.Ticks, killerNickname, killerUserId, (short)killerRole, victimNickname, victimUserId, (short)victimRole, victimIsHandcuffed, (short) ev.Handler.Type, Round.ElapsedTime.Seconds);
 					Plugin.Instance.TeamkillVictims[victimUserId] = teamkill;
 					killerTeamkiller.Teamkills.Add(teamkill);
 
@@ -435,7 +435,7 @@ namespace FriendlyFireAutoban
 							//	Log.Info("Dealing damage to " + attackerNickname + ": " + (ev.Amount * Plugin.Instance.Config.Mirror));
 							//}
 							//attacker.playerStats.HurtPlayer(new PlayerStats.HitInfo(ev.Amount * Plugin.Instance.mirror, attackerNickname, DamageTypes.Falldown, attackerPlayerId), attacker.gameObject);
-							Timing.CallDelayed(0.5f, () => attacker.Hurt(Exiled.API.Enums.DamageType.Falldown.ToString(), ev.Amount * Plugin.Instance.Config.Mirror));
+							Timing.CallDelayed(0.5f, () => attacker.Hurt(ev.Amount * Plugin.Instance.Config.Mirror, Exiled.API.Enums.DamageType.Falldown.ToString()));
 						}
 						// else do nothing
 					}
@@ -446,7 +446,7 @@ namespace FriendlyFireAutoban
 						//	Log.Info("Dealing damage to " + attackerNickname + ": " + (ev.Amount * Plugin.Instance.Config.Mirror));
 						//}
 						//attacker.playerStats.HurtPlayer(new PlayerStats.HitInfo(ev.Amount * Plugin.Instance.mirror, attackerNickname, DamageTypes.Falldown, attackerPlayerId), attacker.gameObject);
-						Timing.CallDelayed(0.5f, () => attacker.Hurt(Exiled.API.Enums.DamageType.Falldown.ToString(), ev.Amount * Plugin.Instance.Config.Mirror));
+						Timing.CallDelayed(0.5f, () => attacker.Hurt(ev.Amount * Plugin.Instance.Config.Mirror, Exiled.API.Enums.DamageType.Falldown.ToString()));
 					}
 				}
 			}
@@ -460,7 +460,7 @@ namespace FriendlyFireAutoban
 				{
 					int damage = (int)ev.Amount;
 					ev.Amount = 0;
-					Timing.CallDelayed(0.5f, () => attacker.Hurt(Exiled.API.Enums.DamageType.Falldown.ToString(), damage));
+					Timing.CallDelayed(0.5f, () => attacker.Hurt(damage, Exiled.API.Enums.DamageType.Falldown.ToString()));
 				}
 				else if (Plugin.Instance.Config.Bomber == 1)
 				{
@@ -476,7 +476,7 @@ namespace FriendlyFireAutoban
 				// Every time a player respawns, if that player is not spectator, update team/role
 				// Therefore when mirror/bomber are triggered, we can use the cached team/role
 				Player player = ev.Player;
-				Team playerTeam = player.Team;
+				Team playerTeam = player.Role.Team;
 				RoleType playerRole = player.Role;
 
 				Teamkiller teamkiller = Plugin.Instance.AddAndGetTeamkiller(ev.Player);
@@ -497,7 +497,7 @@ namespace FriendlyFireAutoban
 				// Every time a player respawns, if that player is not spectator, update team/role
 				// Therefore when mirror/bomber are triggered, we can use the cached team/role
 				Player player = ev.Player;
-				Team playerTeam = player.Team;
+				Team playerTeam = player.Role.Team;
 				RoleType playerRole = player.Role;
 
 				Teamkiller teamkiller = Plugin.Instance.AddAndGetTeamkiller(ev.Player);
