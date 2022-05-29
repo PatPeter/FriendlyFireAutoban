@@ -1,5 +1,5 @@
 # Friendly Fire Autoban
-This is a plugin for [Smod2](https://github.com/Grover-c13/Smod2) that automatically bans players after a specified number of teamkills, for a certain amount of time.
+This is a plugin for [Smod2](https://github.com/Grover-c13/Smod2) and [EXILED](https://github.com/Exiled-Team/EXILED) that automatically bans players after a specified number of teamkills, for a certain amount of time.
 
 ## Configuration Settings
 Key | Value Type | Default Value | Description
