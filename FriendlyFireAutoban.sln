@@ -15,6 +15,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sm_translations", "sm_trans
 		sm_translations\friendly_fire_autoban.ru.txt = sm_translations\friendly_fire_autoban.ru.txt
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SQL", "SQL", "{133202CE-2004-4ED2-A61F-886E7C2ADA99}"
+	ProjectSection(SolutionItems) = preProject
+		SQLHistory.sql = SQLHistory.sql
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +42,7 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{DE756298-ED83-477E-B38B-808EB0CC66AC} = {0DE60663-AAB6-436E-AD52-531FC942E3CD}
+		{133202CE-2004-4ED2-A61F-886E7C2ADA99} = {0DE60663-AAB6-436E-AD52-531FC942E3CD}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {93980AF1-83D2-487D-8CDA-F1CD4AB2B304}

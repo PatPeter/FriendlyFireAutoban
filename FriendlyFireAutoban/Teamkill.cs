@@ -1,9 +1,9 @@
-﻿using System;
+﻿using PlayerRoles;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using YamlDotNet.Serialization;
 
 namespace FriendlyFireAutoban
 {
@@ -44,51 +44,51 @@ namespace FriendlyFireAutoban
 			string retval = "(";
 			switch (KillerTeamRole)
 			{
-				case (short)RoleType.ClassD:
+				case (short)RoleTypeId.ClassD:
 					retval += Plugin.Instance.GetTranslation("role_dclass");
 					break;
 
-				case (short)RoleType.Scientist:
+				case (short)RoleTypeId.Scientist:
 					retval += Plugin.Instance.GetTranslation("role_scientist");
 					break;
 
-				case (short)RoleType.FacilityGuard:
+				case (short)RoleTypeId.FacilityGuard:
 					retval += Plugin.Instance.GetTranslation("role_guard");
 					break;
 
-				case (short)RoleType.NtfPrivate:
+				case (short)RoleTypeId.NtfPrivate:
 					retval += Plugin.Instance.GetTranslation("role_cadet");
 					break;
 
-				case (short)RoleType.NtfSergeant:
+				case (short)RoleTypeId.NtfSergeant:
 					retval += Plugin.Instance.GetTranslation("role_lieutenant");
 					break;
 
-				case (short)RoleType.NtfCaptain:
+				case (short)RoleTypeId.NtfCaptain:
 					retval += Plugin.Instance.GetTranslation("role_commander");
 					break;
 
-				case (short)RoleType.NtfSpecialist:
+				case (short)RoleTypeId.NtfSpecialist:
 					retval += Plugin.Instance.GetTranslation("role_ntf_scientist");
 					break;
 
-				case (short)RoleType.ChaosConscript:
+				case (short)RoleTypeId.ChaosConscript:
 					retval += Plugin.Instance.GetTranslation("role_chaos");
 					break;
 
-				case (short)RoleType.ChaosRifleman:
+				case (short)RoleTypeId.ChaosRifleman:
 					retval += Plugin.Instance.GetTranslation("role_chaos");
 					break;
 
-				case (short)RoleType.ChaosRepressor:
+				case (short)RoleTypeId.ChaosRepressor:
 					retval += Plugin.Instance.GetTranslation("role_chaos");
 					break;
 
-				case (short)RoleType.ChaosMarauder:
+				case (short)RoleTypeId.ChaosMarauder:
 					retval += Plugin.Instance.GetTranslation("role_chaos");
 					break;
 
-				case (short)RoleType.Tutorial:
+				case (short)RoleTypeId.Tutorial:
 					retval += Plugin.Instance.GetTranslation("role_tutorial");
 					break;
 			}
@@ -99,51 +99,51 @@ namespace FriendlyFireAutoban
 			}
 			switch (VictimTeamRole)
 			{
-				case (short)RoleType.ClassD:
+				case (short)RoleTypeId.ClassD:
 					retval += Plugin.Instance.GetTranslation("role_dclass");
 					break;
 
-				case (short)RoleType.Scientist:
+				case (short)RoleTypeId.Scientist:
 					retval += Plugin.Instance.GetTranslation("role_scientist");
 					break;
 
-				case (short)RoleType.FacilityGuard:
+				case (short)RoleTypeId.FacilityGuard:
 					retval += Plugin.Instance.GetTranslation("role_guard");
 					break;
 
-				case (short)RoleType.NtfPrivate:
+				case (short)RoleTypeId.NtfPrivate:
 					retval += Plugin.Instance.GetTranslation("role_cadet");
 					break;
 
-				case (short)RoleType.NtfSergeant:
+				case (short)RoleTypeId.NtfSergeant:
 					retval += Plugin.Instance.GetTranslation("role_lieutenant");
 					break;
 
-				case (short)RoleType.NtfCaptain:
+				case (short)RoleTypeId.NtfCaptain:
 					retval += Plugin.Instance.GetTranslation("role_commander");
 					break;
 
-				case (short)RoleType.NtfSpecialist:
+				case (short)RoleTypeId.NtfSpecialist:
 					retval += Plugin.Instance.GetTranslation("role_ntf_scientist");
 					break;
 
-				case (short)RoleType.ChaosConscript:
+				case (short)RoleTypeId.ChaosConscript:
 					retval += Plugin.Instance.GetTranslation("role_chaos");
 					break;
 
-				case (short)RoleType.ChaosRifleman:
+				case (short)RoleTypeId.ChaosRifleman:
 					retval += Plugin.Instance.GetTranslation("role_chaos");
 					break;
 
-				case (short)RoleType.ChaosRepressor:
+				case (short)RoleTypeId.ChaosRepressor:
 					retval += Plugin.Instance.GetTranslation("role_chaos");
 					break;
 
-				case (short)RoleType.ChaosMarauder:
+				case (short)RoleTypeId.ChaosMarauder:
 					retval += Plugin.Instance.GetTranslation("role_chaos");
 					break;
 
-				case (short)RoleType.Tutorial:
+				case (short)RoleTypeId.Tutorial:
 					retval += Plugin.Instance.GetTranslation("role_tutorial");
 					break;
 			}

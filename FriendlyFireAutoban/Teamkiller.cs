@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using YamlDotNet.Serialization;
+using PlayerRoles;
 
 namespace FriendlyFireAutoban
 {
@@ -15,7 +15,7 @@ namespace FriendlyFireAutoban
 		public string         IPAddress      { get; set; }
 		// Must keep track of team and role for when the player is sent to spectator and events are still running
 		public Team           Team           { get; set; }
-		public RoleType       PlayerRole     { get; set; }
+		public RoleTypeId     PlayerRole     { get; set; }
 		public int            Kills          { get; set; } = 0;
 		public int            Deaths         { get; set; } = 0;
 		public List<Teamkill> Teamkills      { get; set; } = new List<Teamkill>();

@@ -9,6 +9,7 @@ using MEC;
 using static BanHandler;
 using Exiled.Permissions.Extensions;
 using Exiled.API.Enums;
+using PlayerRoles;
 
 namespace FriendlyFireAutoban
 {
@@ -41,42 +42,42 @@ namespace FriendlyFireAutoban
 
 		readonly internal Dictionary<Team, Team> InverseTeams = new Dictionary<Team, Team>()
 		{
-			{ Team.SCP, Team.SCP },
-			{ Team.MTF, Team.CHI },
-			{ Team.CHI, Team.MTF },
-			{ Team.RSC, Team.CDP },
-			{ Team.CDP, Team.RSC },
-			{ Team.RIP, Team.RIP },
-			{ Team.TUT, Team.TUT },
+			{ Team.SCPs, Team.SCPs },
+			{ Team.FoundationForces, Team.ChaosInsurgency },
+			{ Team.ChaosInsurgency, Team.FoundationForces },
+			{ Team.Scientists, Team.ClassD },
+			{ Team.ClassD, Team.Scientists },
+			{ Team.Dead, Team.Dead },
+			{ Team.OtherAlive, Team.OtherAlive },
 		};
-		readonly internal Dictionary<RoleType, RoleType> InverseRoles = new Dictionary<RoleType, RoleType>()
+		readonly internal Dictionary<RoleTypeId, RoleTypeId> InverseRoles = new Dictionary<RoleTypeId, RoleTypeId>()
 		{
-			{ RoleType.None, RoleType.None },
-			{ RoleType.Spectator, RoleType.Spectator },
-			{ RoleType.Tutorial, RoleType.Tutorial },
+			{ RoleTypeId.None, RoleTypeId.None },
+			{ RoleTypeId.Spectator, RoleTypeId.Spectator },
+			{ RoleTypeId.Tutorial, RoleTypeId.Tutorial },
 			// ClassD/Scientist
-			{ RoleType.ClassD, RoleType.Scientist },
-			{ RoleType.Scientist, RoleType.ClassD },
+			{ RoleTypeId.ClassD, RoleTypeId.Scientist },
+			{ RoleTypeId.Scientist, RoleTypeId.ClassD },
 			// NTF to Chaos
-			{ RoleType.FacilityGuard, RoleType.ChaosConscript },
-			{ RoleType.NtfPrivate, RoleType.ChaosConscript },
-			{ RoleType.NtfSpecialist, RoleType.ChaosRifleman },
-			{ RoleType.NtfSergeant, RoleType.ChaosRepressor },
-			{ RoleType.NtfCaptain, RoleType.ChaosMarauder },
+			{ RoleTypeId.FacilityGuard, RoleTypeId.ChaosConscript },
+			{ RoleTypeId.NtfPrivate, RoleTypeId.ChaosConscript },
+			{ RoleTypeId.NtfSpecialist, RoleTypeId.ChaosRifleman },
+			{ RoleTypeId.NtfSergeant, RoleTypeId.ChaosRepressor },
+			{ RoleTypeId.NtfCaptain, RoleTypeId.ChaosMarauder },
 			// Chaos to NTF
-			{ RoleType.ChaosConscript, RoleType.NtfPrivate },
-			{ RoleType.ChaosRifleman, RoleType.NtfSpecialist },
-			{ RoleType.ChaosRepressor, RoleType.NtfSergeant },
-			{ RoleType.ChaosMarauder, RoleType.NtfCaptain },
+			{ RoleTypeId.ChaosConscript, RoleTypeId.NtfPrivate },
+			{ RoleTypeId.ChaosRifleman, RoleTypeId.NtfSpecialist },
+			{ RoleTypeId.ChaosRepressor, RoleTypeId.NtfSergeant },
+			{ RoleTypeId.ChaosMarauder, RoleTypeId.NtfCaptain },
 			// SCPs
-			{ RoleType.Scp049, RoleType.Scp049 },
-			{ RoleType.Scp0492, RoleType.Scp0492 },
-			{ RoleType.Scp079, RoleType.Scp079 },
-			{ RoleType.Scp096, RoleType.Scp096 },
-			{ RoleType.Scp106, RoleType.Scp106 },
-			{ RoleType.Scp173, RoleType.Scp173 },
-			{ RoleType.Scp93953, RoleType.Scp93989 },
-			{ RoleType.Scp93989, RoleType.Scp93953 },
+			{ RoleTypeId.Scp049, RoleTypeId.Scp049 },
+			{ RoleTypeId.Scp0492, RoleTypeId.Scp0492 },
+			{ RoleTypeId.Scp079, RoleTypeId.Scp079 },
+			{ RoleTypeId.Scp096, RoleTypeId.Scp096 },
+			{ RoleTypeId.Scp106, RoleTypeId.Scp106 },
+			{ RoleTypeId.Scp173, RoleTypeId.Scp173 },
+			{ RoleTypeId.Scp939, RoleTypeId.Scp939 },
+			{ RoleTypeId.Scp939, RoleTypeId.Scp939 },
 		};
 
 		private Plugin()
@@ -295,7 +296,7 @@ namespace FriendlyFireAutoban
 			}
 		}
 
-		internal bool isImmune(Player player)
+		internal bool IsImmune(Player player)
 		{
 			//if (Plugin.Instance.Config.Immune.Contains(player.GroupName) || (player.GlobalBadge.HasValue ? Plugin.Instance.Config.Immune.Contains(player.GlobalBadge.Value.Text) : false))
 			if (player.CheckPermission("ffa.immune"))
@@ -322,17 +323,17 @@ namespace FriendlyFireAutoban
 			return false;*/
 		}
 
-		internal bool isTeamkill(Player killer, Player victim, bool death)
+		internal bool IsTeamkill(Player killer, Player victim, bool death)
 		{
 			Teamkiller teamkiller = Plugin.Instance.AddAndGetTeamkiller(killer);
 
 			string killerUserId = killer.UserId;
 			Team killerTeam = killer.Role.Team;
-			RoleType killerRole = killer.Role;
+			RoleTypeId killerRole = killer.Role.Type;
 
 			string victimUserId = victim.UserId;
 			Team victimTeam = victim.Role.Team;
-			RoleType victimRole = victim.Role;
+			RoleTypeId victimRole = victim.Role;
 
 			if (string.Equals(killerUserId, victimUserId))
 			{
@@ -432,7 +433,7 @@ namespace FriendlyFireAutoban
 			{
 				killerUserId = player.UserId;
 				killerIpAddress = player.IPAddress;
-				immune = isImmune(player);
+				immune = IsImmune(player);
 			}
 			else
 			{
@@ -468,7 +469,7 @@ namespace FriendlyFireAutoban
 
 				if (player != null)
 				{
-					player.Ban(banLength, banReason, "FriendlyFireAutoban");
+					player.Ban(banLength, banReason, null); // "FriendlyFireAutoban"
 				}
 				else
 				// if (teamkiller.Disconnected)
@@ -514,7 +515,7 @@ namespace FriendlyFireAutoban
 			string killerUserId = killer.UserId;
 			string killerNickname = killer.Nickname;
 			string killerIpAddress = killer.IPAddress;
-			if (Plugin.Instance.Config.NoGuns > 0 && this.Teamkillers.ContainsKey(killerUserId) && this.Teamkillers[killerUserId].Teamkills.Count >= Plugin.Instance.Config.NoGuns && !this.isImmune(killer))
+			if (Plugin.Instance.Config.NoGuns > 0 && this.Teamkillers.ContainsKey(killerUserId) && this.Teamkillers[killerUserId].Teamkills.Count >= Plugin.Instance.Config.NoGuns && !this.IsImmune(killer))
 			{
 				Log.Info($"Player {killerNickname} {killerUserId} {killerIpAddress} has had his/her guns removed for teamkilling.");
 
@@ -561,11 +562,11 @@ namespace FriendlyFireAutoban
 			string killerUserId = killer.UserId;
 			string killerNickname = killer.Nickname;
 			string killerIpAddress = killer.IPAddress;
-			if (Plugin.Instance.Config.ToSpec > 0 && this.Teamkillers[killerUserId].Teamkills.Count >= Plugin.Instance.Config.ToSpec && !this.isImmune(killer))
+			if (Plugin.Instance.Config.ToSpec > 0 && this.Teamkillers[killerUserId].Teamkills.Count >= Plugin.Instance.Config.ToSpec && !this.IsImmune(killer))
 			{
 				Log.Info($"Player {killerNickname} {killerUserId} {killerIpAddress} has been moved to spectator for teamkilling {this.Teamkillers[killerUserId].Teamkills.Count} times.");
 				killer.Broadcast(new Exiled.API.Features.Broadcast(this.GetTranslation("tospec_output"), 5), false);
-				killer.SetRole(RoleType.Spectator);
+				killer.RoleManager.ServerSetRole(RoleTypeId.Spectator, RoleChangeReason.RemoteAdmin);
 				return true;
 			}
 			else
@@ -583,10 +584,10 @@ namespace FriendlyFireAutoban
 			string victimUserId = victim.UserId;
 			string victimNickname = victim.Nickname;
 			string victimIpAddress = victim.IPAddress;
-			RoleType victimRole = victim.Role;
-			if (Plugin.Instance.Config.Undead > 0 && this.Teamkillers[killerUserId].Teamkills.Count >= Plugin.Instance.Config.Undead && !this.isImmune(killer))
+			RoleTypeId victimRole = victim.Role;
+			if (Plugin.Instance.Config.Undead > 0 && this.Teamkillers[killerUserId].Teamkills.Count >= Plugin.Instance.Config.Undead && !this.IsImmune(killer))
 			{
-				RoleType oldRole = victimRole;
+				RoleTypeId oldRole = victimRole;
 				//Vector oldPosition = victim.GetPosition();
 				Log.Info($"Player {victimNickname} {victimUserId} {victimIpAddress} has been respawned as {oldRole} after {killerNickname} {killerUserId} {killerIpAddress} teamkilled " + this.Teamkillers[killerUserId].Teamkills.Count + " times.");
 				killer.Broadcast(new Exiled.API.Features.Broadcast(string.Format(this.GetTranslation("undead_killer_output"), victimNickname), 5), false);
@@ -599,7 +600,7 @@ namespace FriendlyFireAutoban
 				t.Elapsed += delegate
 				{
 					Log.Info($"Respawning victim {victimNickname} {victimUserId} {victimIpAddress} as {victimRole}...");
-					victim.SetRole(oldRole);
+					killer.RoleManager.ServerSetRole(oldRole, RoleChangeReason.RemoteAdmin);
 					//victim.Teleport(oldPosition);
 					t.Dispose();
 				};
@@ -618,11 +619,11 @@ namespace FriendlyFireAutoban
 			string killerUserId = killer.UserId;
 			string killerNickname = killer.Nickname;
 			string killerIpAddress = killer.IPAddress;
-			if (Plugin.Instance.Config.Kicker > 0 && this.Teamkillers[killerUserId].Teamkills.Count == Plugin.Instance.Config.Kicker && !this.isImmune(killer))
+			if (Plugin.Instance.Config.Kicker > 0 && this.Teamkillers[killerUserId].Teamkills.Count == Plugin.Instance.Config.Kicker && !this.IsImmune(killer))
 			{
 				Log.Info($"Player {killerNickname} {killerUserId} {killerIpAddress} has been kicked for teamkilling " + this.Teamkillers[killerUserId].Teamkills.Count + " times.");
 				killer.Broadcast(new Exiled.API.Features.Broadcast(this.GetTranslation("kicker_output"), 5), true);
-				killer.Kick(this.GetTranslation("kicker_output"), "FriendlyFireAutoban");
+				killer.Kick(this.GetTranslation("kicker_output"), null); // "FriendlyFireAutoban"
 				return true;
 			}
 			else
@@ -665,9 +666,9 @@ namespace FriendlyFireAutoban
 			{
 				Log.Info("votetk > 0: " + Plugin.Instance.Config.VoteTk);
 				Log.Info("Teamkiller count is greater than votetk? " + this.Teamkillers[killerUserId].Teamkills.Count);
-				Log.Info("Teamkiller is immune? " + this.isImmune(killer));
+				Log.Info("Teamkiller is immune? " + this.IsImmune(killer));
 			}
-			if (Plugin.Instance.Config.VoteTk > 0 && this.Teamkillers[killerUserId].Teamkills.Count >= Plugin.Instance.Config.VoteTk && !this.isImmune(killer))
+			if (Plugin.Instance.Config.VoteTk > 0 && this.Teamkillers[killerUserId].Teamkills.Count >= Plugin.Instance.Config.VoteTk && !this.IsImmune(killer))
 			{
 				Log.Info($"Player {killerNickname} {killerUserId} {killerIpAddress} is being voted on a ban for teamkilling {this.Teamkillers[killerUserId].Teamkills.Count} times.");
 				Dictionary<int, string> options = new Dictionary<int, string>();

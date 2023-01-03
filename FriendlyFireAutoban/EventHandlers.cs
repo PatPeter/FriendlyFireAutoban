@@ -9,6 +9,9 @@ using Exiled.Events.EventArgs;
 using MEC;
 using static BanHandler;
 using FriendlyFireAutoban;
+using Exiled.Events.EventArgs.Player;
+using Exiled.Events.EventArgs.Server;
+using PlayerRoles;
 
 namespace FriendlyFireAutoban
 {
@@ -233,27 +236,27 @@ namespace FriendlyFireAutoban
 
 		public void OnPlayerDying(DyingEventArgs ev)
 		{
-			if (ev.Killer == null || ev.Target == null)
+			if (ev.Attacker == null || ev.Player == null)
 			{
 				return;
 			}
 
-			Player killer = ev.Killer;
+			Player killer = ev.Attacker;
 			int killerPlayerId = killer.Id;
 			string killerNickname = killer.Nickname;
 			string killerUserId = killer.UserId;
 			string killerIpAddress = killer.IPAddress;
 			Team killerTeam = killer.Role.Team;
-			RoleType killerRole = killer.Role;
+			RoleTypeId killerRole = killer.Role;
 			string killerOutput = killerNickname + " " + killerUserId + " " + killerIpAddress;
 
-			Player victim = ev.Target;
+			Player victim = ev.Player;
 			int victimPlayerId = victim.Id;
 			string victimNickname = victim.Nickname;
 			string victimUserId = victim.UserId;
 			string victimIpAddress = victim.IPAddress;
 			Team victimTeam = victim.Role.Team;
-			RoleType victimRole = victim.Role;
+			RoleTypeId victimRole = victim.Role;
 			bool victimIsHandcuffed = victim.IsCuffed;
 			string victimOutput = victimNickname + " " + victimUserId + " " + victimIpAddress;
 
@@ -288,13 +291,13 @@ namespace FriendlyFireAutoban
 				Teamkiller killerTeamkiller = Plugin.Instance.Teamkillers[killerUserId];
 
 				if (Plugin.Instance.Config.OutAll) {
-					Log.Info("Was this a teamkill? " + Plugin.Instance.isTeamkill(killer, victim, true));
+					Log.Info("Was this a teamkill? " + Plugin.Instance.IsTeamkill(killer, victim, true));
 				}
-				if (Plugin.Instance.isTeamkill(killer, victim, true))
+				if (Plugin.Instance.IsTeamkill(killer, victim, true))
 				{
 					killerTeamkiller.Kills--;
 
-					Teamkill teamkill = new Teamkill(DateTime.Now.Ticks, killerNickname, killerUserId, (short)killerRole, victimNickname, victimUserId, (short)victimRole, victimIsHandcuffed, (short) ev.Handler.Type, Round.ElapsedTime.Seconds);
+					Teamkill teamkill = new Teamkill(DateTime.Now.Ticks, killerNickname, killerUserId, (short)killerRole, victimNickname, victimUserId, (short)victimRole, victimIsHandcuffed, (short) ev.DamageHandler.Type, Round.ElapsedTime.Seconds);
 					Plugin.Instance.TeamkillVictims[victimUserId] = teamkill;
 					killerTeamkiller.Teamkills.Add(teamkill);
 
@@ -339,13 +342,13 @@ namespace FriendlyFireAutoban
 							killer.Broadcast(new Exiled.API.Features.Broadcast(broadcast, 5), false);
 						}
 
-						Plugin.Instance.OnCheckRemoveGuns(ev.Killer);
+						Plugin.Instance.OnCheckRemoveGuns(killer);
 
-						Plugin.Instance.OnCheckToSpectator(ev.Killer);
+						Plugin.Instance.OnCheckToSpectator(killer);
 
-						Plugin.Instance.OnCheckUndead(ev.Killer, ev.Target);
+						Plugin.Instance.OnCheckUndead(killer, victim);
 
-						Plugin.Instance.OnCheckKick(ev.Killer);
+						Plugin.Instance.OnCheckKick(killer);
 
 						//Plugin.Instance.OnVoteTeamkill(ev.Killer);
 
@@ -403,7 +406,7 @@ namespace FriendlyFireAutoban
 
 		public void OnPlayerHurting(HurtingEventArgs ev)
 		{
-			if (ev.Attacker == null || ev.Target == null)
+			if (ev.Attacker == null || ev.Player == null)
 			{
 				return;
 			}
@@ -413,18 +416,18 @@ namespace FriendlyFireAutoban
 			String attackerUserId = attacker.UserId;
 			String attackerNickname = attacker.Nickname;
 
-			Player victim = ev.Target;
+			Player victim = ev.Player;
 			int victimPlayerId = victim.Id;
 
-			if (ev.Handler == null)
+			if (ev.DamageHandler == null)
 			{
 				return;
 			}
 
-			if (Plugin.Instance.Config.Mirror > 0f && ev.Handler.Type != Exiled.API.Enums.DamageType.Falldown) // && ev.DamageType != DamageTypes.Grenade
+			if (Plugin.Instance.Config.Mirror > 0f && ev.DamageHandler.Type != Exiled.API.Enums.DamageType.Falldown) // && ev.DamageType != DamageTypes.Grenade
 			{
 				//Log.Info("Mirroring " + ev.Amount + " of " + ev.DamageType.ToString() + " damage.");
-				if (Plugin.Instance.isTeamkill(attacker, victim, false) && !Plugin.Instance.isImmune(attacker) && !Plugin.Instance.BanWhitelist.Contains(attackerUserId))
+				if (Plugin.Instance.IsTeamkill(attacker, victim, false) && !Plugin.Instance.IsImmune(attacker) && !Plugin.Instance.BanWhitelist.Contains(attackerUserId))
 				{
 					if (Plugin.Instance.Config.Invert > 0)
 					{
@@ -450,7 +453,7 @@ namespace FriendlyFireAutoban
 					}
 				}
 			}
-			else if (victimPlayerId == attackerPlayerId && ev.Handler.Type == Exiled.API.Enums.DamageType.Explosion)
+			else if (victimPlayerId == attackerPlayerId && ev.DamageHandler.Type == Exiled.API.Enums.DamageType.Explosion)
 			{
 				if (Plugin.Instance.Config.OutAll)
 				{
@@ -477,10 +480,10 @@ namespace FriendlyFireAutoban
 				// Therefore when mirror/bomber are triggered, we can use the cached team/role
 				Player player = ev.Player;
 				Team playerTeam = player.Role.Team;
-				RoleType playerRole = player.Role;
+				RoleTypeId playerRole = player.Role;
 
 				Teamkiller teamkiller = Plugin.Instance.AddAndGetTeamkiller(ev.Player);
-				if (playerTeam != Team.RIP)
+				if (playerTeam != Team.Dead)
 				{
 					teamkiller.Team = playerTeam;
 					teamkiller.PlayerRole = playerRole;
@@ -498,10 +501,10 @@ namespace FriendlyFireAutoban
 				// Therefore when mirror/bomber are triggered, we can use the cached team/role
 				Player player = ev.Player;
 				Team playerTeam = player.Role.Team;
-				RoleType playerRole = player.Role;
+				RoleTypeId playerRole = player.Role;
 
 				Teamkiller teamkiller = Plugin.Instance.AddAndGetTeamkiller(ev.Player);
-				if (playerTeam != Team.RIP)
+				if (playerTeam != Team.Dead)
 				{
 					teamkiller.Team = playerTeam;
 					teamkiller.PlayerRole = playerRole;

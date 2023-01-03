@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using Exiled.API.Interfaces;
+using PlayerRoles;
 
 namespace FriendlyFireAutoban
 {
@@ -13,15 +14,15 @@ namespace FriendlyFireAutoban
 
 		private List<TeamTuple> _MatrixCache = new List<TeamTuple>()
 		{
-			new TeamTuple(Team.SCP, Team.SCP),
-			new TeamTuple(Team.MTF, Team.MTF),
-			new TeamTuple(Team.CHI, Team.CHI),
-			new TeamTuple(Team.RSC, Team.RSC),
-			new TeamTuple(Team.CDP, Team.CDP),
-			new TeamTuple(Team.MTF, Team.RSC),
-			new TeamTuple(Team.CHI, Team.CDP),
-			new TeamTuple(Team.RSC, Team.MTF),
-			new TeamTuple(Team.CDP, Team.CHI),
+			new TeamTuple(Team.SCPs, Team.SCPs),
+			new TeamTuple(Team.FoundationForces, Team.FoundationForces),
+			new TeamTuple(Team.ChaosInsurgency, Team.ChaosInsurgency),
+			new TeamTuple(Team.Scientists, Team.Scientists),
+			new TeamTuple(Team.ClassD, Team.ClassD),
+			new TeamTuple(Team.FoundationForces, Team.Scientists),
+			new TeamTuple(Team.ChaosInsurgency, Team.ClassD),
+			new TeamTuple(Team.Scientists, Team.FoundationForces),
+			new TeamTuple(Team.ClassD, Team.ChaosInsurgency),
 		};
 
 		private List<string> _RoleWl = new List<string>();
@@ -34,6 +35,8 @@ namespace FriendlyFireAutoban
 		/// <inheritdoc/>
 		[Description("Enable or disable the plugin. Defaults to true.")]
 		public bool IsEnabled { get; set; } = true;
+
+		public bool Debug { get; set; } = false;
 
 		/// <summary>
 		/// Output all debugging messages for FFA.
@@ -194,9 +197,9 @@ namespace FriendlyFireAutoban
 						continue;
 					}
 
-					if (Enum.IsDefined(typeof(RoleType), parts[0]) && Enum.IsDefined(typeof(RoleType), parts[1]))
+					if (Enum.IsDefined(typeof(RoleTypeId), parts[0]) && Enum.IsDefined(typeof(RoleTypeId), parts[1]))
 					{
-						_RoleWlCache.Add(new RoleTuple((RoleType)parts[0], (RoleType)parts[1]));
+						_RoleWlCache.Add(new RoleTuple((RoleTypeId)parts[0], (RoleTypeId)parts[1]));
 					}
 				}
 			}
