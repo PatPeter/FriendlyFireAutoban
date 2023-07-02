@@ -502,7 +502,8 @@ namespace FriendlyFireAutoban
 
 				teamkiller.Banned = true;
 				Log.Info($"Player {killerNickname} has been banned for {banLength} minutes after teamkilling {teamkills} players during the round.");
-				Map.Broadcast(new Exiled.API.Features.Broadcast(string.Format(this.GetTranslation("banned_output"), killerNickname, teamkills.Count), 3), false);
+				BroadcastUtil.MapBroadcast(string.Format(this.GetTranslation("banned_output"), killerNickname, teamkills.Count), 3);
+
 				return true;
 			}
 		}
@@ -517,7 +518,6 @@ namespace FriendlyFireAutoban
 			if (Plugin.Instance.Config.NoGuns > 0 && this.Teamkillers.ContainsKey(killerUserId) && this.Teamkillers[killerUserId].Teamkills.Count >= Plugin.Instance.Config.NoGuns && !this.isImmune(killer))
 			{
 				Log.Info($"Player {killerNickname} {killerUserId} {killerIpAddress} has had his/her guns removed for teamkilling.");
-
 
 				List<Item> itemsToRemove = new List<Item>();
 				foreach (Item i in killer.Items)
@@ -545,7 +545,7 @@ namespace FriendlyFireAutoban
 					killer.RemoveItem(i);
 				}
 
-				killer.Broadcast(new Exiled.API.Features.Broadcast(this.GetTranslation("noguns_output"), 2), false);
+				BroadcastUtil.PlayerBroadcast(killer, this.GetTranslation("noguns_output"), 2);
 				return true;
 			}
 			else
@@ -564,7 +564,7 @@ namespace FriendlyFireAutoban
 			if (Plugin.Instance.Config.ToSpec > 0 && this.Teamkillers[killerUserId].Teamkills.Count >= Plugin.Instance.Config.ToSpec && !this.isImmune(killer))
 			{
 				Log.Info($"Player {killerNickname} {killerUserId} {killerIpAddress} has been moved to spectator for teamkilling {this.Teamkillers[killerUserId].Teamkills.Count} times.");
-				killer.Broadcast(new Exiled.API.Features.Broadcast(this.GetTranslation("tospec_output"), 5), false);
+				BroadcastUtil.PlayerBroadcast(killer, this.GetTranslation("tospec_output"), 5);
 				killer.RoleManager.ServerSetRole(RoleTypeId.Spectator, RoleChangeReason.RemoteAdmin);
 				return true;
 			}
@@ -589,8 +589,8 @@ namespace FriendlyFireAutoban
 				RoleTypeId oldRole = victimRole;
 				//Vector oldPosition = victim.GetPosition();
 				Log.Info($"Player {victimNickname} {victimUserId} {victimIpAddress} has been respawned as {oldRole} after {killerNickname} {killerUserId} {killerIpAddress} teamkilled " + this.Teamkillers[killerUserId].Teamkills.Count + " times.");
-				killer.Broadcast(new Exiled.API.Features.Broadcast(string.Format(this.GetTranslation("undead_killer_output"), victimNickname), 5), false);
-				victim.Broadcast(new Exiled.API.Features.Broadcast(string.Format(this.GetTranslation("undead_victim_output"), killerNickname), 5), false);
+				BroadcastUtil.PlayerBroadcast(killer, string.Format(this.GetTranslation("undead_killer_output"), victimNickname), 5);
+				BroadcastUtil.PlayerBroadcast(victim, string.Format(this.GetTranslation("undead_victim_output"), killerNickname), 5);
 				Timer t = new Timer
 				{
 					Interval = 3000,
@@ -621,7 +621,7 @@ namespace FriendlyFireAutoban
 			if (Plugin.Instance.Config.Kicker > 0 && this.Teamkillers[killerUserId].Teamkills.Count == Plugin.Instance.Config.Kicker && !this.isImmune(killer))
 			{
 				Log.Info($"Player {killerNickname} {killerUserId} {killerIpAddress} has been kicked for teamkilling " + this.Teamkillers[killerUserId].Teamkills.Count + " times.");
-				killer.Broadcast(new Exiled.API.Features.Broadcast(this.GetTranslation("kicker_output"), 5), true);
+				BroadcastUtil.PlayerBroadcast(killer, this.GetTranslation("kicker_output"), 5);
 				killer.Kick(this.GetTranslation("kicker_output"), null); // "FriendlyFireAutoban"
 				return true;
 			}

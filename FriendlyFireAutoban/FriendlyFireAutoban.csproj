@@ -50,6 +50,7 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="BroadcastUtil.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="ConsoleCommands\ForgiveCommand.cs" />
     <Compile Include="ConsoleCommands\TksCommand.cs" />

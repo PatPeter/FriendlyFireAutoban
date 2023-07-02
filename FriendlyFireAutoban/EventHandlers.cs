@@ -305,7 +305,7 @@ namespace FriendlyFireAutoban
 					Log.Info("Player " + killerOutput + " " + killerTeam.ToString() + " teamkilled " +
 						victimOutput + " " + victimTeam.ToString() + ", for a total of " + killerTeamkiller.Teamkills.Count + " teamkills.");
 
-					victim.Broadcast(new Exiled.API.Features.Broadcast(string.Format(Plugin.Instance.GetTranslation("victim_message"), killerNickname, DateTime.Now.ToString("yyyy-MM-dd hh:mm tt")), 10), true);
+					BroadcastUtil.PlayerBroadcast(victim, string.Format(Plugin.Instance.GetTranslation("victim_message"), killerNickname, DateTime.Now.ToString("yyyy-MM-dd hh:mm tt")), 10);
 
 					if (!Plugin.Instance.BanWhitelist.Contains(killerUserId))
 					{
@@ -321,7 +321,7 @@ namespace FriendlyFireAutoban
 
 						if (Plugin.Instance.Config.KdSafe > 0 && kdr > (float)Plugin.Instance.Config.KdSafe && killerTeamkiller.Kills > Plugin.Instance.Config.KdSafe)
 						{
-							killer.Broadcast(new Exiled.API.Features.Broadcast(string.Format(Plugin.Instance.GetTranslation("killer_kdr_message"), victimNickname, teamkill.GetRoleDisplay(), kdr), 5), true);
+							BroadcastUtil.PlayerBroadcast(killer, string.Format(Plugin.Instance.GetTranslation("killer_kdr_message"), victimNickname, teamkill.GetRoleDisplay(), kdr), 5);
 							return;
 						}
 						else if (Plugin.Instance.Config.WarnTk != -1)
@@ -339,7 +339,7 @@ namespace FriendlyFireAutoban
 							{
 								broadcast += Plugin.Instance.GetTranslation("killer_request") + " ";
 							}
-							killer.Broadcast(new Exiled.API.Features.Broadcast(broadcast, 5), false);
+							BroadcastUtil.PlayerBroadcast(killer, broadcast, 5);
 						}
 
 						Plugin.Instance.OnCheckRemoveGuns(killer);
