@@ -77,7 +77,6 @@ namespace FriendlyFireAutoban
 			{ RoleTypeId.Scp106, RoleTypeId.Scp106 },
 			{ RoleTypeId.Scp173, RoleTypeId.Scp173 },
 			{ RoleTypeId.Scp939, RoleTypeId.Scp939 },
-			{ RoleTypeId.Scp939, RoleTypeId.Scp939 },
 		};
 
 		private Plugin()
@@ -296,7 +295,7 @@ namespace FriendlyFireAutoban
 			}
 		}
 
-		internal bool IsImmune(Player player)
+		internal bool isImmune(Player player)
 		{
 			//if (Plugin.Instance.Config.Immune.Contains(player.GroupName) || (player.GlobalBadge.HasValue ? Plugin.Instance.Config.Immune.Contains(player.GlobalBadge.Value.Text) : false))
 			if (player.CheckPermission("ffa.immune"))
@@ -433,7 +432,7 @@ namespace FriendlyFireAutoban
 			{
 				killerUserId = player.UserId;
 				killerIpAddress = player.IPAddress;
-				immune = IsImmune(player);
+				immune = isImmune(player);
 			}
 			else
 			{
@@ -515,7 +514,7 @@ namespace FriendlyFireAutoban
 			string killerUserId = killer.UserId;
 			string killerNickname = killer.Nickname;
 			string killerIpAddress = killer.IPAddress;
-			if (Plugin.Instance.Config.NoGuns > 0 && this.Teamkillers.ContainsKey(killerUserId) && this.Teamkillers[killerUserId].Teamkills.Count >= Plugin.Instance.Config.NoGuns && !this.IsImmune(killer))
+			if (Plugin.Instance.Config.NoGuns > 0 && this.Teamkillers.ContainsKey(killerUserId) && this.Teamkillers[killerUserId].Teamkills.Count >= Plugin.Instance.Config.NoGuns && !this.isImmune(killer))
 			{
 				Log.Info($"Player {killerNickname} {killerUserId} {killerIpAddress} has had his/her guns removed for teamkilling.");
 
@@ -562,7 +561,7 @@ namespace FriendlyFireAutoban
 			string killerUserId = killer.UserId;
 			string killerNickname = killer.Nickname;
 			string killerIpAddress = killer.IPAddress;
-			if (Plugin.Instance.Config.ToSpec > 0 && this.Teamkillers[killerUserId].Teamkills.Count >= Plugin.Instance.Config.ToSpec && !this.IsImmune(killer))
+			if (Plugin.Instance.Config.ToSpec > 0 && this.Teamkillers[killerUserId].Teamkills.Count >= Plugin.Instance.Config.ToSpec && !this.isImmune(killer))
 			{
 				Log.Info($"Player {killerNickname} {killerUserId} {killerIpAddress} has been moved to spectator for teamkilling {this.Teamkillers[killerUserId].Teamkills.Count} times.");
 				killer.Broadcast(new Exiled.API.Features.Broadcast(this.GetTranslation("tospec_output"), 5), false);
@@ -585,7 +584,7 @@ namespace FriendlyFireAutoban
 			string victimNickname = victim.Nickname;
 			string victimIpAddress = victim.IPAddress;
 			RoleTypeId victimRole = victim.Role;
-			if (Plugin.Instance.Config.Undead > 0 && this.Teamkillers[killerUserId].Teamkills.Count >= Plugin.Instance.Config.Undead && !this.IsImmune(killer))
+			if (Plugin.Instance.Config.Undead > 0 && this.Teamkillers[killerUserId].Teamkills.Count >= Plugin.Instance.Config.Undead && !this.isImmune(killer))
 			{
 				RoleTypeId oldRole = victimRole;
 				//Vector oldPosition = victim.GetPosition();
@@ -619,7 +618,7 @@ namespace FriendlyFireAutoban
 			string killerUserId = killer.UserId;
 			string killerNickname = killer.Nickname;
 			string killerIpAddress = killer.IPAddress;
-			if (Plugin.Instance.Config.Kicker > 0 && this.Teamkillers[killerUserId].Teamkills.Count == Plugin.Instance.Config.Kicker && !this.IsImmune(killer))
+			if (Plugin.Instance.Config.Kicker > 0 && this.Teamkillers[killerUserId].Teamkills.Count == Plugin.Instance.Config.Kicker && !this.isImmune(killer))
 			{
 				Log.Info($"Player {killerNickname} {killerUserId} {killerIpAddress} has been kicked for teamkilling " + this.Teamkillers[killerUserId].Teamkills.Count + " times.");
 				killer.Broadcast(new Exiled.API.Features.Broadcast(this.GetTranslation("kicker_output"), 5), true);
@@ -666,9 +665,9 @@ namespace FriendlyFireAutoban
 			{
 				Log.Info("votetk > 0: " + Plugin.Instance.Config.VoteTk);
 				Log.Info("Teamkiller count is greater than votetk? " + this.Teamkillers[killerUserId].Teamkills.Count);
-				Log.Info("Teamkiller is immune? " + this.IsImmune(killer));
+				Log.Info("Teamkiller is immune? " + this.isImmune(killer));
 			}
-			if (Plugin.Instance.Config.VoteTk > 0 && this.Teamkillers[killerUserId].Teamkills.Count >= Plugin.Instance.Config.VoteTk && !this.IsImmune(killer))
+			if (Plugin.Instance.Config.VoteTk > 0 && this.Teamkillers[killerUserId].Teamkills.Count >= Plugin.Instance.Config.VoteTk && !this.isImmune(killer))
 			{
 				Log.Info($"Player {killerNickname} {killerUserId} {killerIpAddress} is being voted on a ban for teamkilling {this.Teamkillers[killerUserId].Teamkills.Count} times.");
 				Dictionary<int, string> options = new Dictionary<int, string>();

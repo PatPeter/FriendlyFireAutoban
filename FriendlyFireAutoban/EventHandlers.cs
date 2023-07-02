@@ -427,7 +427,7 @@ namespace FriendlyFireAutoban
 			if (Plugin.Instance.Config.Mirror > 0f && ev.DamageHandler.Type != Exiled.API.Enums.DamageType.Falldown) // && ev.DamageType != DamageTypes.Grenade
 			{
 				//Log.Info("Mirroring " + ev.Amount + " of " + ev.DamageType.ToString() + " damage.");
-				if (Plugin.Instance.IsTeamkill(attacker, victim, false) && !Plugin.Instance.IsImmune(attacker) && !Plugin.Instance.BanWhitelist.Contains(attackerUserId))
+				if (Plugin.Instance.IsTeamkill(attacker, victim, false) && !Plugin.Instance.isImmune(attacker) && !Plugin.Instance.BanWhitelist.Contains(attackerUserId))
 				{
 					if (Plugin.Instance.Config.Invert > 0)
 					{
