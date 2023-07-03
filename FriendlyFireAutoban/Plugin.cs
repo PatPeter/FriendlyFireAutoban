@@ -3,35 +3,37 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Timers;
-using Exiled.API.Features;
-using Exiled.API.Features.Items;
 using MEC;
 using static BanHandler;
-using Exiled.Permissions.Extensions;
-using Exiled.API.Enums;
 using PlayerRoles;
+using PluginAPI.Core;
+using PluginAPI.Core.Attributes;
+using System.Runtime.CompilerServices;
+using PluginAPI.Core.Items;
+using InventorySystem.Items;
 
 namespace FriendlyFireAutoban
 {
-	class Plugin : Plugin<Config, Translation>
+	class Plugin
 	{
 		public static Plugin Instance { get; set; } = new Plugin();
+		public Config Config = new Config();
+        public EventHandlers EventHandlers;
 
-		/*
+        /*
 		 * Public Instance Fields
 		 */
-		public EventHandlers EventHandlers;
-		public override string Name { get; } = FriendlyFireAutoban.AssemblyInfo.Author;
+        /*public override string Name { get; } = FriendlyFireAutoban.AssemblyInfo.Author;
 		public override string Author { get; } = FriendlyFireAutoban.AssemblyInfo.Author;
 		public override Version Version { get; } = new Version(FriendlyFireAutoban.AssemblyInfo.Version);
 		public override string Prefix { get; } = FriendlyFireAutoban.AssemblyInfo.ConfigPrefix;
 		public override Version RequiredExiledVersion { get; } = new Version(5, 1, 3);
-		public override PluginPriority Priority { get; } = PluginPriority.Default;
+		public override PluginPriority Priority { get; } = PluginPriority.Default;*/
 
-		/*
+        /*
 		 * Internal Instance Fields
 		 */
-		internal bool DuringRound = false;
+        internal bool DuringRound = false;
 		internal bool ProcessingDisconnect = false;
 		internal CoroutineHandle FFAHandle = new CoroutineHandle();
 
@@ -90,24 +92,25 @@ namespace FriendlyFireAutoban
 			// Plugin.Instance.Config.Translations.ContainsKey(name)
 			if (p != null)
 			{
-				return (string) p.GetValue(Translation);
-				//return Plugin.Instance.Config.Translations[name];
+				//return (string) p.GetValue(Translation);
+				return Plugin.Instance.Config.Translations[name];
 			}
-			else
-			{
-				return $"INVALID TRANSLATION: {name}";
-			}
-		}
+            else
+            {
+                return $"INVALID TRANSLATION: {name}";
+            }
+        }
 
-		public override void OnEnabled()
-		{
-			try
-			{
-				Log.Debug("Initializing event handlers..");
-				//Set instance varible to a new instance, this should be nulled again in OnDisable
-				EventHandlers = new EventHandlers(this);
-				//Hook the events you will be using in the plugin. You should hook all events you will be using here, all events should be unhooked in OnDisabled
-				Exiled.Events.Handlers.Server.ReloadedConfigs += EventHandlers.OnReloadedConfig;
+        [PluginEntryPoint(FriendlyFireAutoban.AssemblyInfo.Name, FriendlyFireAutoban.AssemblyInfo.Version, FriendlyFireAutoban.AssemblyInfo.Description, FriendlyFireAutoban.AssemblyInfo.Author)]
+        public void OnEnabled()
+        {
+            try
+            {
+                Log.Debug("Initializing event handlers..");
+                //Set instance varible to a new instance, this should be nulled again in OnDisable
+                EventHandlers = new EventHandlers(this);
+                //Hook the events you will be using in the plugin. You should hook all events you will be using here, all events should be unhooked in OnDisabled
+				/*Exiled.Events.Handlers.Server.ReloadedConfigs += EventHandlers.OnReloadedConfig;
 
 				Exiled.Events.Handlers.Server.RoundStarted += EventHandlers.OnRoundStart;
 				Exiled.Events.Handlers.Server.RoundEnded += EventHandlers.OnRoundEnd;
@@ -120,7 +123,7 @@ namespace FriendlyFireAutoban
 
 				Exiled.Events.Handlers.Player.Spawning += EventHandlers.OnPlayerSpawn;
 				Exiled.Events.Handlers.Player.ChangingRole += EventHandlers.OnSetClass;
-				Exiled.Events.Handlers.Player.PickingUpItem += EventHandlers.OnPickupItem;
+				Exiled.Events.Handlers.Player.PickingUpItem += EventHandlers.OnPickupItem;*/
 
 				//Exiled.Events.Handlers.Server.SendingRemoteAdminCommand += EventHandlers.OnRACommand;
 				//Exiled.Events.Handlers.Server.SendingConsoleCommand += EventHandlers.OnConsoleCommand;
@@ -134,9 +137,10 @@ namespace FriendlyFireAutoban
 			}
 		}
 
-		public override void OnDisabled()
+        [PluginUnload]
+        public void OnDisabled()
 		{
-			Exiled.Events.Handlers.Server.ReloadedConfigs -= EventHandlers.OnReloadedConfig;
+			/*Exiled.Events.Handlers.Server.ReloadedConfigs -= EventHandlers.OnReloadedConfig;
 
 			Exiled.Events.Handlers.Server.RoundStarted -= EventHandlers.OnRoundStart;
 			Exiled.Events.Handlers.Server.RoundEnded -= EventHandlers.OnRoundEnd;
@@ -149,7 +153,7 @@ namespace FriendlyFireAutoban
 
 			Exiled.Events.Handlers.Player.Spawning -= EventHandlers.OnPlayerSpawn;
 			Exiled.Events.Handlers.Player.ChangingRole -= EventHandlers.OnSetClass;
-			Exiled.Events.Handlers.Player.PickingUpItem -= EventHandlers.OnPickupItem;
+			Exiled.Events.Handlers.Player.PickingUpItem -= EventHandlers.OnPickupItem;*/
 
 			//Exiled.Events.Handlers.Server.SendingRemoteAdminCommand -= EventHandlers.OnRACommand;
 			//Exiled.Events.Handlers.Server.SendingConsoleCommand -= EventHandlers.OnConsoleCommand;
@@ -157,7 +161,34 @@ namespace FriendlyFireAutoban
 			EventHandlers = null;
 		}
 
-		public void PrintConfigs()
+        [PluginReload]
+        public void OnReloadedConfig()
+        {
+            //This is only fired when you use the EXILED reload command, the reload command will call OnDisable, OnReload, reload the plugin, then OnEnable in that order. There is no GAC bypass, so if you are updating a plugin, it must have a unique assembly name, and you need to remove the old version from the plugins folder
+            Log.Debug($"{AssemblyInfo.ConfigPrefix}.is_enabled: {Plugin.Instance.Config.IsEnabled}");
+            Log.Debug($"{AssemblyInfo.ConfigPrefix}.out_all: {Plugin.Instance.Config.OutAll}");
+            Log.Debug($"{AssemblyInfo.ConfigPrefix}.system: {Plugin.Instance.Config.System}");
+            Log.Debug($"{AssemblyInfo.ConfigPrefix}.matrix: {string.Join(",", Plugin.Instance.Config.Matrix)}");
+            Log.Debug($"{AssemblyInfo.ConfigPrefix}.amount: {Plugin.Instance.Config.Amount}");
+            Log.Debug($"{AssemblyInfo.ConfigPrefix}.length: {Plugin.Instance.Config.Length}");
+            Log.Debug($"{AssemblyInfo.ConfigPrefix}.expire: {Plugin.Instance.Config.Expire}");
+            Log.Debug($"{AssemblyInfo.ConfigPrefix}.scaled: {string.Join(",", Plugin.Instance.Config.Scaled)}");
+            Log.Debug($"{AssemblyInfo.ConfigPrefix}.no_guns: {Plugin.Instance.Config.NoGuns}");
+            Log.Debug($"{AssemblyInfo.ConfigPrefix}.to_spec: {Plugin.Instance.Config.ToSpec}");
+            Log.Debug($"{AssemblyInfo.ConfigPrefix}.kicker: {Plugin.Instance.Config.Kicker}");
+            //Log.Debug($"{AssemblyInfo.ConfigPrefix}.immune: {string.Join(",", Plugin.Instance.Config.Immune)}");
+            Log.Debug($"{AssemblyInfo.ConfigPrefix}.bomber: {Plugin.Instance.Config.Bomber}");
+            Log.Debug($"{AssemblyInfo.ConfigPrefix}.disarm: {Plugin.Instance.Config.Disarm}");
+            Log.Debug($"{AssemblyInfo.ConfigPrefix}.role_wl: {string.Join(",", Plugin.Instance.Config.RoleWl)}");
+            Log.Debug($"{AssemblyInfo.ConfigPrefix}.invert: {Plugin.Instance.Config.Invert}");
+            Log.Debug($"{AssemblyInfo.ConfigPrefix}.mirror: {Plugin.Instance.Config.Mirror}");
+            Log.Debug($"{AssemblyInfo.ConfigPrefix}.undead: {Plugin.Instance.Config.Undead}");
+            Log.Debug($"{AssemblyInfo.ConfigPrefix}.warn_tk: {Plugin.Instance.Config.WarnTk}");
+            Log.Debug($"{AssemblyInfo.ConfigPrefix}.vote_tk: {Plugin.Instance.Config.VoteTk}");
+            Log.Debug($"{AssemblyInfo.ConfigPrefix}.kd_safe: {Plugin.Instance.Config.KdSafe}");
+        }
+
+        public void PrintConfigs()
 		{
 			Log.Info("friendly_fire_autoban.enable value: " + Plugin.Instance.Config.IsEnabled);
 			Log.Info("friendly_fire_autoban.system value: " + Plugin.Instance.Config.System);
@@ -297,29 +328,31 @@ namespace FriendlyFireAutoban
 
 		internal bool isImmune(Player player)
 		{
+			UserGroup ug = player.ReferenceHub.serverRoles.Group;
+
 			//if (Plugin.Instance.Config.Immune.Contains(player.GroupName) || (player.GlobalBadge.HasValue ? Plugin.Instance.Config.Immune.Contains(player.GlobalBadge.Value.Text) : false))
-			if (player.CheckPermission("ffa.immune"))
+			/*if (player.CheckPermission("ffa.immune"))
 			{
 				return true;
 			}
 			else
 			{
 				return false;
-			}
+			}*/
 
-			/*string[] immuneRanks = Config.GetStringList("friendly_fire_autoban_immune");
+			HashSet<string> immuneRanks = Plugin.Instance.Config.Immune;
 			foreach (string rank in immuneRanks)
 			{
 				if (Plugin.Instance.Config.OutAll)
 				{
-					Log.Info("Does immune rank " + rank + " equal " + player.GetUserGroup().Name + " or " + player.GetRankName() + "?");
+					Log.Info("Does immune rank " + rank + " equal " + ug.BadgeText + "?");
 				}
-				if (String.Equals(rank, player.GetUserGroup().Name, StringComparison.CurrentCultureIgnoreCase) || String.Equals(rank, player.GetRankName(), StringComparison.CurrentCultureIgnoreCase))
+				if (String.Equals(rank, ug.BadgeText, StringComparison.CurrentCultureIgnoreCase))
 				{
 					return true;
 				}
 			}
-			return false;*/
+			return false;
 		}
 
 		internal bool IsTeamkill(Player killer, Player victim, bool death)
@@ -327,11 +360,11 @@ namespace FriendlyFireAutoban
 			Teamkiller teamkiller = Plugin.Instance.AddAndGetTeamkiller(killer);
 
 			string killerUserId = killer.UserId;
-			Team killerTeam = killer.Role.Team;
-			RoleTypeId killerRole = killer.Role.Type;
+			Team killerTeam = killer.Team;
+			RoleTypeId killerRole = killer.Role;
 
 			string victimUserId = victim.UserId;
-			Team victimTeam = victim.Role.Team;
+			Team victimTeam = victim.Team;
 			RoleTypeId victimRole = victim.Role;
 
 			if (string.Equals(killerUserId, victimUserId))
@@ -340,7 +373,7 @@ namespace FriendlyFireAutoban
 				return false;
 			}
 
-			if (Plugin.Instance.Config.Disarm && victim.IsCuffed)
+			if (Plugin.Instance.Config.Disarm && victim.IsDisarmed)
 			{
 				victimTeam = this.InverseTeams[victimTeam];
 				victimRole = this.InverseRoles[victimRole];
@@ -420,18 +453,18 @@ namespace FriendlyFireAutoban
 		{
 			if (teamkiller.Banned)
 			{
-				Log.Warn("[OnBan] Attempted to log repeat ban for " + teamkiller);
+				Log.Warning("[OnBan] Attempted to log repeat ban for " + teamkiller);
 				return false;
 			}
 
 			// If two players with the same UserId are on the server, this will cause a problem
-			Player player = Player.List.Where(tk => tk.UserId == teamkiller.UserId).First();
+			Player player = Player.GetPlayers().Where(tk => tk.UserId == teamkiller.UserId).First();
 			string killerUserId, killerIpAddress;
 			bool immune;
 			if (player != null)
 			{
 				killerUserId = player.UserId;
-				killerIpAddress = player.IPAddress;
+				killerIpAddress = player.IpAddress;
 				immune = isImmune(player);
 			}
 			else
@@ -468,7 +501,7 @@ namespace FriendlyFireAutoban
 
 				if (player != null)
 				{
-					player.Ban(banLength, banReason, null); // "FriendlyFireAutoban"
+					player.Ban(banReason, banLength); // "FriendlyFireAutoban"
 				}
 				else
 				// if (teamkiller.Disconnected)
@@ -514,15 +547,15 @@ namespace FriendlyFireAutoban
 		{
 			string killerUserId = killer.UserId;
 			string killerNickname = killer.Nickname;
-			string killerIpAddress = killer.IPAddress;
+			string killerIpAddress = killer.IpAddress;
 			if (Plugin.Instance.Config.NoGuns > 0 && this.Teamkillers.ContainsKey(killerUserId) && this.Teamkillers[killerUserId].Teamkills.Count >= Plugin.Instance.Config.NoGuns && !this.isImmune(killer))
 			{
 				Log.Info($"Player {killerNickname} {killerUserId} {killerIpAddress} has had his/her guns removed for teamkilling.");
 
-				List<Item> itemsToRemove = new List<Item>();
-				foreach (Item i in killer.Items)
+				List<ItemBase> itemsToRemove = new List<ItemBase>();
+				foreach (ItemBase i in killer.Items)
 				{
-					switch (i.Type)
+					switch (i.ItemTypeId)
 					{
 						case ItemType.GunAK:
 						case ItemType.GunCOM15:
@@ -540,7 +573,7 @@ namespace FriendlyFireAutoban
 							break;
 					}
 				}
-				foreach (Item i in itemsToRemove)
+				foreach (ItemBase i in itemsToRemove)
 				{
 					killer.RemoveItem(i);
 				}
@@ -560,12 +593,12 @@ namespace FriendlyFireAutoban
 		{
 			string killerUserId = killer.UserId;
 			string killerNickname = killer.Nickname;
-			string killerIpAddress = killer.IPAddress;
+			string killerIpAddress = killer.IpAddress;
 			if (Plugin.Instance.Config.ToSpec > 0 && this.Teamkillers[killerUserId].Teamkills.Count >= Plugin.Instance.Config.ToSpec && !this.isImmune(killer))
 			{
 				Log.Info($"Player {killerNickname} {killerUserId} {killerIpAddress} has been moved to spectator for teamkilling {this.Teamkillers[killerUserId].Teamkills.Count} times.");
 				BroadcastUtil.PlayerBroadcast(killer, this.GetTranslation("tospec_output"), 5);
-				killer.RoleManager.ServerSetRole(RoleTypeId.Spectator, RoleChangeReason.RemoteAdmin);
+				killer.SetRole(RoleTypeId.Spectator, RoleChangeReason.RemoteAdmin);
 				return true;
 			}
 			else
@@ -579,10 +612,10 @@ namespace FriendlyFireAutoban
 		{
 			string killerUserId = killer.UserId;
 			string killerNickname = killer.Nickname;
-			string killerIpAddress = killer.IPAddress;
+			string killerIpAddress = killer.IpAddress;
 			string victimUserId = victim.UserId;
 			string victimNickname = victim.Nickname;
-			string victimIpAddress = victim.IPAddress;
+			string victimIpAddress = victim.IpAddress;
 			RoleTypeId victimRole = victim.Role;
 			if (Plugin.Instance.Config.Undead > 0 && this.Teamkillers[killerUserId].Teamkills.Count >= Plugin.Instance.Config.Undead && !this.isImmune(killer))
 			{
@@ -599,7 +632,7 @@ namespace FriendlyFireAutoban
 				t.Elapsed += delegate
 				{
 					Log.Info($"Respawning victim {victimNickname} {victimUserId} {victimIpAddress} as {victimRole}...");
-					killer.RoleManager.ServerSetRole(oldRole, RoleChangeReason.RemoteAdmin);
+					killer.SetRole(oldRole, RoleChangeReason.RemoteAdmin);
 					//victim.Teleport(oldPosition);
 					t.Dispose();
 				};
@@ -617,12 +650,12 @@ namespace FriendlyFireAutoban
 		{
 			string killerUserId = killer.UserId;
 			string killerNickname = killer.Nickname;
-			string killerIpAddress = killer.IPAddress;
+			string killerIpAddress = killer.IpAddress;
 			if (Plugin.Instance.Config.Kicker > 0 && this.Teamkillers[killerUserId].Teamkills.Count == Plugin.Instance.Config.Kicker && !this.isImmune(killer))
 			{
 				Log.Info($"Player {killerNickname} {killerUserId} {killerIpAddress} has been kicked for teamkilling " + this.Teamkillers[killerUserId].Teamkills.Count + " times.");
 				BroadcastUtil.PlayerBroadcast(killer, this.GetTranslation("kicker_output"), 5);
-				killer.Kick(this.GetTranslation("kicker_output"), null); // "FriendlyFireAutoban"
+				killer.Kick(this.GetTranslation("kicker_output")); // "FriendlyFireAutoban"
 				return true;
 			}
 			else
@@ -633,10 +666,10 @@ namespace FriendlyFireAutoban
 
 		internal Teamkiller AddAndGetTeamkiller(Player player)
 		{
-			int playerId = player.Id;
+			int playerId = player.PlayerId;
 			string playerNickname = player.Nickname;
 			string playerUserId = player.UserId;
-			string playerIpAddress = player.IPAddress;
+			string playerIpAddress = player.IpAddress;
 
 			if (!Plugin.Instance.Teamkillers.ContainsKey(playerUserId))
 			{
@@ -659,7 +692,7 @@ namespace FriendlyFireAutoban
 		{
 			string killerUserId = killer.UserId;
 			string killerNickname = killer.Nickname;
-			string killerIpAddress = killer.IPAddress;
+			string killerIpAddress = killer.IpAddress;
 
 			if (Plugin.Instance.Config.OutAll)
 			{
@@ -688,7 +721,7 @@ namespace FriendlyFireAutoban
 					Log.Warn("patpeter.callvote Voting PipeLink is broken. Cannot start vote.");
 					return false;
 				}*/
-				Log.Warn("patpeter.callvote Voting PipeLink is broken. Cannot start vote.");
+				Log.Warning("patpeter.callvote Voting PipeLink is broken. Cannot start vote.");
 				return false;
 			}
 			else
