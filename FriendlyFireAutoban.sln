@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2026
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33723.286
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FriendlyFireAutoban", "FriendlyFireAutoban\FriendlyFireAutoban.csproj", "{9280B8BA-6290-4FC8-A58F-BC24E43AA486}"
 EndProject
@@ -24,14 +24,20 @@ Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|x64 = Debug|x64
+		EXILED|Any CPU = EXILED|Any CPU
+		EXILED|x64 = EXILED|x64
 		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{9280B8BA-6290-4FC8-A58F-BC24E43AA486}.Debug|Any CPU.ActiveCfg = Smod2|Any CPU
-		{9280B8BA-6290-4FC8-A58F-BC24E43AA486}.Debug|Any CPU.Build.0 = Smod2|Any CPU
+		{9280B8BA-6290-4FC8-A58F-BC24E43AA486}.Debug|Any CPU.ActiveCfg = EXILED|Any CPU
+		{9280B8BA-6290-4FC8-A58F-BC24E43AA486}.Debug|Any CPU.Build.0 = EXILED|Any CPU
 		{9280B8BA-6290-4FC8-A58F-BC24E43AA486}.Debug|x64.ActiveCfg = Smod2|x64
-		{9280B8BA-6290-4FC8-A58F-BC24E43AA486}.Debug|x64.Build.0 = EXILED|x64
+		{9280B8BA-6290-4FC8-A58F-BC24E43AA486}.Debug|x64.Build.0 = Smod2|x64
+		{9280B8BA-6290-4FC8-A58F-BC24E43AA486}.EXILED|Any CPU.ActiveCfg = EXILED|Any CPU
+		{9280B8BA-6290-4FC8-A58F-BC24E43AA486}.EXILED|Any CPU.Build.0 = EXILED|Any CPU
+		{9280B8BA-6290-4FC8-A58F-BC24E43AA486}.EXILED|x64.ActiveCfg = EXILED|x64
+		{9280B8BA-6290-4FC8-A58F-BC24E43AA486}.EXILED|x64.Build.0 = EXILED|x64
 		{9280B8BA-6290-4FC8-A58F-BC24E43AA486}.Release|Any CPU.ActiveCfg = EXILED|Any CPU
 		{9280B8BA-6290-4FC8-A58F-BC24E43AA486}.Release|Any CPU.Build.0 = EXILED|Any CPU
 		{9280B8BA-6290-4FC8-A58F-BC24E43AA486}.Release|x64.ActiveCfg = EXILED|x64
