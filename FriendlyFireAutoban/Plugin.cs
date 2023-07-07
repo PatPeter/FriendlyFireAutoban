@@ -14,21 +14,24 @@ using InventorySystem.Items;
 
 namespace FriendlyFireAutoban
 {
-	class Plugin
+	public class Plugin
 	{
-		public static Plugin Instance { get; set; } = new Plugin();
-		public Config Config = new Config();
-        public EventHandlers EventHandlers;
+		public static Plugin Instance { get; private set; } = new Plugin();
+
+        [PluginConfig]
+        public Config Config = new Config();
+
+        internal EventHandlers EventHandlers;
 
         /*
 		 * Public Instance Fields
 		 */
-        /*public override string Name { get; } = FriendlyFireAutoban.AssemblyInfo.Author;
-		public override string Author { get; } = FriendlyFireAutoban.AssemblyInfo.Author;
-		public override Version Version { get; } = new Version(FriendlyFireAutoban.AssemblyInfo.Version);
-		public override string Prefix { get; } = FriendlyFireAutoban.AssemblyInfo.ConfigPrefix;
-		public override Version RequiredExiledVersion { get; } = new Version(5, 1, 3);
-		public override PluginPriority Priority { get; } = PluginPriority.Default;*/
+        public string Name { get; } = FriendlyFireAutoban.AssemblyInfo.Author;
+		public string Author { get; } = FriendlyFireAutoban.AssemblyInfo.Author;
+		public Version Version { get; } = new Version(FriendlyFireAutoban.AssemblyInfo.Version);
+		public string Prefix { get; } = FriendlyFireAutoban.AssemblyInfo.ConfigPrefix;
+		//public Version RequiredExiledVersion { get; } = new Version(5, 1, 3);
+		//public PluginPriority Priority { get; } = PluginPriority.Default;
 
         /*
 		 * Internal Instance Fields
@@ -80,10 +83,6 @@ namespace FriendlyFireAutoban
 			{ RoleTypeId.Scp173, RoleTypeId.Scp173 },
 			{ RoleTypeId.Scp939, RoleTypeId.Scp939 },
 		};
-
-		private Plugin()
-		{
-		}
 
 		public string GetTranslation(string name)
 		{
