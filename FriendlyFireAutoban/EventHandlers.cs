@@ -17,6 +17,7 @@ using PluginAPI.Core.Items;
 using PluginAPI.Enums;
 using PlayerRoles.PlayableScps.Scp939;
 using System.Runtime.CompilerServices;
+using static RoundSummary;
 
 namespace FriendlyFireAutoban
 {
@@ -46,7 +47,7 @@ namespace FriendlyFireAutoban
 		}
 
 		[PluginEvent(PluginAPI.Enums.ServerEventType.RoundEnd)]
-		public void OnRoundEnd(RoundSummary.LeadingTeam leadingTeam)
+		public void OnRoundEnd(LeadingTeam leadingTeam)
 		{
 			//if (EventPlugin.GetRoundDuration() >= 3)
 			//{
@@ -549,7 +550,7 @@ namespace FriendlyFireAutoban
 		}
 
         [PluginEvent(PluginAPI.Enums.ServerEventType.PlayerSearchPickup)]
-        public void OnPickupItem(Player player, ItemPickup item)
+        public void OnPickupItem(Player player, ItemPickupBase item)
 		{
 			if (Plugin.Instance.Config.IsEnabled)
 			{
