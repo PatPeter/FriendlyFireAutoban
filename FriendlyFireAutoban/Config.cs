@@ -120,7 +120,7 @@ namespace FriendlyFireAutoban
 		/// For ban system #2, Time it takes in seconds for teamkill to degrade and not count towards ban.
 		/// </summary>
 		[Description("For ban system #2, Time it takes in seconds for teamkill to degrade and not count towards ban.")]
-		public IDictionary<int, int> Scaled { get; set; } = new Dictionary<int, int>()
+		public Dictionary<int, int> Scaled { get; set; } = new Dictionary<int, int>()
 		{
 			{ 4, 1440 },
 			{ 5, 4320 },
@@ -156,7 +156,7 @@ namespace FriendlyFireAutoban
 		/// Groups that are immune to being autobanned.
 		/// </summary>
 		[Description("Groups that are immune to being autobanned.")]
-		public ISet<string> Immune { get; set; } = new HashSet<string>()
+		public HashSet<string> Immune { get; set; } = new HashSet<string>()
 		{
 			//"owner",
 			"admin",
@@ -249,7 +249,7 @@ namespace FriendlyFireAutoban
 		/// Translations for using Friendly Fire Autoban in other languages.
 		/// </summary>
 		[Description("Translations for using Friendly Fire Autoban in other languages.")]
-		public IDictionary<string, string> Translations = new Dictionary<string, string>
+		public Dictionary<string, string> Translations = new Dictionary<string, string>
 		{
 			// Ban Events
 			{ "victim_message", "<size=36>{0}, <color=red>teamkilled</color> you at {1}. If this was an accidental teamkill, please press ~ and then type .forgive to prevent this user from being banned.</size>" },
