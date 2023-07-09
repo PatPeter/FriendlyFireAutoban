@@ -16,6 +16,7 @@ using InventorySystem.Items.Pickups;
 using PluginAPI.Core.Items;
 using PluginAPI.Enums;
 using PlayerRoles.PlayableScps.Scp939;
+using System.Runtime.CompilerServices;
 
 namespace FriendlyFireAutoban
 {
@@ -418,8 +419,25 @@ namespace FriendlyFireAutoban
 			Player victim = target;
 			int victimPlayerId = victim.PlayerId;
 
-			var universalDamageHandler = (UniversalDamageHandler)damageHandler;
-            var attackerDamgeHandler = damageHandler as AttackerDamageHandler;
+			UniversalDamageHandler universalDamageHandler = null;
+			try
+			{
+				universalDamageHandler = damageHandler as UniversalDamageHandler;
+			}
+			catch
+			{
+				Log.Warning("Could not cast damageHandler as UniversalDamageHandler.");
+			}
+
+			AttackerDamageHandler attackerDamgeHandler = null;
+			try
+			{
+				attackerDamgeHandler = damageHandler as AttackerDamageHandler;
+			}
+			catch
+			{
+				Log.Warning("Could not cast damageHandler as AttackerDamageHandler.");
+			}
 
             if (damageHandler == null || universalDamageHandler == null || attackerDamgeHandler == null)
 			{
