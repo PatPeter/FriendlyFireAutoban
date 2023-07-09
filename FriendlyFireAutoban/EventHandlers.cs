@@ -125,8 +125,11 @@ namespace FriendlyFireAutoban
         public void OnPlayerVerified(Player player)
 		{
 			Teamkiller teamkiller = Plugin.Instance.AddAndGetTeamkiller(player);
-			teamkiller.Banned = false;
-			teamkiller.Disconnected = false;
+			if (teamkiller != null)
+			{
+				teamkiller.Banned = false;
+				teamkiller.Disconnected = false;
+			}
 		}
 
         [PluginEvent(PluginAPI.Enums.ServerEventType.PlayerLeft)]
@@ -489,7 +492,7 @@ namespace FriendlyFireAutoban
 				RoleTypeId playerRole = player.Role;
 
 				Teamkiller teamkiller = Plugin.Instance.AddAndGetTeamkiller(player);
-				if (playerTeam != Team.Dead)
+				if (teamkiller != null && playerTeam != Team.Dead)
 				{
 					teamkiller.Team = playerTeam;
 					teamkiller.PlayerRole = playerRole;
@@ -517,7 +520,7 @@ namespace FriendlyFireAutoban
 				RoleTypeId playerRole = player.Role;
 
 				Teamkiller teamkiller = Plugin.Instance.AddAndGetTeamkiller(player);
-				if (playerTeam != Team.Dead)
+				if (teamkiller != null && playerTeam != Team.Dead)
 				{
 					teamkiller.Team = playerTeam;
 					teamkiller.PlayerRole = playerRole;
