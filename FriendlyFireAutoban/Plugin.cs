@@ -11,15 +11,18 @@ using PluginAPI.Core.Attributes;
 using System.Runtime.CompilerServices;
 using PluginAPI.Core.Items;
 using InventorySystem.Items;
+using PluginAPI.Events;
+using JetBrains.Annotations;
+using System.Collections.Concurrent;
 
 namespace FriendlyFireAutoban
 {
 	public class Plugin
 	{
-		public static Plugin Instance { get; private set; } = new Plugin();
+		public static Plugin Instance { get; private set; }
 
         [PluginConfig]
-        public Config Config = new Config();
+        public Config Config;
 
         internal EventHandlers EventHandlers;
 
@@ -40,12 +43,12 @@ namespace FriendlyFireAutoban
 		internal bool ProcessingDisconnect = false;
 		internal CoroutineHandle FFAHandle = new CoroutineHandle();
 
-		internal Dictionary<string, Teamkiller> Teamkillers = new Dictionary<string, Teamkiller>();
-		internal Dictionary<string, Teamkill> TeamkillVictims = new Dictionary<string, Teamkill>();
+		internal IDictionary<string, Teamkiller> Teamkillers = new ConcurrentDictionary<string, Teamkiller>();
+		internal IDictionary<string, Teamkill> TeamkillVictims = new ConcurrentDictionary<string, Teamkill>();
 
-		internal HashSet<string> BanWhitelist = new HashSet<string>();
+		internal ISet<string> BanWhitelist = new HashSet<string>();
 
-		readonly internal Dictionary<Team, Team> InverseTeams = new Dictionary<Team, Team>()
+		readonly internal IDictionary<Team, Team> InverseTeams = new Dictionary<Team, Team>()
 		{
 			{ Team.SCPs, Team.SCPs },
 			{ Team.FoundationForces, Team.ChaosInsurgency },
@@ -55,7 +58,7 @@ namespace FriendlyFireAutoban
 			{ Team.Dead, Team.Dead },
 			{ Team.OtherAlive, Team.OtherAlive },
 		};
-		readonly internal Dictionary<RoleTypeId, RoleTypeId> InverseRoles = new Dictionary<RoleTypeId, RoleTypeId>()
+		readonly internal IDictionary<RoleTypeId, RoleTypeId> InverseRoles = new Dictionary<RoleTypeId, RoleTypeId>()
 		{
 			{ RoleTypeId.None, RoleTypeId.None },
 			{ RoleTypeId.Spectator, RoleTypeId.Spectator },
@@ -103,12 +106,16 @@ namespace FriendlyFireAutoban
         [PluginEntryPoint(FriendlyFireAutoban.AssemblyInfo.Name, FriendlyFireAutoban.AssemblyInfo.Version, FriendlyFireAutoban.AssemblyInfo.Description, FriendlyFireAutoban.AssemblyInfo.Author)]
         public void OnEnabled()
         {
-            try
+			Instance = this;
+			Config = new Config();
+
+			try
             {
                 Log.Debug("Initializing event handlers..");
                 //Set instance varible to a new instance, this should be nulled again in OnDisable
                 EventHandlers = new EventHandlers(this);
-                //Hook the events you will be using in the plugin. You should hook all events you will be using here, all events should be unhooked in OnDisabled
+				EventManager.RegisterEvents(this, EventHandlers);
+				//Hook the events you will be using in the plugin. You should hook all events you will be using here, all events should be unhooked in OnDisabled
 				/*Exiled.Events.Handlers.Server.ReloadedConfigs += EventHandlers.OnReloadedConfig;
 
 				Exiled.Events.Handlers.Server.RoundStarted += EventHandlers.OnRoundStart;
@@ -339,7 +346,7 @@ namespace FriendlyFireAutoban
 				return false;
 			}*/
 
-			HashSet<string> immuneRanks = Plugin.Instance.Config.Immune;
+			ISet<string> immuneRanks = Plugin.Instance.Config.Immune;
 			foreach (string rank in immuneRanks)
 			{
 				if (Plugin.Instance.Config.OutAll)
@@ -665,6 +672,12 @@ namespace FriendlyFireAutoban
 
 		internal Teamkiller AddAndGetTeamkiller(Player player)
 		{
+			if (player == null)
+			{
+				Log.Warning("[AddAndGetTeamkiller] Null player passed in.");
+				return null;
+			}
+
 			int playerId = player.PlayerId;
 			string playerNickname = player.Nickname;
 			string playerUserId = player.UserId;
@@ -702,11 +715,11 @@ namespace FriendlyFireAutoban
 			if (Plugin.Instance.Config.VoteTk > 0 && this.Teamkillers[killerUserId].Teamkills.Count >= Plugin.Instance.Config.VoteTk && !this.isImmune(killer))
 			{
 				Log.Info($"Player {killerNickname} {killerUserId} {killerIpAddress} is being voted on a ban for teamkilling {this.Teamkillers[killerUserId].Teamkills.Count} times.");
-				Dictionary<int, string> options = new Dictionary<int, string>();
+				IDictionary<int, string> options = new Dictionary<int, string>();
 				options[1] = "Yes";
 				options[2] = "No";
-				HashSet<string> votes = new HashSet<string>();
-				Dictionary<int, int> counter = new Dictionary<int, int>();
+				ISet<string> votes = new HashSet<string>();
+				IDictionary<int, int> counter = new Dictionary<int, int>();
 
 				/*if (Voting != null && StartVote != null && !Voting.Invoke())
 				{

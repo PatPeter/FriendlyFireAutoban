@@ -35,8 +35,8 @@ namespace FriendlyFireAutoban
 			/**
 			 * MEMORY CLEANUP
 			 */
-			//Plugin.Instance.Teamkillers = new Dictionary<string, Teamkiller>();
-			//Plugin.Instance.TeamkillTimers = new Dictionary<string, Timer>();
+			//Plugin.Instance.Teamkillers = new ConcurrentDictionary<string, Teamkiller>();
+			//Plugin.Instance.TeamkillTimers = new ConcurrentDictionary<string, Timer>();
 
 			if (Plugin.Instance.Config.OutAll)
 			{
@@ -116,12 +116,12 @@ namespace FriendlyFireAutoban
 			 * 
 			 * Do not wipe arrays between rounds to preserve teamkills, deal with memory leak in next version
 			 */
-			//Plugin.Instance.Teamkillers = new Dictionary<string, Teamkiller>();
-			//Plugin.Instance.TeamkillTimers = new Dictionary<string, Timer>();
+			//Plugin.Instance.Teamkillers = new ConcurrentDictionary<string, Teamkiller>();
+			//Plugin.Instance.TeamkillTimers = new ConcurrentDictionary<string, Timer>();
 			//Plugin.Instance.ProcessingDisconnect = false;
 		}
 
-        [PluginEvent(PluginAPI.Enums.ServerEventType.PlayerJoined)]
+		[PluginEvent(PluginAPI.Enums.ServerEventType.PlayerJoined)]
         public void OnPlayerVerified(Player player)
 		{
 			Teamkiller teamkiller = Plugin.Instance.AddAndGetTeamkiller(player);
@@ -474,11 +474,17 @@ namespace FriendlyFireAutoban
         [PluginEvent(PluginAPI.Enums.ServerEventType.PlayerSpawn)]
         public void OnPlayerSpawn(Player spawnedPlayer, RoleTypeId role)
 		{
+			Player player = spawnedPlayer;
+			if (player == null)
+			{
+				Log.Warning("[OnPlayerSpawn] Null player passed into event.");
+				return;
+			}
+
 			if (Plugin.Instance.Config.IsEnabled)
 			{
 				// Every time a player respawns, if that player is not spectator, update team/role
 				// Therefore when mirror/bomber are triggered, we can use the cached team/role
-				Player player = spawnedPlayer;
 				Team playerTeam = player.Team;
 				RoleTypeId playerRole = player.Role;
 
@@ -496,11 +502,17 @@ namespace FriendlyFireAutoban
         [PluginEvent(PluginAPI.Enums.ServerEventType.PlayerChangeRole)]
         public void OnSetClass(Player changeRolePlayer, PlayerRoleBase oldRole, RoleTypeId RoleTypeId, RoleChangeReason changeReason)
 		{
+			Player player = changeRolePlayer;
+			if (player == null)
+			{
+				Log.Warning("[OnSetClass] Null player passed into event.");
+				return;
+			}
+
 			if (Plugin.Instance.Config.IsEnabled)
 			{
 				// Every time a player respawns, if that player is not spectator, update team/role
 				// Therefore when mirror/bomber are triggered, we can use the cached team/role
-				Player player = changeRolePlayer;
 				Team playerTeam = player.Team;
 				RoleTypeId playerRole = player.Role;
 
