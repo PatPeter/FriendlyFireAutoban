@@ -35,6 +35,8 @@ namespace FriendlyFireAutoban
 		[Description("Enable or disable the plugin. Defaults to true.")]
 		public bool IsEnabled { get; set; } = true;
 
+		/// <inheritdoc/>
+		[Description("Enable or disable debug messages. Defaults to false.")]
 		public bool Debug { get; set; } = false;
 
 		/// <summary>

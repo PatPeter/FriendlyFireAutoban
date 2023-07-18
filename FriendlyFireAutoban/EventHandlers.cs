@@ -124,7 +124,7 @@ namespace FriendlyFireAutoban
 		}
 
 		// [2023-07-17 18:00:00.000 -05:00] [Warning] [FriendlyFireAutoban] Adding Teamkiller entry failed for player #11 (null) [] [123.123.123.123]
-		/*[PluginEvent(PluginAPI.Enums.ServerEventType.PlayerJoined)]
+		[PluginEvent(PluginAPI.Enums.ServerEventType.PlayerJoined)]
         public void OnPlayerVerified(Player player)
 		{
 			Teamkiller teamkiller = Plugin.Instance.AddAndGetTeamkiller(player);
@@ -133,16 +133,19 @@ namespace FriendlyFireAutoban
 				teamkiller.Banned = false;
 				teamkiller.Disconnected = false;
 			}
-		}*/
+		}
 
 		[PluginEvent(PluginAPI.Enums.ServerEventType.PlayerLeft)]
         public void OnPlayerDestroying(Player player)
 		{
 			Log.Debug("[OnPlayerLeave] Triggered, Enabled: " + Plugin.Instance.Config.IsEnabled + ", during round: " + Plugin.Instance.DuringRound + ", processing player leave: " + Plugin.Instance.ProcessingDisconnect);
 			// Flag player as a disconnected user
-			Plugin.Instance.Teamkillers.Values.Where(tker => tker.UserId == player.UserId).First().Disconnected = true;
+			if (Plugin.Instance.Teamkillers.Count > 0)
+			{
+				Plugin.Instance.Teamkillers.Values.Where(tker => tker.UserId == player.UserId).First().Disconnected = true;
+			}
 
-			/*if (Plugin.Instance.Config.IsEnabled && // plugin must be enabled
+			if (Plugin.Instance.Config.IsEnabled && // plugin must be enabled
 				Plugin.Instance.DuringRound && // must be during round, otherwise will process on 20+ player leaves on round restart
 				!Plugin.Instance.ProcessingDisconnect // mutual exclusion lock
 			) {
@@ -220,7 +223,7 @@ namespace FriendlyFireAutoban
 			else
 			{
 				Log.Info("Not processing OnPlayerLeave");
-			}*/
+			}
 		}
 
         [PluginEvent(PluginAPI.Enums.ServerEventType.PlayerDying)]

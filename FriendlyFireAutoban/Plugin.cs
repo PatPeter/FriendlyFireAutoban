@@ -689,7 +689,7 @@ namespace FriendlyFireAutoban
 			string playerIpAddress = player.IpAddress;
 			if (playerId == 0 || String.IsNullOrEmpty(playerNickname) || String.IsNullOrEmpty(playerUserId) || String.IsNullOrEmpty(playerIpAddress))
 			{
-				Log.Warning($"Adding Teamkiller entry failed for player #{playerId} {playerNickname} [{playerUserId}] [{playerIpAddress}]");
+				Log.Debug($"Adding Teamkiller entry failed for player #{playerId} {playerNickname} [{playerUserId}] [{playerIpAddress}]");
 				return null;
 			}
 
