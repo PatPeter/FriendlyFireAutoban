@@ -29,7 +29,7 @@ namespace FriendlyFireAutoban
         [PluginEvent(PluginAPI.Enums.ServerEventType.RoundStart)]
         public void OnRoundStart()
 		{
-			Log.Info("Round has started.");
+			Log.Debug("Round has started, set ProcessingDisconnect and DuringRound to false, and run FFAHandle.");
 			Plugin.Instance.ProcessingDisconnect = false;
 			Plugin.Instance.DuringRound = true;
 			Plugin.Instance.FFAHandle = Timing.RunCoroutine(Plugin.Instance.FFACoRoutine());
@@ -123,7 +123,8 @@ namespace FriendlyFireAutoban
 			//Plugin.Instance.ProcessingDisconnect = false;
 		}
 
-		[PluginEvent(PluginAPI.Enums.ServerEventType.PlayerJoined)]
+		// [2023-07-17 18:00:00.000 -05:00] [Warning] [FriendlyFireAutoban] Adding Teamkiller entry failed for player #11 (null) [] [123.123.123.123]
+		/*[PluginEvent(PluginAPI.Enums.ServerEventType.PlayerJoined)]
         public void OnPlayerVerified(Player player)
 		{
 			Teamkiller teamkiller = Plugin.Instance.AddAndGetTeamkiller(player);
@@ -132,12 +133,12 @@ namespace FriendlyFireAutoban
 				teamkiller.Banned = false;
 				teamkiller.Disconnected = false;
 			}
-		}
+		}*/
 
-        [PluginEvent(PluginAPI.Enums.ServerEventType.PlayerLeft)]
+		[PluginEvent(PluginAPI.Enums.ServerEventType.PlayerLeft)]
         public void OnPlayerDestroying(Player player)
 		{
-			Log.Info("[OnPlayerLeave] Triggered, Enabled: " + Plugin.Instance.Config.IsEnabled + ", during round: " + Plugin.Instance.DuringRound + ", processing player leave: " + Plugin.Instance.ProcessingDisconnect);
+			Log.Debug("[OnPlayerLeave] Triggered, Enabled: " + Plugin.Instance.Config.IsEnabled + ", during round: " + Plugin.Instance.DuringRound + ", processing player leave: " + Plugin.Instance.ProcessingDisconnect);
 			// Flag player as a disconnected user
 			Plugin.Instance.Teamkillers.Values.Where(tker => tker.UserId == player.UserId).First().Disconnected = true;
 

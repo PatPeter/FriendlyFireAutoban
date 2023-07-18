@@ -283,7 +283,7 @@ namespace FriendlyFireAutoban
 						// Decrease teamkiller timer by 1 second
 						//if (Plugin.Instance.Config.OutAll)
 						//{
-						//	Log.Info("Decrease timer for " + killerTeamkiller + " from " + killerTeamkiller.TimerCountdown + " to " + (killerTeamkiller.TimerCountdown - 1));
+						//	Log.Debug("Decrease timer for " + killerTeamkiller + " from " + killerTeamkiller.TimerCountdown + " to " + (killerTeamkiller.TimerCountdown - 1));
 						//}
 					}
 					else if (killerTeamkiller.TimerCountdown == 0)
@@ -351,7 +351,7 @@ namespace FriendlyFireAutoban
 			{
 				if (Plugin.Instance.Config.OutAll)
 				{
-					Log.Info("Does immune rank " + rank + " equal " + ug.BadgeText + "?");
+					Log.Debug("Does immune rank " + rank + " equal " + ug.BadgeText + "?");
 				}
 				if (String.Equals(rank, ug.BadgeText, StringComparison.CurrentCultureIgnoreCase))
 				{
@@ -695,7 +695,7 @@ namespace FriendlyFireAutoban
 
 			if (!Plugin.Instance.Teamkillers.ContainsKey(playerUserId))
 			{
-				Log.Info($"Adding Teamkiller entry for player #{playerId} {playerNickname} [{playerUserId}] [{playerIpAddress}]");
+				Log.Debug($"Adding Teamkiller entry for player #{playerId} {playerNickname} [{playerUserId}] [{playerIpAddress}]");
 				Plugin.Instance.Teamkillers[playerUserId] = new Teamkiller(playerId, playerNickname, playerUserId, playerIpAddress);
 			}
 			//else
@@ -718,13 +718,13 @@ namespace FriendlyFireAutoban
 
 			if (Plugin.Instance.Config.OutAll)
 			{
-				Log.Info("votetk > 0: " + Plugin.Instance.Config.VoteTk);
-				Log.Info("Teamkiller count is greater than votetk? " + this.Teamkillers[killerUserId].Teamkills.Count);
-				Log.Info("Teamkiller is immune? " + this.isImmune(killer));
+				Log.Debug("votetk > 0: " + Plugin.Instance.Config.VoteTk);
+				Log.Debug("Teamkiller count is greater than votetk? " + this.Teamkillers[killerUserId].Teamkills.Count);
+				Log.Debug("Teamkiller is immune? " + this.isImmune(killer));
 			}
 			if (Plugin.Instance.Config.VoteTk > 0 && this.Teamkillers[killerUserId].Teamkills.Count >= Plugin.Instance.Config.VoteTk && !this.isImmune(killer))
 			{
-				Log.Info($"Player {killerNickname} {killerUserId} {killerIpAddress} is being voted on a ban for teamkilling {this.Teamkillers[killerUserId].Teamkills.Count} times.");
+				Log.Debug($"Player {killerNickname} {killerUserId} {killerIpAddress} is being voted on a ban for teamkilling {this.Teamkillers[killerUserId].Teamkills.Count} times.");
 				IDictionary<int, string> options = new Dictionary<int, string>();
 				options[1] = "Yes";
 				options[2] = "No";
@@ -734,7 +734,7 @@ namespace FriendlyFireAutoban
 				/*if (Voting != null && StartVote != null && !Voting.Invoke())
 				{
 					//Plugin.Instance.InvokeEvent("OnStartVote", $"Ban {killerNickname}?", options, votes, counter);
-					Log.Info($"Running vote:  Ban {killerNickname}?");
+					Log.Debug($"Running vote:  Ban {killerNickname}?");
 					this.StartVote.Invoke($"Ban {killerNickname}?", options, votes, counter);
 					return true;
 				}
