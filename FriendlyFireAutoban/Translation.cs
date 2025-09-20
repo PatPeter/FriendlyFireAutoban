@@ -4,12 +4,11 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Exiled.API.Interfaces;
 
 namespace FriendlyFireAutoban
 {
 	/// <inheritdoc cref="ITranslation"/>
-	class Translation : ITranslation
+	class Translation
 	{
 		/// <summary>
 		/// Ban Events - Victim Message

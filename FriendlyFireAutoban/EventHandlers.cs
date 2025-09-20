@@ -3,15 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Timers;
-using Exiled;
-using Exiled.API.Features;
-using Exiled.Events.EventArgs;
 using MEC;
 using static BanHandler;
 using FriendlyFireAutoban;
-using Exiled.Events.EventArgs.Player;
-using Exiled.Events.EventArgs.Server;
 using PlayerRoles;
+using PluginAPI.Core;
+using Mirror;
+using PluginAPI.Core.Attributes;
+using PlayerStatsSystem;
+using PluginAPI.Events;
+using InventorySystem.Items.Pickups;
+using PluginAPI.Core.Items;
+using PluginAPI.Enums;
+using PlayerRoles.PlayableScps.Scp939;
+using System.Runtime.CompilerServices;
+using static RoundSummary;
 
 namespace FriendlyFireAutoban
 {
@@ -20,34 +26,10 @@ namespace FriendlyFireAutoban
 		internal Plugin plugin;
 		internal EventHandlers(Plugin plugin) => this.plugin = plugin;
 
-		public void OnReloadedConfig()
+        [PluginEvent(PluginAPI.Enums.ServerEventType.RoundStart)]
+        public void OnRoundStart()
 		{
-			Log.Debug($"{AssemblyInfo.ConfigPrefix}.is_enabled: {Plugin.Instance.Config.IsEnabled}");
-			Log.Debug($"{AssemblyInfo.ConfigPrefix}.out_all: {Plugin.Instance.Config.OutAll}");
-			Log.Debug($"{AssemblyInfo.ConfigPrefix}.system: {Plugin.Instance.Config.System}");
-			Log.Debug($"{AssemblyInfo.ConfigPrefix}.matrix: {string.Join(",", Plugin.Instance.Config.Matrix)}");
-			Log.Debug($"{AssemblyInfo.ConfigPrefix}.amount: {Plugin.Instance.Config.Amount}");
-			Log.Debug($"{AssemblyInfo.ConfigPrefix}.length: {Plugin.Instance.Config.Length}");
-			Log.Debug($"{AssemblyInfo.ConfigPrefix}.expire: {Plugin.Instance.Config.Expire}");
-			Log.Debug($"{AssemblyInfo.ConfigPrefix}.scaled: {string.Join(",", Plugin.Instance.Config.Scaled)}");
-			Log.Debug($"{AssemblyInfo.ConfigPrefix}.no_guns: {Plugin.Instance.Config.NoGuns}");
-			Log.Debug($"{AssemblyInfo.ConfigPrefix}.to_spec: {Plugin.Instance.Config.ToSpec}");
-			Log.Debug($"{AssemblyInfo.ConfigPrefix}.kicker: {Plugin.Instance.Config.Kicker}");
-			//Log.Debug($"{AssemblyInfo.ConfigPrefix}.immune: {string.Join(",", Plugin.Instance.Config.Immune)}");
-			Log.Debug($"{AssemblyInfo.ConfigPrefix}.bomber: {Plugin.Instance.Config.Bomber}");
-			Log.Debug($"{AssemblyInfo.ConfigPrefix}.disarm: {Plugin.Instance.Config.Disarm}");
-			Log.Debug($"{AssemblyInfo.ConfigPrefix}.role_wl: {string.Join(",", Plugin.Instance.Config.RoleWl)}");
-			Log.Debug($"{AssemblyInfo.ConfigPrefix}.invert: {Plugin.Instance.Config.Invert}");
-			Log.Debug($"{AssemblyInfo.ConfigPrefix}.mirror: {Plugin.Instance.Config.Mirror}");
-			Log.Debug($"{AssemblyInfo.ConfigPrefix}.undead: {Plugin.Instance.Config.Undead}");
-			Log.Debug($"{AssemblyInfo.ConfigPrefix}.warn_tk: {Plugin.Instance.Config.WarnTk}");
-			Log.Debug($"{AssemblyInfo.ConfigPrefix}.vote_tk: {Plugin.Instance.Config.VoteTk}");
-			Log.Debug($"{AssemblyInfo.ConfigPrefix}.kd_safe: {Plugin.Instance.Config.KdSafe}");
-		}
-
-		public void OnRoundStart()
-		{
-			Log.Info("Round has started.");
+			Log.Debug("Round has started, set ProcessingDisconnect and DuringRound to false, and run FFAHandle.");
 			Plugin.Instance.ProcessingDisconnect = false;
 			Plugin.Instance.DuringRound = true;
 			Plugin.Instance.FFAHandle = Timing.RunCoroutine(Plugin.Instance.FFACoRoutine());
@@ -55,8 +37,8 @@ namespace FriendlyFireAutoban
 			/**
 			 * MEMORY CLEANUP
 			 */
-			//Plugin.Instance.Teamkillers = new Dictionary<string, Teamkiller>();
-			//Plugin.Instance.TeamkillTimers = new Dictionary<string, Timer>();
+			//Plugin.Instance.Teamkillers = new ConcurrentDictionary<string, Teamkiller>();
+			//Plugin.Instance.TeamkillTimers = new ConcurrentDictionary<string, Timer>();
 
 			if (Plugin.Instance.Config.OutAll)
 			{
@@ -64,7 +46,8 @@ namespace FriendlyFireAutoban
 			}
 		}
 
-		public void OnRoundEnd(RoundEndedEventArgs ev)
+		[PluginEvent(PluginAPI.Enums.ServerEventType.RoundEnd)]
+		public void OnRoundEnd(LeadingTeam leadingTeam)
 		{
 			//if (EventPlugin.GetRoundDuration() >= 3)
 			//{
@@ -135,25 +118,34 @@ namespace FriendlyFireAutoban
 			 * 
 			 * Do not wipe arrays between rounds to preserve teamkills, deal with memory leak in next version
 			 */
-			//Plugin.Instance.Teamkillers = new Dictionary<string, Teamkiller>();
-			//Plugin.Instance.TeamkillTimers = new Dictionary<string, Timer>();
+			//Plugin.Instance.Teamkillers = new ConcurrentDictionary<string, Teamkiller>();
+			//Plugin.Instance.TeamkillTimers = new ConcurrentDictionary<string, Timer>();
 			//Plugin.Instance.ProcessingDisconnect = false;
 		}
 
-		public void OnPlayerVerified(VerifiedEventArgs ev)
+		// [2023-07-17 18:00:00.000 -05:00] [Warning] [FriendlyFireAutoban] Adding Teamkiller entry failed for player #11 (null) [] [123.123.123.123]
+		[PluginEvent(PluginAPI.Enums.ServerEventType.PlayerJoined)]
+        public void OnPlayerVerified(Player player)
 		{
-			Teamkiller teamkiller = Plugin.Instance.AddAndGetTeamkiller(ev.Player);
-			teamkiller.Banned = false;
-			teamkiller.Disconnected = false;
+			Teamkiller teamkiller = Plugin.Instance.AddAndGetTeamkiller(player);
+			if (teamkiller != null)
+			{
+				teamkiller.Banned = false;
+				teamkiller.Disconnected = false;
+			}
 		}
 
-		public void OnPlayerDestroying(DestroyingEventArgs ev)
+		[PluginEvent(PluginAPI.Enums.ServerEventType.PlayerLeft)]
+        public void OnPlayerDestroying(Player player)
 		{
-			Log.Info("[OnPlayerLeave] Triggered, Enabled: " + Plugin.Instance.Config.IsEnabled + ", during round: " + Plugin.Instance.DuringRound + ", processing player leave: " + Plugin.Instance.ProcessingDisconnect);
+			Log.Debug("[OnPlayerLeave] Triggered, Enabled: " + Plugin.Instance.Config.IsEnabled + ", during round: " + Plugin.Instance.DuringRound + ", processing player leave: " + Plugin.Instance.ProcessingDisconnect);
 			// Flag player as a disconnected user
-			Plugin.Instance.Teamkillers.Values.Where(tker => tker.UserId == ev.Player.UserId).First().Disconnected = true;
+			if (Plugin.Instance.Teamkillers.Count > 0)
+			{
+				Plugin.Instance.Teamkillers.Values.Where(tker => tker.UserId == player.UserId).First().Disconnected = true;
+			}
 
-			/*if (Plugin.Instance.Config.IsEnabled && // plugin must be enabled
+			if (Plugin.Instance.Config.IsEnabled && // plugin must be enabled
 				Plugin.Instance.DuringRound && // must be during round, otherwise will process on 20+ player leaves on round restart
 				!Plugin.Instance.ProcessingDisconnect // mutual exclusion lock
 			) {
@@ -231,33 +223,34 @@ namespace FriendlyFireAutoban
 			else
 			{
 				Log.Info("Not processing OnPlayerLeave");
-			}*/
+			}
 		}
 
-		public void OnPlayerDying(DyingEventArgs ev)
+        [PluginEvent(PluginAPI.Enums.ServerEventType.PlayerDying)]
+        public void OnPlayerDying(Player player, Player attacker, DamageHandlerBase damageHandler)
 		{
-			if (ev.Attacker == null || ev.Player == null)
+			if (attacker == null || player == null)
 			{
 				return;
 			}
 
-			Player killer = ev.Attacker;
-			int killerPlayerId = killer.Id;
+			Player killer = attacker;
+			int killerPlayerId = killer.PlayerId;
 			string killerNickname = killer.Nickname;
 			string killerUserId = killer.UserId;
-			string killerIpAddress = killer.IPAddress;
-			Team killerTeam = killer.Role.Team;
+			string killerIpAddress = killer.IpAddress;
+			Team killerTeam = killer.Team;
 			RoleTypeId killerRole = killer.Role;
 			string killerOutput = killerNickname + " " + killerUserId + " " + killerIpAddress;
 
-			Player victim = ev.Player;
-			int victimPlayerId = victim.Id;
+			Player victim = player;
+			int victimPlayerId = victim.PlayerId;
 			string victimNickname = victim.Nickname;
 			string victimUserId = victim.UserId;
-			string victimIpAddress = victim.IPAddress;
-			Team victimTeam = victim.Role.Team;
+			string victimIpAddress = victim.IpAddress;
+			Team victimTeam = victim.Team;
 			RoleTypeId victimRole = victim.Role;
-			bool victimIsHandcuffed = victim.IsCuffed;
+			bool victimIsHandcuffed = victim.IsDisarmed;
 			string victimOutput = victimNickname + " " + victimUserId + " " + victimIpAddress;
 
 			if (Plugin.Instance.Config.OutAll)
@@ -297,7 +290,18 @@ namespace FriendlyFireAutoban
 				{
 					killerTeamkiller.Kills--;
 
-					Teamkill teamkill = new Teamkill(DateTime.Now.Ticks, killerNickname, killerUserId, (short)killerRole, victimNickname, victimUserId, (short)victimRole, victimIsHandcuffed, (short) ev.DamageHandler.Type, Round.ElapsedTime.Seconds);
+					Teamkill teamkill = new Teamkill(
+						DateTime.Now.Ticks, 
+						killerNickname, 
+						killerUserId, 
+						(short)killerRole, 
+						victimNickname, 
+						victimUserId, 
+						(short)victimRole, 
+						victimIsHandcuffed, 
+						0, 
+						Round.Duration.Seconds
+					);
 					Plugin.Instance.TeamkillVictims[victimUserId] = teamkill;
 					killerTeamkiller.Teamkills.Add(teamkill);
 
@@ -402,29 +406,50 @@ namespace FriendlyFireAutoban
 					victimOutput + " " + victimTeam.ToString() + ", but FriendlyFireAutoban is not enabled.");
 				return;
 			}
-		}
+        }
 
-		public void OnPlayerHurting(HurtingEventArgs ev)
+        [PluginEvent(PluginAPI.Enums.ServerEventType.PlayerDamage)]
+        public void OnPlayerHurting(Player target, Player assaulter, DamageHandlerBase damageHandler)
 		{
-			if (ev.Attacker == null || ev.Player == null)
+			if (assaulter == null || target == null)
 			{
 				return;
 			}
 
-			Player attacker = ev.Attacker;
-			int attackerPlayerId = attacker.Id;
+			Player attacker = assaulter;
+			int attackerPlayerId = attacker.PlayerId;
 			String attackerUserId = attacker.UserId;
 			String attackerNickname = attacker.Nickname;
 
-			Player victim = ev.Player;
-			int victimPlayerId = victim.Id;
+			Player victim = target;
+			int victimPlayerId = victim.PlayerId;
 
-			if (ev.DamageHandler == null)
+			UniversalDamageHandler universalDamageHandler = null;
+			try
+			{
+				universalDamageHandler = damageHandler as UniversalDamageHandler;
+			}
+			catch
+			{
+				Log.Warning("Could not cast damageHandler as UniversalDamageHandler.");
+			}
+
+			AttackerDamageHandler attackerDamgeHandler = null;
+			try
+			{
+				attackerDamgeHandler = damageHandler as AttackerDamageHandler;
+			}
+			catch
+			{
+				Log.Warning("Could not cast damageHandler as AttackerDamageHandler.");
+			}
+
+            if (damageHandler == null || universalDamageHandler == null || attackerDamgeHandler == null)
 			{
 				return;
 			}
 
-			if (Plugin.Instance.Config.Mirror > 0f && ev.DamageHandler.Type != Exiled.API.Enums.DamageType.Falldown) // && ev.DamageType != DamageTypes.Grenade
+            if (Plugin.Instance.Config.Mirror > 0f && universalDamageHandler.TranslationId != DeathTranslations.Falldown.Id) // && ev.DamageType != DamageTypes.Grenade
 			{
 				//Log.Info("Mirroring " + ev.Amount + " of " + ev.DamageType.ToString() + " damage.");
 				if (Plugin.Instance.IsTeamkill(attacker, victim, false) && !Plugin.Instance.isImmune(attacker) && !Plugin.Instance.BanWhitelist.Contains(attackerUserId))
@@ -438,7 +463,7 @@ namespace FriendlyFireAutoban
 							//	Log.Info("Dealing damage to " + attackerNickname + ": " + (ev.Amount * Plugin.Instance.Config.Mirror));
 							//}
 							//attacker.playerStats.HurtPlayer(new PlayerStats.HitInfo(ev.Amount * Plugin.Instance.mirror, attackerNickname, DamageTypes.Falldown, attackerPlayerId), attacker.gameObject);
-							Timing.CallDelayed(0.5f, () => attacker.Hurt(ev.Amount * Plugin.Instance.Config.Mirror, Exiled.API.Enums.DamageType.Falldown.ToString()));
+							Timing.CallDelayed(0.5f, () => attacker.Damage(attackerDamgeHandler.Damage * Plugin.Instance.Config.Mirror, DeathTranslations.Falldown.LogLabel));
 						}
 						// else do nothing
 					}
@@ -449,11 +474,11 @@ namespace FriendlyFireAutoban
 						//	Log.Info("Dealing damage to " + attackerNickname + ": " + (ev.Amount * Plugin.Instance.Config.Mirror));
 						//}
 						//attacker.playerStats.HurtPlayer(new PlayerStats.HitInfo(ev.Amount * Plugin.Instance.mirror, attackerNickname, DamageTypes.Falldown, attackerPlayerId), attacker.gameObject);
-						Timing.CallDelayed(0.5f, () => attacker.Hurt(ev.Amount * Plugin.Instance.Config.Mirror, Exiled.API.Enums.DamageType.Falldown.ToString()));
+						Timing.CallDelayed(0.5f, () => attacker.Damage(attackerDamgeHandler.Damage * Plugin.Instance.Config.Mirror, DeathTranslations.Falldown.LogLabel));
 					}
 				}
 			}
-			else if (victimPlayerId == attackerPlayerId && ev.DamageHandler.Type == Exiled.API.Enums.DamageType.Explosion)
+			else if (victimPlayerId == attackerPlayerId && universalDamageHandler.TranslationId != DeathTranslations.Explosion.Id)
 			{
 				if (Plugin.Instance.Config.OutAll)
 				{
@@ -461,64 +486,79 @@ namespace FriendlyFireAutoban
 				}
 				if (Plugin.Instance.Config.Bomber == 2)
 				{
-					int damage = (int)ev.Amount;
-					ev.Amount = 0;
-					Timing.CallDelayed(0.5f, () => attacker.Hurt(damage, Exiled.API.Enums.DamageType.Falldown.ToString()));
+					int damage = (int)attackerDamgeHandler.Damage;
+                    attackerDamgeHandler.Damage = 0;
+					Timing.CallDelayed(0.5f, () => attacker.Damage(damage, DeathTranslations.Falldown.LogLabel));
 				}
 				else if (Plugin.Instance.Config.Bomber == 1)
 				{
-					ev.Amount = 0;
+                    attackerDamgeHandler.Damage = 0;
 				}
 			}
 		}
 
-		public void OnPlayerSpawn(SpawningEventArgs ev)
+        [PluginEvent(PluginAPI.Enums.ServerEventType.PlayerSpawn)]
+        public void OnPlayerSpawn(Player spawnedPlayer, RoleTypeId role)
 		{
+			Player player = spawnedPlayer;
+			if (player == null)
+			{
+				Log.Warning("[OnPlayerSpawn] Null player passed into event.");
+				return;
+			}
+
 			if (Plugin.Instance.Config.IsEnabled)
 			{
 				// Every time a player respawns, if that player is not spectator, update team/role
 				// Therefore when mirror/bomber are triggered, we can use the cached team/role
-				Player player = ev.Player;
-				Team playerTeam = player.Role.Team;
+				Team playerTeam = player.Team;
 				RoleTypeId playerRole = player.Role;
 
-				Teamkiller teamkiller = Plugin.Instance.AddAndGetTeamkiller(ev.Player);
-				if (playerTeam != Team.Dead)
+				Teamkiller teamkiller = Plugin.Instance.AddAndGetTeamkiller(player);
+				if (teamkiller != null && playerTeam != Team.Dead)
 				{
 					teamkiller.Team = playerTeam;
 					teamkiller.PlayerRole = playerRole;
 				}
 
-				Plugin.Instance.OnCheckRemoveGuns(ev.Player);
+				Plugin.Instance.OnCheckRemoveGuns(player);
 			}
 		}
 
-		public void OnSetClass(ChangingRoleEventArgs ev)
+        [PluginEvent(PluginAPI.Enums.ServerEventType.PlayerChangeRole)]
+        public void OnSetClass(Player changeRolePlayer, PlayerRoleBase oldRole, RoleTypeId RoleTypeId, RoleChangeReason changeReason)
 		{
+			Player player = changeRolePlayer;
+			if (player == null)
+			{
+				Log.Warning("[OnSetClass] Null player passed into event.");
+				return;
+			}
+
 			if (Plugin.Instance.Config.IsEnabled)
 			{
 				// Every time a player respawns, if that player is not spectator, update team/role
 				// Therefore when mirror/bomber are triggered, we can use the cached team/role
-				Player player = ev.Player;
-				Team playerTeam = player.Role.Team;
+				Team playerTeam = player.Team;
 				RoleTypeId playerRole = player.Role;
 
-				Teamkiller teamkiller = Plugin.Instance.AddAndGetTeamkiller(ev.Player);
-				if (playerTeam != Team.Dead)
+				Teamkiller teamkiller = Plugin.Instance.AddAndGetTeamkiller(player);
+				if (teamkiller != null && playerTeam != Team.Dead)
 				{
 					teamkiller.Team = playerTeam;
 					teamkiller.PlayerRole = playerRole;
 				}
 
-				Plugin.Instance.OnCheckRemoveGuns(ev.Player);
+				Plugin.Instance.OnCheckRemoveGuns(player);
 			}
 		}
 
-		public void OnPickupItem(PickingUpItemEventArgs ev)
+        [PluginEvent(PluginAPI.Enums.ServerEventType.PlayerSearchPickup)]
+        public void OnPickupItem(Player player, ItemPickupBase item)
 		{
 			if (Plugin.Instance.Config.IsEnabled)
 			{
-				Timing.CallDelayed(0.5f, () => Plugin.Instance.OnCheckRemoveGuns(ev.Player));
+				Timing.CallDelayed(0.5f, () => Plugin.Instance.OnCheckRemoveGuns(player));
 			}
 		}
 

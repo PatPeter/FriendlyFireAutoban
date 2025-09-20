@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using Exiled.API.Interfaces;
 using PlayerRoles;
 
 namespace FriendlyFireAutoban
 {
 	/// <inheritdoc cref="IConfig"/>
-	public sealed class Config : IConfig
+	public sealed class Config
 	{
 		private List<string> _Matrix = new List<string>();
 
@@ -36,6 +35,8 @@ namespace FriendlyFireAutoban
 		[Description("Enable or disable the plugin. Defaults to true.")]
 		public bool IsEnabled { get; set; } = true;
 
+		/// <inheritdoc/>
+		[Description("Enable or disable debug messages. Defaults to false.")]
 		public bool Debug { get; set; } = false;
 
 		/// <summary>
@@ -153,7 +154,7 @@ namespace FriendlyFireAutoban
 		[Description("Number of kills at which to kick the player as a warning for teamkilling.")]
 		public int Kicker { get; set; } = 0;
 
-		/*/// <summary>
+		/// <summary>
 		/// Groups that are immune to being autobanned.
 		/// </summary>
 		[Description("Groups that are immune to being autobanned.")]
@@ -162,7 +163,7 @@ namespace FriendlyFireAutoban
 			//"owner",
 			"admin",
 			"moderator"
-		};*/
+		};
 
 		/// <summary>
 		/// Whether to delay grenade damage of thrower by one second [experimental] (2), make player immune to grenade damage (1), or keep disabled (0).
@@ -249,7 +250,7 @@ namespace FriendlyFireAutoban
 		/// <summary>
 		/// Translations for using Friendly Fire Autoban in other languages.
 		/// </summary>
-		/*[Description("Translations for using Friendly Fire Autoban in other languages.")]
+		[Description("Translations for using Friendly Fire Autoban in other languages.")]
 		public Dictionary<string, string> Translations = new Dictionary<string, string>
 		{
 			// Ban Events
@@ -304,6 +305,6 @@ namespace FriendlyFireAutoban
 			{ "tks_teamkill_entry", "({0}) {1}, teamkilled {2}, {3}." },
 			{ "tks_not_found", "Player name not provided or not quoted." },
 			{ "ffa_disabled", "Friendly Fire Autoban is currently disabled." },
-		};*/
+		};
 	}
 }

@@ -47,7 +47,7 @@ namespace FriendlyFireAutoban
 	static internal class AssemblyInfo
 	{
 		internal const string Author = "PatPeter";
-		internal const string Name = "Friendly Fire Autoban";
+		internal const string Name = "FriendlyFireAutoban";
 		internal const string Description = "Plugin that autobans players for friendly firing.";
 		internal const string Id = "patpeter.friendly.fire.autoban";
 		internal const string ConfigPrefix = "friendly_fire_autoban";
@@ -55,6 +55,6 @@ namespace FriendlyFireAutoban
 		/// <summary>
 		/// The AssemblyFileVersion of this web part
 		/// </summary>
-		internal const string Version = "6.3.1";
+		internal const string Version = "6.3.2.9";
 	}
 }
