@@ -1,3 +1,10 @@
+# FriendlyFireAutoban End-Of-Life Announcement
+First an Smod2 plugin, then EXILED, then finally NWAPI, I kept FFA updated out of pride for being one of my first SCP:SL plugins. Sadly, this was mostly a waste of time since FFA was made deprecated by Metapatch II in 2019.
+
+Also, Hubert asked for plugin examples in order to develop NWAPI. Instead, [he stole this concept or code and integrated it into SCP:SL with no credit given](https://discord.com/channels/330432627649544202/472406493229219860/682088448202506246).
+
+I shut down my Unigamia SCP:SL servers in 2023 and I will no longer be maintaining my plugins. I am therefore archiving this repository.
+
 # Friendly Fire Autoban
 This is a plugin for [Smod2](https://github.com/Grover-c13/Smod2) and [EXILED](https://github.com/Exiled-Team/EXILED) that automatically bans players after a specified number of teamkills, for a certain amount of time.
 
